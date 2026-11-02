@@ -404,14 +404,18 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 
 ## Commits and pushes
 
-29 commits on `feat/x1-29dof` after the upstream `cb334ff`, pushed in batches; the head at the time of writing is
-`62a7d348` (`git ls-remote origin feat/x1-29dof`). Nothing was force-pushed and no remote ref was rewritten; the
-network to github.com:443 dropped repeatedly (TCP timeouts, `Empty reply from server`, HTTP/2 framing errors), so
-several pushes were retried — each successful one printed the old..new range, and the remote ref was re-read after
-every ambiguous attempt rather than retried blind.
+The branch carries a linear series of commits after the upstream `cb334ff`. The listing below is a snapshot; the
+authoritative check is the command in its header (`git ls-remote origin feat/x1-29dof` for the live head), and a
+later docs commit naturally adds one more line than the snapshot shows.
+
+Nothing was force-pushed and no remote ref was rewritten. The network to github.com:443 dropped repeatedly (TCP
+timeouts, `Empty reply from server`, HTTP/2 framing errors), so several pushes were retried — each successful one
+printed the old..new range, and the remote ref was re-read after every ambiguous attempt rather than retried blind.
 
 ```
 $ git log --oneline cb334ff..feat/x1-29dof
+087d76b docs: G1 path has runtime evidence now (path only, labelled)
+2c483e9 docs: fix the report's two stale claims, add the 0.657 m question and the commit record
 62a7d34 Gradmotion: G1 path-check config and create JSON (runtime proof the upstream robot still trains)
 75e245b X1 library: correct the report numbers, one gait detector, an independent audit
 ed62e3f docs: final results of the 3000-iteration X1 run
