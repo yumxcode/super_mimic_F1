@@ -212,6 +212,25 @@ source clip set (see the report's next steps).
 `docs/X1_SUPERMIMIC_REPORT.md` has the full record: what was measured, what failed on the platform, and the
 open items.
 
+## X1 29-DoF phase 2 (branch `feat/x1-29dof`)
+
+Second-phase record: [`docs/X1_PHASE2_REPORT.md`](docs/X1_PHASE2_REPORT.md). Headlines on the vendored X1 asset:
+
+* **Arm retargeting fixed at the cause.** GMR's pelvis-relative arm targets float 0.25-0.45 m above the X1's
+  short torso and the elbow sits at the shoulder (wrist confined to 0.244-0.308 m from the shoulder), so the
+  stock solve parks the elbows on the +2.0 rad stop (67.2% of frames near a joint limit). The fix re-anchors the
+  wrist target on the robot's live shoulder FK with an arm-length-preserving distance and re-solves the arms in a
+  second pass (posture prior + limit margin + smoothing): **0.3% at-limit, elbow 0%, wrist direction error
+  78-120 deg -> 14-34 deg** (`tools/x1_arm_fix.py`, baked into `scripts/build_x1_motions.py --arm-mode refine`).
+* **281-clip multi-activity library** (walk/turn/dance/jog, 45 subjects, 26.4 min) from 1542 scored AMASS CMU
+  candidates under quantitative gates (`tools/x1_retarget_gates.py`); running is a documented physical boundary,
+  not a filtered choice. Held-out: 18 clips from 5 whole subjects.
+* **Training**: 32k iterations on one 4090D (~Y30) reach in-sample **0.9299 return, 0/289 failures** (three
+  consecutive zero-failure evals; stopped on the pre-registered criterion), vs the phase-1 41-clip baseline
+  0.9205 / 0 failures at 3k.
+* **CPU-MuJoCo sim2sim** (`scripts/x1_sim2sim.py`, training-env control loop replicated): held-out 18 clips
+  **0 failures**, root position p50 0.094 m, root yaw p90 4.8 deg; 1.5 m/s root push survived.
+
 ## Results
 
 Training time is wall-clock hours of training on one RTX 4090 with `--preset recommended`, excluding evaluation.
