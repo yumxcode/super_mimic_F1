@@ -38,7 +38,9 @@ def apply() -> bool:
         return False
     wp.init()
     drv = wp.context.runtime.driver_version
-    if wp.is_conditional_graph_supported():
+    supported = wp.is_conditional_graph_supported()
+    print(f'[gm-compat] driver {drv} is_conditional_graph_supported={supported}', flush=True)
+    if supported:
         print(f'[gm-compat] driver {drv} supports conditional graphs; mujoco_warp gate left as is', flush=True)
         return False
 
