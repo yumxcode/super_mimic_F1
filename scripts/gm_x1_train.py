@@ -36,11 +36,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REQUIREMENTS = ROOT / 'requirements.txt'
 EXTRA_PIP = ('tensorboardX',)  # metric channel only; not needed to train
-# torch is the one pin the wrapper does not force: the platform's CUDA images already ship a CUDA build (IsaacSim 5.1
-# has torch 2.7, and mjlab 1.2.0 only requires >= 2.7), so reinstalling it costs a ~1 GB download and risks a wheel
-# that does not match the image's driver. requirements.txt keeps the pin for local installs; if the image's torch is
-# missing or CPU-only, the pinned CUDA wheel is installed instead. pytest is test-only, matplotlib is optional.
-SKIP_PINS = ('torch', 'pytest', 'matplotlib')
+# The pins the wrapper does not force, and why (all three were measured on the platform, see the report):
+#   torch     the CUDA images already ship a CUDA build (IsaacSim 5.1 has torch 2.7 and mjlab 1.2.0 only requires
+#             >= 2.7); reinstalling costs a ~1 GB download and risks a wheel that does not match the image's driver.
+#             Installed below from the cu126 index only if the image's torch is missing or CPU-only.
+#   numpy     the IsaacSim images carry an Isaac Sim pip constraint "numpy<2" against requirements.txt's
+#             numpy==2.4.6, and pip stops with ResolutionImpossible before installing anything. None of mjlab,
+#             mujoco-warp or warp-lang pins numpy (their PyPI metadata only says "numpy"), so the image's numpy is
+#             used and verify_stack() prints which version actually ran.
+#   pytest / matplotlib   test-only and optional.
+SKIP_PINS = ('torch', 'pytest', 'matplotlib', 'numpy')
 
 
 def log(msg: str) -> None:
@@ -96,7 +101,8 @@ def pip_install() -> None:
         line for line in REQUIREMENTS.read_text().splitlines(keepends=True)
         if not line.strip().startswith(SKIP_PINS) and not line.strip().startswith('#')
     ))
-    log(f'filtered requirements -> {req} (torch / pytest / matplotlib left to the image)')
+    kept = [ln.split('==')[0].split()[0] for ln in req.read_text().splitlines() if ln.strip()]
+    log(f'filtered requirements -> {req}: {kept} (left to the image: {", ".join(SKIP_PINS)})')
     for index in PIP_INDEXES:
         cmd = [*base, '-r', req, *EXTRA_PIP]
         if index:
