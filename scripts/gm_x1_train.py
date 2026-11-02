@@ -118,7 +118,7 @@ def pip_install() -> None:
     log('pip install done')
 
 
-def verify_stack() -> None:
+def verify_stack() -> str:
     # The driver/toolkit pair matters: mujoco_warp.put_model calls warp's is_conditional_graph_supported() and raises
     # "Minimum supported CUDA version: 12.4." if it returns False, which is about the *driver* warp sees, not the
     # CUDA version torch was built with. The driver line is printed before training so the log records it either way.
@@ -135,6 +135,8 @@ def verify_stack() -> None:
     r = run([sys.executable, '-c', code], check=False)
     if r.returncode != 0:
         raise SystemExit('the X1 stack does not import; see the pip log above')
+    m = re.search(r'^driver: (\S+)', r.stdout or '', re.M)
+    return m.group(1) if m else ''
 
 
 def trainer_argv(hp: dict) -> list[str]:
@@ -226,7 +228,13 @@ def main() -> int:
         log('the image already imports the whole stack; skipping pip')
     elif not args.skip_install:
         pip_install()
-    verify_stack()
+    driver = verify_stack()
+    # mjlab disables CUDA graphs below driver 12.4 and prints why; mujoco_warp raises instead, so on an older driver
+    # the training process gets scripts/gm_compat.py's no-op guard. Decided from the driver number, not assumed.
+    try:
+        old_driver = tuple(int(v) for v in driver.split('.')[:2]) < (12, 4)
+    except ValueError:
+        old_driver = False
 
     (ROOT / 'output').mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -239,8 +247,20 @@ def main() -> int:
         # them) is reachable through the image's own PYTHONPATH, and setting PYTHONPATH=ROOT alone made
         # `python -m allmimic.train` die with "No module named 'torch'" while the very same interpreter imported it
         # in the probe above (TASK_20261102_024).
-        env = {**os.environ, 'PYTHONPATH': f'{ROOT}:{os.environ.get("PYTHONPATH", "")}', 'PYTHONUNBUFFERED': '1'}
-        code = subprocess.call(argv, cwd=str(ROOT), env=env)
+        env = {**os.environ, 'PYTHONPATH': f'{ROOT}:{ROOT / "scripts"}:{os.environ.get("PYTHONPATH", "")}',
+               'PYTHONUNBUFFERED': '1'}
+        if old_driver:
+            # scripts/gm_compat.py: bypass mujoco_warp's ">= driver 12.4" gate, which mjlab itself works around by
+            # disabling CUDA graphs. Only set when the probe found the driver below 12.4.
+            env['GM_ALLOW_OLD_CUDA_DRIVER'] = '1'
+            preamble = ('import sys; sys.path.insert(0, {s!r}); import gm_compat; gm_compat.apply(); '
+                        'sys.argv = {a!r}; import runpy; runpy.run_module("allmimic.train", run_name="__main__")')
+            cmd = [sys.executable, '-c', preamble.format(s=str(ROOT / 'scripts'), a=argv[2:])]
+        else:
+            cmd = argv
+        log('driver {} -> {}'.format(driver, 'bypassing mujoco_warp\'s >=12.4 gate (gm_compat)' if old_driver
+                                     else 'supported natively'))
+        code = subprocess.call(cmd, cwd=str(ROOT), env=env)
     finally:
         stop.set()
         mirror.join(timeout=30)
