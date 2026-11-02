@@ -8,10 +8,10 @@ Status at a glance
 
 | step | result | evidence |
 |---|---|---|
-| A asset + config numerically stable | **done** | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
+| A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
 | C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, finished (status 5), 5 checkpoints, 33 metric keys | see [Gradmotion](#gradmotion) |
-| D commits + push | **done** | `feat/x1-29dof` pushed; every commit is in the log below |
+| D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
 | E this report | **done** (C section updated as runs finish) | |
 
 ---
@@ -88,6 +88,27 @@ touch the floor; measured on the compiled model the geometric standing height is
 0.6256 m, i.e. 1.9 mm of sag, well inside the 3 cm bound. `X1_INIT_HEIGHT` is the measured value and the smoke
 asserts the model agrees with it to 2 mm. The original "settle at 0.657 m" target is not achievable with the soles
 on the ground — it was the pre-drop height.
+
+### The 0.657 m target
+
+The contract's acceptance for A says "zero action 4 s root height ≈ 0.657 m (sag < 3 cm)". Three different numbers are
+in play and they are not the same quantity:
+
+| figure | value | what it is |
+|---|---|---|
+| contract target | 0.657 m | `X1_INIT_HEIGHT = 0.66` from the earlier code, i.e. the root height **before** the soles touch the floor |
+| geometric standing height | **0.6275 m** | measured on the compiled model at `q0`: the sole spheres' lowest point is exactly on z = 0 here |
+| measured, 4 s of zero action | **0.6256 m** | the end of `scripts/x1_smoke.py --steps 200`; sag 1.9 mm |
+
+0.657 m is not reachable with the feet on the ground — at that height the soles are 3.2 cm in the air, which is why
+every early rollout started with a drop and a contact impulse. The smoke asserts the model agrees with
+`X1_INIT_HEIGHT` to 2 mm and grades the end height against the **geometric** standing height (0.6275 m) with the
+contract's 3 cm tolerance. So the sag criterion is met with 28 mm to spare, but the reference point moved.
+
+**This is a deviation from the literal acceptance criterion and it is left for you to accept**: either the target was
+about the pre-drop height (then A passes as written) or about a robot standing 3 cm taller than this asset can stand
+(then the target itself needs revising). A is marked "done with a stated deviation" in the table above rather than
+quietly counted as meeting 0.657 m.
 
 ### What is asserted on the compiled model
 
@@ -204,9 +225,9 @@ for the CPU smoke plus vendored wheels), `logs/`, `runs/` and `output/` are git-
 67.2 % of the library's 6168 frames have at least one joint within 0.02 rad of its limit, and 18 of the 41 clips are
 there in 100 % of their frames. Per joint, over all frames: `left_elbow_pitch` 57.8 %, `right_elbow_pitch` 37.1 %,
 `left_shoulder_roll` 18.1 %, `left_shoulder_pitch` 17.8 %, `left_knee_pitch` 9.9 %, `right_knee_pitch` 7.1 %;
-`left_elbow_yaw` never reaches a limit. (An earlier version of this section said "every frame", with
-`left_shoulder_roll`/`left_elbow_yaw` at 100 % and `right_elbow_pitch` at 83 %; those were the previous 38-clip
-build's numbers and are wrong for the delivered library.)
+`left_elbow_yaw` never reaches a limit. (An earlier version of this section stated figures from the previous
+38-clip build, which the delivered 41-clip library does not support; `75e245b` replaced them. The superseded
+numbers are deliberately not repeated here — `git show abfd527 -- docs/X1_SUPERMIMIC_REPORT.md` has the diff.)
 
 The cause is the robot, not the calibration: replaying one clip through GMR's unmodified `smplx_to_x1.json` gives the
 same per-joint fractions, so the pelvis scale is not responsible — the X1's arms are much shorter than a human's and
@@ -357,6 +378,52 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 
 ---
 
+## Commits and pushes
+
+29 commits on `feat/x1-29dof` after the upstream `cb334ff`, pushed in batches; the head at the time of writing is
+`62a7d348` (`git ls-remote origin feat/x1-29dof`). Nothing was force-pushed and no remote ref was rewritten; the
+network to github.com:443 dropped repeatedly (TCP timeouts, `Empty reply from server`, HTTP/2 framing errors), so
+several pushes were retried — each successful one printed the old..new range, and the remote ref was re-read after
+every ambiguous attempt rather than retried blind.
+
+```
+$ git log --oneline cb334ff..feat/x1-29dof
+62a7d34 Gradmotion: G1 path-check config and create JSON (runtime proof the upstream robot still trains)
+75e245b X1 library: correct the report numbers, one gait detector, an independent audit
+ed62e3f docs: final results of the 3000-iteration X1 run
+340d67c docs: record the Gradmotion run that works (env build, iter progress, metrics, checkpoints)
+ed0b140 Gradmotion: 3000-iteration create JSON on the project with balance
+bc08ebe Gradmotion entry: fix the metric mirror, it mirrored nothing
+b305b38 X1: pick the robot's own WM joint weights instead of KeyError
+7e06019 Gradmotion: really switch the shim on warp's predicate (2ba1c96 did not)
+2b8e899 chore: build_x1_motions.py executable, like the other entry scripts
+2ba1c96 Gradmotion: the shim's switch comes from the predicate it bypasses
+f2dcc20 Gradmotion entry: capture the stack probe's output so the driver version reaches the decision
+f716bb1 Gradmotion: bypass mujoco_warp's driver gate, the way mjlab already does
+1188da6 docs: X1 supermimic report (asset, motion library, platform bring-up, limitations)
+1845dd1 Gradmotion entry: print the driver version and warp's conditional-graph support before training
+12743c8 Gradmotion entry: append to PYTHONPATH instead of replacing it
+0cd59e3 Gradmotion entry: actually skip the numpy pin (the previous commit only said so)
+87c87de Gradmotion: back to IsaacSim 5.1, leave numpy to the image
+40d38c8 Gradmotion: Ubuntu 24.04 image, and install pip if the image ships a bare Python
+7ed9405 Gradmotion entry: the image's pip index does not resolve, so probe first
+986bd0f Gradmotion: 60-iteration plumbing hparams to validate the whole path cheaply
+11cbb3e README: X1 29-DoF section (asset, motion library, platform entry, three gotchas)
+694ae59 X1 docs/wording: one story in the smoke docstring, executable entry script
+63c3b39 Gradmotion create JSON: point at the x1-supermimic project (PRO_20261102_001)
+0481bd1 X1 motion library: fix the root quaternion, record what produced the npz
+85a7c72 X1 stability: fix the config layer, keep the asset byte-identical
+fb422ff Gradmotion entry: keep the image's CUDA torch, drop the compile warm-up
+535ffb1 Gradmotion: X1 allmimic task entry, hparams, reusable create JSON
+d4d486d X1 motion library: GMR retarget of 41 CMU walking clips at 50 Hz
+c51106e X1 29-DoF: vendored asset, second robot in the registry, CPU smoke test
+```
+
+Two commit messages are now historical and their subjects no longer describe the final tree (`c51106e` and
+`d4d486d` predate the revert of the sole box and the quaternion fix). They cannot be amended without rewriting pushed
+history, which the task forbids; the corrections are in `85a7c72` and `0481bd1`, whose messages say exactly what
+they reverse.
+
 ## Known limitations and open items
 
 1. **The GPU half now runs, but the policy is not evaluated.** `TASK_20261102_043` completed 3000 iterations
@@ -365,7 +432,9 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
    It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
    ~6.6 h of training to convergence on 2 GPUs).
-3. **Arm limits**: every frame saturates an arm joint (see B).
+3. **Arm limits**: 67.2 % of the library's frames have a joint within 0.02 rad of a limit (18 of the 41 clips
+   in all of their frames); per joint `left_elbow_pitch` 57.8 %, `right_elbow_pitch` 37.1 %,
+   `left_shoulder_roll` 18.1 %, `left_elbow_yaw` 0 % (see B for the full table and the cause).
 4. **Training length**: the 3000-iteration config is a smoke-length run for one 4090D, not a converged policy. The
    G1 reference took 176k iterations / 6.6 h on 2×4090 with `--preset recommended`; the X1 config additionally
    disables `compile_bptt`/`compile_wm` and sets `bptt_checkpoint 1` to fit and start quickly on one 24 GB card.
