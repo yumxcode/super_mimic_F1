@@ -63,7 +63,8 @@ class Adapter(Trainer):
         from .evaluate import evaluate, make_eval_env
 
         if not hasattr(self, 'eval_env'):
-            self.eval_env = make_eval_env(self.lib, self.lib.num_clips, self.device, self.tcfg)
+            self.eval_env = make_eval_env(self.lib, self.lib.num_clips, self.device, self.tcfg,
+                                          robot=self.cfg.robot)  # same robot as training, not the g1 default
         self.policy.eval()
         from . import networks
 

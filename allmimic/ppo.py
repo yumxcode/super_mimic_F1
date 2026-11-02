@@ -299,7 +299,8 @@ class PPOTrainer:
                 self.eval_clip_ids = torch.randperm(self.lib.num_clips, generator=g)[: cfg.eval_clips].to(self.device)
             else:
                 self.eval_clip_ids = torch.arange(self.lib.num_clips, device=self.device)
-            self.eval_env = make_eval_env(self.lib, min(cfg.eval_envs, len(self.eval_clip_ids)), self.device)
+            self.eval_env = make_eval_env(self.lib, min(cfg.eval_envs, len(self.eval_clip_ids)), self.device,
+                                          robot=cfg.robot)  # same robot as training, not the g1 default
         t0 = time.time()
         res = evaluate(lambda o, g: self.actor.mean(o, g), self.lib, self.eval_env, self.eval_clip_ids)
         rec = {

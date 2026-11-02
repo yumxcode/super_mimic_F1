@@ -345,7 +345,7 @@ def main(argv=None):
         pol, ck = load_supermimic_policy(path, dev)
         tcfg = task_cfg(ck['cfg'], train=False)
         if env is None:
-            env, tcfg0 = make_eval_env(lib, m, dev, tcfg), tcfg
+            env, tcfg0 = (make_eval_env(lib, m, dev, tcfg, robot=ck['cfg'].get('robot', 'g1')), tcfg)
             env.reset()
         if tcfg != tcfg0:
             raise SystemExit(f'{path}: task cfg differs from the first checkpoint; probe it in a separate call')

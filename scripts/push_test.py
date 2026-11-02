@@ -59,7 +59,8 @@ def main():
         pol, ck = load_supermimic_policy(c, dev)
         # the env's task encoding (goal / action / heading / offsets) must be the checkpoint's: a residual-action
         # policy in a default (absolute-action) env would be scored with wrong setpoints
-        env = make_eval_env(lib, n, dev, task_cfg(ck.get('cfg', {}), train=False))
+        env = make_eval_env(lib, n, dev, task_cfg(ck.get('cfg', {}), train=False),
+                            robot=ck.get('cfg', {}).get('robot', 'g1'))  # the checkpoint's robot
         env.reset()
         ids = torch.arange(n, device=dev)
         # Start a little into the clip so the 10 future frames are all T-pose.

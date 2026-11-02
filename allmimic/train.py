@@ -867,7 +867,13 @@ class Trainer:
             else:
                 self.eval_clip_ids = torch.arange(self.lib.num_clips, device=self.device)
             n = min(cfg.eval_envs, len(self.eval_clip_ids))
-            self.eval_env = make_eval_env(self.lib, n, self.device, self.tcfg)
+            # the eval env must be the SAME ROBOT as training: make_eval_env defaults to 'g1', and omitting this
+            # scored a 3000-iteration X1 policy in a G1 simulator (TASK_20261102_043's end-of-run eval reported
+            # 0/41 that was G1, not X1 -- and nothing failed loudly, which is why the assertion below exists)
+            self.eval_env = make_eval_env(self.lib, n, self.device, self.tcfg, robot=cfg.robot)
+        assert self.eval_env.robot_cfg.name == cfg.robot, (
+            f'eval env robot {self.eval_env.robot_cfg.name!r} != training robot {cfg.robot!r}'
+        )
         t0 = time.time()
         self.policy.eval()
         res = evaluate(lambda o, g: self.policy(o, g), self.lib, self.eval_env, self.eval_clip_ids)
