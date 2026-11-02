@@ -118,6 +118,7 @@ def verify_stack() -> None:
         'print(f"torch {torch.__version__} cuda {torch.version.cuda} available {torch.cuda.is_available()} '
         'count {torch.cuda.device_count()}") \n'
         'print(f"mujoco {mujoco.__version__} warp {warp.__version__} mjlab {mjlab.__file__} numpy {numpy.__version__}")\n'
+        'assert int(numpy.__version__.split(".")[0]) >= 1\n'
         'print(f"gpu {torch.cuda.get_device_name(0)}")\n'
     )
     r = run([sys.executable, '-c', code], check=False)
