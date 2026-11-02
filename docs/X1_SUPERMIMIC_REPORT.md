@@ -10,7 +10,7 @@ Status at a glance
 |---|---|---|
 | A asset + config numerically stable | **done** | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; asset byte-identical to source |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
-| C Gradmotion run | **in progress** — 5 plumbing runs, each fixing one real platform blocker; not yet iterating | see [Gradmotion](#gradmotion) |
+| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, finished (status 5), 5 checkpoints, 33 metric keys | see [Gradmotion](#gradmotion) |
 | D commits + push | **done** | `feat/x1-29dof` pushed; every commit is in the log below |
 | E this report | **done** (C section updated as runs finish) | |
 
@@ -253,9 +253,40 @@ Checkpoints, `gm task model list`:
 | `0000030` | `upload/2026/11/2/ckpt_0000030_20261102113419A751.pt` |
 | (last) | `upload/2026/11/2/last_20261102113435A797.pt` |
 
-Those three are from the plumbing run `TASK_20261102_041`, which completed 60 iterations, exited 0 and published
-`output/x1_supermimic_iter000060.pt`. `TASK_20261102_043`'s own checkpoints and final evaluation are appended below
-once it finishes.
+Those three are from the plumbing run `TASK_20261102_041` (60 iterations, exit 0, published
+`output/x1_supermimic_iter000060.pt`). The 3000-iteration run's own checkpoints:
+
+| checkpoint | policUrl |
+|---|---|
+| `003000` (published copy of `ckpt_0003000`) | `upload/2026/11/2/x1_supermimic_iter003000_20261102121634A086.pt` |
+| `0003000` | `upload/2026/11/2/ckpt_0003000_20261102121554A350.pt` |
+| `0002000` | `upload/2026/11/2/ckpt_0002000_20261102120616A040.pt` |
+| `0001000` | `upload/2026/11/2/ckpt_0001000_20261102115644A554.pt` |
+| (last) | `upload/2026/11/2/last_20261102121548A488.pt` |
+
+### Final result of the 3000-iteration run
+
+Finished normally (`status 5`), 3000 iterations at 0.55 s/iter ≈ 33 min of training, single 4090D. From
+`gm task data get` (120 sampled points per key, `--sampling-mode accelerate`):
+
+| key | it 25 | it 3000 |
+|---|---|---|
+| `Train/ep_return` | 0.8535 | **3.8904** |
+| `Train/ep_norm_return` | 0.3125 | **0.7931** |
+| `Train/wm_err1` (1-step world-model error) | 1.0748 | **0.0259** |
+| `Train/wm_errk` (k-step) | 12.8419 | **0.0657** |
+| `Train/img_survival` (imagined-rollout survival) | 0.1634 | **0.9993** |
+
+Console equivalents at the end: `it 3000 upd 1200 h 0.531 iter 0.552s ret 0.793 len 46.1 term 0.000 wm1 0.0259
+wm8 0.0657 J 3.009 surv 0.999`. Episodes no longer terminate (`term` 0.000) and the imagined rollouts survive
+(0.999), i.e. the world model and the policy are both working on this robot's data.
+
+**What this does and does not show.** It shows the whole X1 path runs on the platform: the vendored asset loads in
+mjlab, MuJoCo Warp builds the scene, the 41-clip library is read, PPO + world model train, checkpoints and metrics
+are published. It does **not** show a policy that walks: 3000 iterations is ~2 % of the G1 reference run, and the
+in-run evaluation of the 60-iteration plumbing run reported `failed 41/41` (that run evaluated at iteration 60,
+where nothing is expected to succeed). No evaluation of `ckpt_0003000` has been run on the clips; that is the next
+step, not a result.
 
 ### Environment as measured on the platform
 
@@ -274,9 +305,9 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 
 ## Known limitations and open items
 
-1. **The GPU half is not proven yet.** No Gradmotion run has produced an iteration, a checkpoint or a metric; the
-   five runs above are environment bring-up. The moment one does, this file and the task note get the numbers.
-   * Nothing here should be read as "training works on the X1".
+1. **The GPU half now runs, but the policy is not evaluated.** `TASK_20261102_043` completed 3000 iterations
+   (status 5), published five checkpoints and 33 metric keys; nothing has replayed `ckpt_0003000` on the library, so
+   there is no success rate for the X1 yet. Do not read the training curves as "the X1 walks".
 2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
    It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
    ~6.6 h of training to convergence on 2 GPUs).
@@ -291,11 +322,17 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 
 ## Next steps
 
-1. Read the driver version from the next plumbing run; if it is < 12.4, pin a `mujoco-warp`/`warp-lang` pair that
-   does not require conditional graphs, or ask for a host with a newer driver.
-2. Once one plumbing run reaches `it 5` and writes `ckpt_0000030.pt`, run `configs/x1_supermimic.json` (3000
-   iterations) and record `gm task model list` + `gm task data get` here.
-3. Then: rebuild the library with more than CMU walking (BONES-SEED or LAFAN1 through the same GMR pipeline), and
-   decide the arm question (filter, separate arm retarget, or accept).
-4. Restore `--preset recommended`'s compile flags once the pipeline is known good, and measure the wall-clock cost
-   per iteration with and without them on one 4090D.
+1. **Evaluate `ckpt_0003000` on the 41 clips** (`tools/eval_allmimic.py`, or `--eval-every` on a resumed run) to get
+   the only number that matters for "does it walk": the clip success rate. Until then this report claims a working
+   pipeline, not a working policy.
+2. **Run to a useful length.** 3000 iterations is ~2 % of the G1 reference run (176k). A first real target is on the
+   order of 50k-100k iterations (≈9-18 h at the measured 0.55 s/iter on one 4090D), then re-evaluate.
+3. **Widen the data**: BONES-SEED or LAFAN1 through the same `scripts/build_x1_motions.py` (41 CMU walking clips,
+   2.06 min, is a pipeline proof, not a training set), and decide the arm question (filter the arm entries out of the
+   IK match table, retarget arms separately, or accept the saturation).
+4. **Restore the preset's compile flags** (`compile_bptt`/`compile_wm`) once the pipeline is trusted, and measure the
+   per-iteration cost with and without them on one 4090D; the current config disables them to start in seconds.
+5. **Driver gate**: the host's 535.183.01 driver works only because `scripts/gm_compat.py` bypasses mujoco_warp's
+   `>= 12.4` check (mjlab disables CUDA graphs on that driver by design). Either keep the shim, pin a mujoco-warp
+   version without the gate, or ask for a host with a >= 12.4 driver — the shim is the one piece of this setup that
+   deliberately departs from the library's own precondition.
