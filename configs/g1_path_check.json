@@ -1,0 +1,18 @@
+{
+  "description": "G1 regression check: run the SAME entry script, image and branch as the X1 task but with --robot g1, to prove the upstream G1 code path (mjlab's G1 entity + G1_ACTION_SCALE + TRACKED_BODIES + the 'tracked' joint-weight table + MotionLibrary) still executes end to end after the X1 changes. 40 iterations, 512 envs. NOTE: it is fed motions/x1_cmu_walk.npz because the repository ships no G1 library (data/ is gitignored); the reference is therefore X1 data interpreted in G1 joint order, so the returns are meaningless -- what this run tests is that the path runs (config builds, scene compiles, iterations advance, checkpoint is written), not G1 tracking quality.",
+  "robot": "g1",
+  "preset": "recommended",
+  "motions": "motions/x1_cmu_walk.npz",
+  "out": "runs/g1_path_check",
+  "iterations": 40,
+  "num_envs": 512,
+  "log_every": 5,
+  "ckpt_every": 20,
+  "eval_every": 1000000,
+  "seed": 0,
+  "buffer_steps": 256,
+  "wall_hours": 1.0,
+  "compile_bptt": "",
+  "compile_wm": false,
+  "bptt_checkpoint": 1
+}

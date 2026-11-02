@@ -1,0 +1,30 @@
+{
+  "taskBaseInfo": {
+    "projectId": "PRO_20261102_002",
+    "taskType": "1",
+    "trainType": "1",
+    "taskName": "g1-path-check-40",
+    "taskDescription": "G1 regression check for the X1 branch: same entry script, image and branch as x1-supermimic-plumbing-60 but --robot g1, 40 iterations / 512 envs. Tests that the upstream G1 code path (mjlab G1 entity, G1_ACTION_SCALE, TRACKED_BODIES, the 'tracked' joint-weight table, MotionLibrary) still builds and trains after the X1 changes. Fed the X1 library because the repo ships no G1 library, so returns are not meaningful -- this is a path test, not a G1 result.",
+    "taskTag": [
+      "g1",
+      "regression",
+      "path-check"
+    ],
+    "goodsId": "ESKU000001",
+    "imageId": "BJX00000178",
+    "imageVersion": "V000446",
+    "personalDataPath": ""
+  },
+  "taskCodeInfo": {
+    "codeType": "2",
+    "codeUrl": "[{\"codeUrl\":\"https://github.com/yumxcode/super_mimic_F1.git\",\"versionType\":\"1\",\"versionName\":\"feat/x1-29dof\"}]",
+    "mainCodeUri": "super_mimic_F1/allmimic/train.py",
+    "hparamsPath": "super_mimic_F1/configs/g1_path_check.json",
+    "startScript": "gm-run super_mimic_F1/scripts/gm_x1_train.py --hparams super_mimic_F1/configs/g1_path_check.json",
+    "isOpen": "1"
+  },
+  "runtimeReminderConfig": {
+    "enableRuntimeReminder": false,
+    "reminderDurations": []
+  }
+}
