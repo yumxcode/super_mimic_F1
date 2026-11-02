@@ -156,11 +156,15 @@ python -m allmimic.train --preset recommended --robot x1_29dof \
     --motions motions/x1_cmu_walk.npz --out runs/x1_cmu_walk
 ```
 
-Measured on the platform (1x4090D, 3000 iterations, 0.55 s/iter): the run completes, publishes checkpoints and
-metrics, and evaluates. An earlier report claimed "0 of 41 clips" for the X1 from that run — that number was produced
-with the **G1** eval env (`make_eval_env` defaulted to it; fixed in `af76c5c`, with
-`tests/test_eval_robot.py` guarding the call sites), so it is not an X1 result. The X1-env measurement is in
-`docs/X1_SUPERMIMIC_REPORT.md`; 3000 iterations is ~2 % of the G1 reference run either way.
+Measured on the platform (1x4090D, 3000 iterations, 0.55 s/iter, `TASK_20261102_068`): the end-of-run evaluation
+tracks **all 41 clips** (`EVAL it 3000 h 0.549 norm_return 0.9205 failed 0/41`). That is in-sample — the 41 clips it
+trained on — and 3000 iterations is ~2 % of the G1 reference run, so treat it as "the pipeline and the learning loop
+work on this robot", not as a converged or generalizing policy.
+
+One trap worth knowing: `make_eval_env` defaults to `robot='g1'`, so an eval that forgets the argument scores the
+policy in the wrong robot. That happened here — the same 3000-iteration X1 policy scored `failed 41/41` in the G1 env
+and `failed 0/41` in the X1 env. `tests/test_eval_robot.py` now rejects any `make_eval_env` call without an explicit
+robot.
 
 | item | where | notes |
 |---|---|---|

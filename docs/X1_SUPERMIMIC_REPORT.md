@@ -10,7 +10,7 @@ Status at a glance
 |---|---|---|
 | A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target-unreachable-as-specified) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
-| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys. Its end-of-run eval ran in the **G1** env (a bug, fixed in `af76c5c`), so it is not an X1 number; the X1 result comes from `TASK_20261102_068` | see [Gradmotion](#gradmotion) and [the X1 evaluation](#the-x1-evaluation) |
+| C Gradmotion run | **done, and the X1 policy tracks all 41 clips** — `TASK_20261102_068`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys, `EVAL … norm_return 0.9205 failed 0/41` | see [Gradmotion](#gradmotion) and [the X1 evaluation](#the-x1-evaluation-0-of-41-clips-failed) |
 | D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
 | G1 path | **done: static + runtime (path only)** | `TASK_20261102_067` trained 40 iterations with `--robot g1` (status 5, 0.45 s/iter, 4 checkpoints), fed X1 motion, so it proves the path runs, not G1 quality — see [G1 path](#g1-path) |
 | E this report | **done** (C section updated as runs finish) | |
@@ -392,9 +392,33 @@ Console equivalents at the end: `it 3000 upd 1200 h 0.531 iter 0.552s ret 0.793 
 wm8 0.0657 J 3.009 surv 0.999`. Episodes no longer terminate (`term` 0.000) and the imagined rollouts survive
 (0.999), i.e. the world model and the policy are both working on this robot's data.
 
-### The X1 evaluation
+### The X1 evaluation: 0 of 41 clips failed
 
-*Pending: `TASK_20261102_068` (same config, fixed eval env) is running; this section is replaced by its number.*
+`TASK_20261102_068` is the same config (`configs/x1_supermimic.json`, 3000 iterations, 4096 envs) re-run on the fixed
+code, so its end-of-run evaluation ran in the **X1** env:
+
+```
+EVAL it 3000 h 0.549 norm_return 0.9205 failed 0/41 (39s)
+```
+
+**All 41 clips played to the end (status 5, exit 0, 5 checkpoints, 33 metric keys).** Normalized return 0.9205 on the
+benchmark protocol (every clip from its first frame, no randomization, deterministic policy, 1e9 s episode length so
+only termination ends an episode).
+
+The contrast with the wrong-robot run is the whole story:
+
+| run | robot in the eval env | `EVAL` line | clips failed |
+|---|---|---|---|
+| `TASK_20261102_043` | **G1** (the bug) | `norm_return -0.0220 failed 41/41` | 41/41 |
+| `TASK_20261102_068` | **X1** (fixed) | `norm_return 0.9205 failed 0/41` | **0/41** |
+
+Same config, same 3000 iterations, same data — only the evaluated robot differed. The X1 policy learned to track the
+41 CMU walking clips; the earlier "the policy fails every clip" conclusion in this report was an artifact of scoring
+an X1 policy in a G1 simulator, and it is retracted.
+
+Caveat on what 0/41 establishes: it is *tracking on the 41 clips it trained on*. There is no held-out set yet, so
+this is not a generalization result, and 0.92 normalized return is not 1.0 (the clips end within the 10 s episode
+budget but the tracking is not perfect). See [Next steps](#next-steps).
 
 ### The evaluation-env bug
 
@@ -490,12 +514,11 @@ they reverse.
 
 ## Known limitations and open items
 
-1. **The GPU half runs; the X1 benchmark came from the wrong robot the first time.** `TASK_20261102_043` completed
-   3000 iterations (status 5), published five checkpoints and 33 metric keys, and its end-of-run evaluation reported
-   0/41 — but in the **G1** env, because `make_eval_env` was called without a robot (fixed in `af76c5c`). That number
-   is not an X1 result and is not quoted as one. Whatever `TASK_20261102_068` reports is the X1 number, and the
-   training curves (`ep_norm_return` 0.79, `img_survival` 0.999) still measure the policy's own collected and
-   imagined episodes rather than whole clips.
+1. **The X1 result is in-sample only.** `TASK_20261102_068` tracks all 41 clips it trained on (0 failures,
+   `norm_return 0.9205`), but there is no held-out library: generalization is unmeasured. The first attempt at this
+   number (`TASK_20261102_043`) was taken in the **G1** env because `make_eval_env` defaulted to it (fixed in
+   `af76c5c`, guarded by `tests/test_eval_robot.py`) and reported 41/41 failures — a wrong-robot artifact that this
+   report originally quoted as the X1 benchmark.
 2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
    It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
    ~6.6 h of training to convergence on 2 GPUs).
@@ -515,10 +538,10 @@ they reverse.
 
 ## Next steps
 
-1. **Get one honest X1 success rate, then a curve.** `TASK_20261102_068` gives the first (3000 iterations, X1 env).
-   After that the useful sequence is: a longer run on the same 41 clips for the training-length curve, and a held-out
-   set (other AMASS subsets through the same `scripts/build_x1_motions.py`) so "walks on what it trained on" is not
-   confused with "walks". Quote no success rate until one has been measured in the X1 env.
+1. **Turn 0/41 in-sample into a generalization number.** Retarget other AMASS subsets with the same
+   `scripts/build_x1_motions.py` and evaluate `ckpt_0003000` on them: the current 0/41 is on the training clips, so it
+   says the policy tracks what it saw, not that it transfers. A training-length curve on the same 41 clips is the
+   other useful axis (3000 iterations was chosen for a smoke-length run, not for convergence).
 2. **Run to a useful length.** 3000 iterations is ~2 % of the G1 reference run (176k). A first real target is on the
    order of 50k-100k iterations (≈9-18 h at the measured 0.55 s/iter on one 4090D), then re-evaluate.
 3. **Widen the data**: BONES-SEED or LAFAN1 through the same `scripts/build_x1_motions.py` (41 CMU walking clips,
