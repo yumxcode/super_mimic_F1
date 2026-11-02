@@ -44,7 +44,7 @@ from tools.x1_retarget_gates import GateModel, human_torso_twist, score_clip  # 
 RAW_EXTRA = Path.home() / 'code' / 'X1_29_AMP' / 'data' / 'amass' / 'CMU_raw'  # phase-1 walk raws (read-only)
 RAW_LOCAL = ROOT / 'data' / 'amass' / 'CMU_raw'
 STAGE = ROOT / 'data' / 'amass' / 'stageii'
-CACHE = ROOT / 'data' / 'phase2_cache'
+CACHE = ROOT / 'data' / 'phase2_cache'  # overridden by --cache-dir (shard mode)
 
 # subject family -> coarse activity tag for quotas and held-out design
 FAMILY = {
@@ -52,12 +52,20 @@ FAMILY = {
     '49': 'walk', '82': 'walk', '91': 'walk', '103': 'walk',
     '02': 'walk', '06': 'walk', '17': 'walk', '13': 'walk',
     '09': 'run', '10': 'run',
+    '12': 'varied', '15': 'varied', '39': 'varied', '76': 'walk', '77': 'varied',
+    '83': 'varied', '84': 'varied', '85': 'varied', '86': 'varied', '87': 'varied',
+    '88': 'varied', '89': 'varied', '93': 'varied', '94': 'varied', '102': 'varied',
+    '104': 'varied', '105': 'varied', '106': 'varied', '107': 'varied', '108': 'varied',
+    '111': 'varied', '113': 'varied', '114': 'varied', '115': 'varied', '118': 'varied',
+    '120': 'walk', '122': 'varied', '123': 'varied', '124': 'varied', '125': 'varied',
+    '126': 'varied', '127': 'varied', '128': 'varied', '132': 'varied', '133': 'varied',
+    '139': 'varied', '140': 'varied', '141': 'varied', '142': 'varied', '144': 'varied',
     '05': 'dance', '60': 'dance', '131': 'dance', '135': 'dance', '136': 'dance',
     '137': 'dance', '143': 'dance',
     '90': 'varied', '138': 'varied',
 }
-QUOTA = {'walk': 150, 'run': 90, 'dance': 50, 'varied': 40, 'turn': 0}  # turn detected by measurement
-HELDOUT_SUBJECTS = {'91'}  # whole-family walk hold-out
+QUOTA = {'walk': 200, 'run': 90, 'dance': 50, 'varied': 40, 'turn': 60}  # run/jog mostly fails the wrist gates (physical boundary, see report)
+HELDOUT_SUBJECTS = {'91', '137'}  # whole-family hold-out: 91 = walk, 137 = dance
 HELDOUT_EXTRA = {'09_03', '09_06', '09_09', '137_05', '137_10', '137_20', '136_03', '136_12', '143_02', '143_09', '90_05', '90_14'}
 
 
@@ -137,8 +145,17 @@ def main() -> int:
     ap.add_argument('--out-heldout', type=Path, default=ROOT / 'motions' / 'x1_phase2_heldout.npz')
     ap.add_argument('--report', type=Path, default=ROOT / 'motions' / 'x1_phase2.meta.json')
     ap.add_argument('--limit', type=int, default=0, help='debug: only first N candidates')
+    ap.add_argument('--cache-dir', type=Path, default=ROOT / 'data' / 'phase2_cache')
+    ap.add_argument('--no-assemble', action='store_true', help='score only (shard mode); no library output')
+    ap.add_argument('--only-new', action='store_true', help='skip candidates whose cache npz already exists')
+    ap.add_argument('--shard', default='', help="'i/n': process every n-th candidate starting at i (parallel shards)")
+    ap.add_argument('--clean', action='store_true',
+                    help='after the libraries are written and verified non-empty, delete the raw SMPL-H '
+                         'files (data/amass/CMU_raw), the stageii intermediates and the per-clip cache '
+                         '(storage red line: only train/held-out npz + meta are kept)')
     ap.add_argument('--workers', type=int, default=1)
     args = ap.parse_args()
+    cache_dir: Path = args.cache_dir
     use_ik_config(ROOT / 'motions' / 'x1_ik_config.json')
 
     STAGE.mkdir(parents=True, exist_ok=True)
@@ -150,6 +167,9 @@ def main() -> int:
             if sub in FAMILY:
                 raws.append((name, sub, Path(f)))
     raws = sorted(set(raws))
+    if args.shard:
+        i, n = (int(v) for v in args.shard.split('/'))
+        raws = raws[i::n]
     if args.limit:
         raws = raws[: args.limit]
     print(f'{len(raws)} raw candidates', flush=True)
@@ -160,6 +180,8 @@ def main() -> int:
     t0 = time.time()
     rows = []
     for idx, (name, sub, path) in enumerate(raws):
+        if args.only_new and (cache_dir / f'{name}.npz').exists():
+            continue
         try:
             d = np.load(path, allow_pickle=True)
             poses = np.asarray(d['poses'], dtype=np.float32)
@@ -249,10 +271,11 @@ def main() -> int:
                                   torch.tensor(qp[:, 3:7], dtype=torch.float64),
                                   torch.tensor(qp[:, 7:], dtype=torch.float64),
                                   1.0 / FPS_OUT), dim=-1).float().numpy()
-        CACHE.mkdir(parents=True, exist_ok=True)
-        np.savez(CACHE / f'{name}.npz', qpos=qp, qvel=qv)
-        sc = score_clip(qp, FPS_OUT, gate_model, wrist_err=werr, chest_yaw_human=twist_h)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        np.savez(cache_dir / f'{name}.npz', qpos=qp, qvel=qv)
         ftag = refine_tag(feat, arm_rom)
+        sc = score_clip(qp, FPS_OUT, gate_model, wrist_err=werr, chest_yaw_human=twist_h,
+                        tag=ftag, human_net_yaw=feat['yaw_net'])
         heldout = sub in HELDOUT_SUBJECTS or name in HELDOUT_EXTRA
         row = {'clip': name, 'subject': sub, 'family': tag, 'tag': ftag, 'heldout': heldout,
                'feat': {k: round(v, 3) for k, v in feat.items()}, 'arm_rom_h': round(arm_rom, 4),
@@ -265,8 +288,23 @@ def main() -> int:
               f'werr50={row["wrist_err_p50"]:.3f} pass={sc["pass"]} '
               f'{bad} {[(g, sc["metrics"][g]) for g in bad]}', flush=True)
 
+    if args.no_assemble:
+        out_rows = ROOT / 'data' / f'phase2_rows_{args.cache_dir.name}.json'
+        out_rows.write_text(json.dumps({'clips': rows}, indent=1, default=float))
+        print(f'\nshard done: {sum(1 for r in rows if "error" not in r and r["score"]["pass"])} pass of '
+              f'{len(rows)} scored; rows -> {out_rows}')
+        return 0
+
+    # merge rows from previous shard runs if present
+    for extra in sorted((ROOT / 'data').glob('phase2_rows_*.json')):
+        try:
+            rows.extend(json.loads(extra.read_text())['clips'])
+            print(f'merged rows from {extra.name}')
+        except Exception as e:  # noqa: BLE001
+            print(f'skip {extra.name}: {e}')
+
     # ---- assembly ----
-    cache = CACHE
+    cache = cache_dir
     def take(rows_in, heldout_want: bool):
         sel, counts = [], {}
         for row in rows_in:
@@ -282,11 +320,13 @@ def main() -> int:
     train_sel, _ = take(rows, False)
     ho_sel, _ = take(rows, True)
 
+    cache_dirs = [cache_dir] + sorted((ROOT / 'data').glob('phase2_cache_s*'))
+
     def write_library(sel, out: Path):
         qpos_all, qvel_all, names, kept = [], [], [], []
         for row in sel:
-            c = cache / f"{row['clip']}.npz"
-            if not c.exists():
+            c = next((d / f"{row['clip']}.npz" for d in cache_dirs if (d / f"{row['clip']}.npz").exists()), None)
+            if c is None:
                 continue
             d = np.load(c)
             qpos_all.append(d['qpos'])
@@ -328,6 +368,14 @@ def main() -> int:
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(meta, indent=1, default=float))
     print(f"\ntrain {n_train} clips, heldout {n_ho} clips; report {args.report}; {meta['elapsed_s']} s")
+    if args.clean and n_train > 0:
+        import shutil
+
+        for d in (ROOT / 'data' / 'amass' / 'CMU_raw', ROOT / 'data' / 'amass' / 'stageii', cache_dir,
+                  *(sorted((ROOT / 'data').glob('phase2_cache_s*')))):
+            if d.exists():
+                shutil.rmtree(d)
+                print(f'cleaned {d}')
     return 0
 
 

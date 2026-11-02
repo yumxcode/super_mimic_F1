@@ -1,5 +1,5 @@
 {
- "out": "motions/x1_cmu_walk_v3.npz",
+ "out": "motions/x1_cmu_walk.npz",
  "out_sha256": "a431b43c33ee460a0eef2ab440a065432d2eb0add64911a3dbd22dfbf7208c74",
  "out_bytes": 1754832,
  "clips_kept": 41,
@@ -3330,5 +3330,6 @@
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_13_stageii.npz",
    "src_fps": 120.0
   }
- ]
+ ],
+ "note": "rebuilt with the phase-2 arm fix (--arm-mode refine, explicit anchored targets); replaces the phase-1 library at the same path"
 }
