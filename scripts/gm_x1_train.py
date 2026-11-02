@@ -230,9 +230,12 @@ def main() -> int:
     mirror.start()
     t0 = time.time()
     try:
-        code = subprocess.call(
-            argv, cwd=str(ROOT), env={**os.environ, 'PYTHONPATH': str(ROOT), 'PYTHONUNBUFFERED': '1'}
-        )
+        # append, never replace: the platform's python is a hermetic kit install whose site-packages (torch among
+        # them) is reachable through the image's own PYTHONPATH, and setting PYTHONPATH=ROOT alone made
+        # `python -m allmimic.train` die with "No module named 'torch'" while the very same interpreter imported it
+        # in the probe above (TASK_20261102_024).
+        env = {**os.environ, 'PYTHONPATH': f'{ROOT}:{os.environ.get("PYTHONPATH", "")}', 'PYTHONUNBUFFERED': '1'}
+        code = subprocess.call(argv, cwd=str(ROOT), env=env)
     finally:
         stop.set()
         mirror.join(timeout=30)
