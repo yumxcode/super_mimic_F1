@@ -138,6 +138,47 @@ python tools/eval_allmimic.py --ckpt runs/bones/last.pt --out-dir runs/bones/eva
 python tools/failure_report.py runs/bones/eval --testsets lafan1_seg10 bones_test_content_seg10
 ```
 
+## X1 29-DoF (second robot)
+
+The upstream robot is the Unitree G1 and stays the default. The Zhiyuan/roboparty X1 29-DoF humanoid is a
+second, switchable entry in `allmimic/robots` (`--robot x1_29dof`); it has the same 29 joints, so every
+network shape, `OBS_DIM` and the task/reward code are shared, and what differs (kinematic tree, joint order,
+limits, actuators, the 14 reward bodies, the joint-weight table) comes from `allmimic/robots/x1_29dof.py`.
+`--robot g1` and every command above are unchanged.
+
+```bash
+# model + contact + servo checks and a 4 s zero-action stance, on CPU (no GPU, no mjlab install needed for mjlab
+# itself: only its CollisionCfg / create_position_actuator are imported, from a checkout or the wheel on PYTHONPATH)
+MJLAB_SRC=/path/to/unpacked/mjlab PYTHONPATH=. python scripts/x1_smoke.py --steps 200
+
+# the CMU walking library that ships with this branch (41 clips, 50 Hz, 1.75 MB)
+python -m allmimic.train --preset recommended --robot x1_29dof \
+    --motions motions/x1_cmu_walk.npz --out runs/x1_cmu_walk
+```
+
+| item | where | notes |
+|---|---|---|
+| asset | `assets/x1_29dof/` | vendored MJCF + the 30 STLs it references; `tools/vendor_x1_assets.py` regenerates it and `--check` verifies it. `PROVENANCE.md` has the sha256s |
+| joint table | `docs/x1_29dof_joints.md` | per-joint limits, kp/kd/effort/armature, masses, foot contact geoms; `tools/x1_joint_table.py` regenerates it |
+| motion library | `motions/x1_cmu_walk.npz` | GMR SMPLX→X1 retarget of the 41 CMU walking clips; `scripts/build_x1_motions.py` rebuilds it, `motions/x1_cmu_walk.meta.json` has the per-clip validation numbers |
+| platform run | `scripts/gm_x1_train.py`, `configs/x1_supermimic.json` | Gradmotion entry: pip-installs `requirements.txt`, verifies CUDA/mjlab, trains, mirrors `log.jsonl` to TensorBoard and publishes the checkpoint |
+
+Three things about this robot are worth knowing before reading the numbers:
+
+* **The asset's `<option>` block and contact defaults target its own 1 kHz scene.** allmimic steps physics at
+  200 Hz, where the asset's 5 ms `solref` is unstable, so the entity's `CollisionCfg` gives the sole geoms
+  `solref 0.02 1`, `condim 3`, `priority 1` and friction 0.6. `scripts/x1_smoke.py` asserts those on the
+  *compiled* model rather than assuming the config landed.
+* **Armature has to be written at spec level, before compile** (mjlab's `create_position_actuator` does).
+  Setting it on a compiled model leaves `dof_M0` stale and the robot topples in ~2 s with no NaN to warn you.
+* **The X1's arms are much shorter than a human's**, so GMR's IK saturates the arm limits on every CMU frame
+  (`left_shoulder_roll` and `left_elbow_yaw` sit at a limit in 100% of frames, `right_elbow_pitch` in 83%).
+  That is GMR's stock `smplx_to_x1.json` too, not a side effect of the local calibration. The reward does not
+  punish a joint at its limit, but a policy trained on this library cannot learn an arm trajectory beyond it.
+
+`docs/X1_SUPERMIMIC_REPORT.md` has the full record: what was measured, what failed on the platform, and the
+open items.
+
 ## Results
 
 Training time is wall-clock hours of training on one RTX 4090 with `--preset recommended`, excluding evaluation.
