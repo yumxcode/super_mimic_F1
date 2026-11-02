@@ -10,7 +10,7 @@ Status at a glance
 |---|---|---|
 | A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
-| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys; its end-of-run evaluation is **0/41 clips** (`norm_return -0.0220`) | see [Gradmotion](#gradmotion) and [the final evaluation](#the-final-evaluation-0-of-41-clips) |
+| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys. Its end-of-run eval ran in the **G1** env (a bug, fixed in `af76c5c`), so it is not an X1 number; the X1 result comes from `TASK_20261102_068` | see [Gradmotion](#gradmotion) and [the X1 evaluation](#the-x1-evaluation) |
 | D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
 | G1 path | **done: static + runtime (path only)** | `TASK_20261102_067` trained 40 iterations with `--robot g1` (status 5, 0.45 s/iter, 4 checkpoints), fed X1 motion, so it proves the path runs, not G1 quality — see [G1 path](#g1-path) |
 | E this report | **done** (C section updated as runs finish) | |
@@ -90,26 +90,33 @@ touch the floor; measured on the compiled model the geometric standing height is
 asserts the model agrees with it to 2 mm. The original "settle at 0.657 m" target is not achievable with the soles
 on the ground — it was the pre-drop height.
 
-### The 0.657 m target
+### The 0.657 m target: unreachable as specified
 
-The contract's acceptance for A says "zero action 4 s root height ≈ 0.657 m (sag < 3 cm)". Three different numbers are
-in play and they are not the same quantity:
+The contract's acceptance for A says "zero action 4 s root height ≈ 0.657 m (sag < 3 cm)". Measured with MuJoCo
+forward kinematics on the vendored MJCF, at `q = q0` and no contact:
 
-| figure | value | what it is |
+| root height | lowest sole sphere | meaning |
 |---|---|---|
-| contract target | 0.657 m | `X1_INIT_HEIGHT = 0.66` from the earlier code, i.e. the root height **before** the soles touch the floor |
-| geometric standing height | **0.6275 m** | measured on the compiled model at `q0`: the sole spheres' lowest point is exactly on z = 0 here |
-| measured, 4 s of zero action | **0.6256 m** | the end of `scripts/x1_smoke.py --steps 200`; sag 1.9 mm |
+| 0.7000 m | +0.0724635 m | reference measurement |
+| **0.6570 m** | **+0.0294635 m** | **the soles are 29.5 mm in the air** |
+| **0.6275 m** | −0.0000365 m | soles on the floor — the standing height |
+| 0.6256 m | — | where the 200-step rollout ends (1.9 mm sag) |
 
-0.657 m is not reachable with the feet on the ground — at that height the soles are 3.2 cm in the air, which is why
-every early rollout started with a drop and a contact impulse. The smoke asserts the model agrees with
-`X1_INIT_HEIGHT` to 2 mm and grades the end height against the **geometric** standing height (0.6275 m) with the
-contract's 3 cm tolerance. So the sag criterion is met with 28 mm to spare, but the reference point moved.
+So the MJCF **cannot stand at 0.657 m**: with the soles on the ground the root is at 0.62754 m, and 0.657 m is a
+*spawn* height that leaves the feet 3 cm above the floor. That is also why `X1_INIT_HEIGHT` was 0.66 in the first
+version and why every early rollout began with a drop and a contact impulse. The smoke asserts the model agrees with
+`X1_INIT_HEIGHT = 0.6275` to 2 mm and grades the end height against the **geometric** standing height with the
+contract's 3 cm tolerance; 1.9 mm of sag passes that with 28 mm to spare.
 
-**This is a deviation from the literal acceptance criterion and it is left for you to accept**: either the target was
-about the pre-drop height (then A passes as written) or about a robot standing 3 cm taller than this asset can stand
-(then the target itself needs revising). A is marked "done with a stated deviation" in the table above rather than
-quietly counted as meeting 0.657 m.
+**This is the one place where the delivered work does not match the written acceptance criterion, and it needs your
+decision**, because the two readings differ and I cannot pick for you:
+
+* if the 0.657 m was meant as the pre-drop spawn height, A passes as written and the wording should say so;
+* if it was meant as a standing height, the criterion is unachievable for this asset and should be restated as
+  0.6275 m ± 3 cm.
+
+This is a documentation/wording issue about the acceptance baseline. It is **not** the reason any evaluation failed —
+the evaluation failure was a separate bug in the eval env (see [the evaluation-env bug](#the-evaluation-env-bug)).
 
 ### What is asserted on the compiled model
 
@@ -382,32 +389,36 @@ Console equivalents at the end: `it 3000 upd 1200 h 0.531 iter 0.552s ret 0.793 
 wm8 0.0657 J 3.009 surv 0.999`. Episodes no longer terminate (`term` 0.000) and the imagined rollouts survive
 (0.999), i.e. the world model and the policy are both working on this robot's data.
 
-### The final evaluation: 0 of 41 clips
+### The X1 evaluation
 
-`Trainer.run()` evaluates the last checkpoint when training ends (`allmimic/train.py:837`: `if cfg.eval_every and
-self.it % cfg.eval_every != 0: self.run_eval()`), so `ckpt_0003000` *was* evaluated on all 41 clips on the benchmark
-protocol (every clip from its first frame, no randomization, deterministic policy):
+*Pending: `TASK_20261102_068` (same config, fixed eval env) is running; this section is replaced by its number.*
+
+### The evaluation-env bug
+
+`Trainer.run()` evaluates the last checkpoint when training ends (`allmimic/train.py:837`). `TASK_20261102_043`'s
+evaluation reported:
 
 ```
 EVAL it 3000 h 0.531 norm_return -0.0220 failed 41/41 (31s)
 ```
 
-**The policy fails every clip after 3000 iterations.** A normalized return of -0.022 means it does worse than an
-episode of doing nothing (`evaluate` normalizes by each clip's maximum). This is the single most important number in
-this report, and it is not a surprise: 3000 iterations is ~2 % of the G1 reference run, and the healthy-looking
-training curves (`ep_norm_return` 0.79, `img_survival` 0.999) measure the policy's own collected and imagined
-episodes — reset points the sampler chose, 10 s episodes — not whole clips from frame 0.
+**That number is not an X1 measurement.** `make_eval_env` has the signature default `robot='g1'` and `run_eval` did
+not pass one (`allmimic/train.py:870`), so this evaluated the X1 policy inside a **G1 simulator** — a robot whose
+kinematic tree, joint order, limits and contact geometry are different. A "failed 41/41" from mismatched physics says
+nothing about the X1. An earlier revision of this report quoted it as the X1 benchmark; that was wrong.
 
-Evidence trail: the `EVAL` line is quoted from the task log; the console log has since rolled over (the API now
-returns 71 KB ending at the publish line), but three facts confirm the evaluation ran: `eval.jsonl` was created at
-12:16:10 (log), the task ended at 12:16:42 — 32 s later, matching `(31s)` — and `train.py:837` guarantees the call.
-The 60-iteration plumbing run shows the same path one step earlier in its log: `EVAL it 60 h 0.064 norm_return 0.0129
-failed 41/41 (35s)`.
+The bug is fixed (`af76c5c`): `run_eval` passes `robot=cfg.robot`, the same latent default was removed from
+`adapt.py`, `ppo.py`, `scripts/push_test.py` and `tools/wm_grad_fidelity.py`, `run_eval` now asserts
+`eval_env.robot_cfg.name == cfg.robot`, and `tests/test_eval_robot.py` parses every `make_eval_env` call site and
+fails on a missing or hardcoded robot. Details in [the evaluation-env bug](#the-evaluation-env-bug).
 
-**What this does and does not show.** It shows the whole X1 path runs on the platform: the vendored asset loads in
-mjlab, MuJoCo Warp builds the scene, the 41-clip library is read, PPO + world model train, checkpoints, metrics and
-the evaluation all run, and nothing crashes. It does **not** show a policy that walks — at this budget it shows the
-opposite, measured as 0/41.
+The X1-env number comes from `TASK_20261102_068`, the same config re-run on the fixed code; it is recorded in
+[the final evaluation](#the-x1-evaluation) once measured. Until then this report has **no** X1 clip-success rate.
+
+**What this does and does not show.** The pipeline is real: the vendored X1 asset loads in mjlab, MuJoCo Warp builds
+the scene, the 41-clip library is read, PPO + world model train for 3000 iterations, and checkpoints, metrics and the
+evaluation all run without crashing. Whether the policy walks is a question this report could not answer at the time
+of writing, because the only evaluation that ran used the wrong robot; `TASK_20261102_068` answers it.
 
 ### Environment as measured on the platform
 
@@ -476,11 +487,12 @@ they reverse.
 
 ## Known limitations and open items
 
-1. **The GPU half runs, and the policy fails every clip.** `TASK_20261102_043` completed 3000 iterations (status 5),
-   published five checkpoints and 33 metric keys, and its end-of-run evaluation reports `norm_return -0.0220 failed
-   41/41 (31s)`: 0 % clip success at this budget. The training curves (`ep_norm_return` 0.79, `img_survival` 0.999)
-   measure the policy's own collected and imagined episodes, not the benchmark. Do not read them as "the X1 walks";
-   the measured answer is 0/41.
+1. **The GPU half runs; the X1 benchmark came from the wrong robot the first time.** `TASK_20261102_043` completed
+   3000 iterations (status 5), published five checkpoints and 33 metric keys, and its end-of-run evaluation reported
+   0/41 — but in the **G1** env, because `make_eval_env` was called without a robot (fixed in `af76c5c`). That number
+   is not an X1 result and is not quoted as one. Whatever `TASK_20261102_068` reports is the X1 number, and the
+   training curves (`ep_norm_return` 0.79, `img_survival` 0.999) still measure the policy's own collected and
+   imagined episodes rather than whole clips.
 2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
    It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
    ~6.6 h of training to convergence on 2 GPUs).
@@ -500,11 +512,10 @@ they reverse.
 
 ## Next steps
 
-1. **The 0/41 is the baseline to improve, not a missing measurement.** `ckpt_0003000` already has its benchmark
-   number (0 of 41 clips, `norm_return -0.0220`), so the next measurement should be a different one: a longer run
-   evaluated on the same 41 clips, to get the training-length curve, plus a held-out set (other AMASS subsets through
-   the same `scripts/build_x1_motions.py`) so "walks on what it trained on" is not confused with "walks". Nothing here
-   should be quoted as a success rate until that number moves above zero.
+1. **Get one honest X1 success rate, then a curve.** `TASK_20261102_068` gives the first (3000 iterations, X1 env).
+   After that the useful sequence is: a longer run on the same 41 clips for the training-length curve, and a held-out
+   set (other AMASS subsets through the same `scripts/build_x1_motions.py`) so "walks on what it trained on" is not
+   confused with "walks". Quote no success rate until one has been measured in the X1 env.
 2. **Run to a useful length.** 3000 iterations is ~2 % of the G1 reference run (176k). A first real target is on the
    order of 50k-100k iterations (≈9-18 h at the measured 0.55 s/iter on one 4090D), then re-evaluate.
 3. **Widen the data**: BONES-SEED or LAFAN1 through the same `scripts/build_x1_motions.py` (41 CMU walking clips,

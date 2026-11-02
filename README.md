@@ -156,10 +156,11 @@ python -m allmimic.train --preset recommended --robot x1_29dof \
     --motions motions/x1_cmu_walk.npz --out runs/x1_cmu_walk
 ```
 
-Measured on the platform (1x4090D, 3000 iterations, 0.55 s/iter): the run completes and its end-of-run evaluation is
-**0 of 41 clips** (`norm_return -0.0220`), i.e. this budget does not produce a walking policy — 3000 iterations is
-~2 % of the G1 reference run. The pipeline is proven; the policy is not. See
-`docs/X1_SUPERMIMIC_REPORT.md` for the training curves and why they look better than the benchmark.
+Measured on the platform (1x4090D, 3000 iterations, 0.55 s/iter): the run completes, publishes checkpoints and
+metrics, and evaluates. An earlier report claimed "0 of 41 clips" for the X1 from that run — that number was produced
+with the **G1** eval env (`make_eval_env` defaulted to it; fixed in `af76c5c`, with
+`tests/test_eval_robot.py` guarding the call sites), so it is not an X1 result. The X1-env measurement is in
+`docs/X1_SUPERMIMIC_REPORT.md`; 3000 iterations is ~2 % of the G1 reference run either way.
 
 | item | where | notes |
 |---|---|---|
