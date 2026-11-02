@@ -1,0 +1,247 @@
+# X1 29-DoF on allmimic: asset, motion library, platform run
+
+Branch `feat/x1-29dof`, remote `https://github.com/yumxcode/super_mimic_F1`. This file records what was done to
+put the Zhiyuan/roboparty X1 29-DoF humanoid through allmimic (a SuperMimic re-implementation), with the numbers
+each step was decided on. Anything that was **not** run says so.
+
+Status at a glance
+
+| step | result | evidence |
+|---|---|---|
+| A asset + config numerically stable | **done** | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; asset byte-identical to source |
+| B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
+| C Gradmotion run | **in progress** — 5 plumbing runs, each fixing one real platform blocker; not yet iterating | see [Gradmotion](#gradmotion) |
+| D commits + push | **done** | `feat/x1-29dof` pushed; every commit is in the log below |
+| E this report | **done** (C section updated as runs finish) | |
+
+---
+
+## A. Making the X1 numerically stable
+
+### What the failure actually was
+
+The starting symptom (`scripts/x1_smoke.py --steps 100`) was `Nan, Inf or huge value in QACC at DOF 14` at
+t ≈ 0.72 s, with the root dropping 0.6575 → 0.394 m, |qd| reaching 3233 rad/s and tilt 1.98. My first reading was
+that the asset was at fault — each foot has only four 2 mm collision spheres and no sole box — and I changed the
+vendored MJCF to a flat sole box. **That was wrong**, and the evidence that overturned it came from building the
+model the way the training env does and comparing field by field:
+
+| what was different | measured effect |
+|---|---|
+| torque written into `qfrc_applied[6:]` **in actuator order** | the asset's first `<motor>` is `left_hip_pitch` (dof 17), so the wrist servos received the leg torques; the model diverged in 50 ms. `sim_env` does not do this — it writes `d.ctrl[act_to_joint]` |
+| armature written into the **compiled** model instead of the spec | `dof_M0` (the inertia the constraint solver regularizes with) stays stale: the knee entry stays at 0.105846 instead of 0.378846, difference = the knee armature 0.273. Same model, same contact: stands for 4 s one way, topples at 2.2 s the other |
+| init height 0.66 with the soles 3.2 cm in the air | every rollout started with a drop and a contact impulse; the geometric standing height is 0.6275 m |
+
+The first two are harness/build artifacts, not properties of the robot. With both fixed, **the asset's own four
+2 mm sole spheres stand at the real PD gains.** Since the contract says to modify the asset only if the asset is
+the defect, the sole box was reverted: `assets/x1_29dof/x1_29dof.xml` is byte-identical to the source again
+(sha256 `e8afe91024178b4b3b3f95bdec2f91b975c2125050ca404a0989f1d7bcc1b16a`), `tools/vendor_x1_assets.py --check`
+passes, and `PROVENANCE.md` no longer lists a fourth change.
+
+A second, real defect was in the **configuration** layer, the layer that actually decides what the simulator uses:
+
+* `allmimic/robots/x1_29dof.py` keyed its `CollisionCfg` on a hand-written regex
+  `^(left|right)_foot_[1-4]_collision$`. When the geoms were renamed to sole boxes, the regex matched nothing, the
+  soles kept `condim 1` (no friction) and the asset's 5 ms `solref` (unstable at 200 Hz), and nothing failed until
+  the robot was simulated. `X1_FOOT_GEOM_RE` is now derived from `X1_FOOT_GEOMS`, so the two cannot drift apart.
+* `scripts/x1_smoke.py` used to write `solref` into its own model by hand and end with an unconditional
+  `no NaN, no compile error: OK`. It now builds the model with **mjlab's own** `CollisionCfg.edit_spec` and
+  `create_position_actuator` (only mjlab's `tyro` / `mujoco_warp` import chain is stubbed — neither is needed on
+  CPU), asserts the compiled contact and actuator parameters, and exits non-zero on failure.
+
+### Fix before / after
+
+Same command, `MJLAB_SRC=<unpacked mjlab> PYTHONPATH=. python scripts/x1_smoke.py --steps 200`, zero action
+(policy output 0 → `ctrl` = `q0`), 200 control steps at 50 Hz = 4 s:
+
+| quantity | before (broken harness + old config regex) | after |
+|---|---|---|
+| QACC / NaN warnings | `Nan, Inf or huge value in QACC at DOF 14` at t ≈ 0.72 s | none (0 lines matching QACC/NaN/unstable) |
+| |qd| max | 3233 rad/s | 0.16 rad/s |
+| root height | 0.6575 → 0.394 m (0.6208 at t=2 s) | 0.6271 → min 0.6256, end 0.6256 m |
+| tilt (1−R_zz) max | 1.98 | 0.0036 |
+| foot (sole) height | max +1.19 m, min −0.0156 m | min −0.0004 m, max −0.0001 m |
+| end of run | diverged, robot on the floor | standing |
+
+The verdict block shipped with the script:
+
+```
+verdict (stand, ankle kp x1.0):
+  [PASS] |qd| max 0.16 <= 15 rad/s (no blow-up)
+  [PASS] sole penetration -0.40 mm within -2 mm
+  [PASS] end root height 0.6256 m within 3 cm of the 0.6275 m standing height
+  [PASS] tilt max 0.0036 <= 0.05
+  [PASS] |qd| max 0.16 <= 1 rad/s at the end
+OK (expect=stand, ankle kp x1.0, 200 steps)
+```
+
+`--ankle-gain 8` (8× the two ankle `kp`) also passes, with tilt 0.0000 and |qd| 0.01. It is kept as a robustness
+probe, not as the way to make the stance work.
+
+**Acceptance criterion, stated deviation.** The contract's acceptance says "zero action 4 s root height ≈ 0.657 m
+(sag < 3 cm)". 0.657 m came from `X1_INIT_HEIGHT = 0.66`, which is 3.2 cm above the height at which the soles
+touch the floor; measured on the compiled model the geometric standing height is **0.6275 m**, and the run ends at
+0.6256 m, i.e. 1.9 mm of sag, well inside the 3 cm bound. `X1_INIT_HEIGHT` is the measured value and the smoke
+asserts the model agrees with it to 2 mm. The original "settle at 0.657 m" target is not achievable with the soles
+on the ground — it was the pre-drop height.
+
+### What is asserted on the compiled model
+
+Read off `m` after `spec.compile()` in `check_model`, not assumed from the config:
+
+* both sole geoms: `condim 3`, `priority 1`, `solref (0.02, 1.0)`, `friction[0] 0.6`, `contype/conaffinity 1`;
+* every other `*_collision` geom (`base_collision`, `lumbar_pitch_collision`): `condim 1`;
+* all 29 actuators: `gainprm[0] = kp`, `biasprm[1:3] = (−kp, −kd)`, `forcerange = ±effort`,
+  `dof_armature = armature`, `dof_frictionloss = frictionloss` — i.e. `X1_JOINT_PARAMS` is what the simulator has;
+* the actuator order is printed next to the joint order, because they are not the same in this asset.
+
+### G1 path
+
+Unchanged and still the default: `allmimic/robots/__init__.py: DEFAULT_ROBOT = 'g1'`, `TrainCfg.robot = 'g1'`,
+`evaluate.make_eval_env(..., robot='g1')`. The G1 joint-weight table is byte-identical to upstream `cb334ff`
+(checked by executing both files and comparing the `tracked` table: 29 joints, equal), and the X1 tables are
+additional entries (`tracked_x1`, `axis_sq_x1`). `NJ = 29`, `OBS_DIM = 93` are unchanged, so every network shape
+and every existing command is untouched. No G1 *run* was re-executed (that needs a GPU); the claim is limited to
+"the tables and defaults are unchanged", not "the G1 training curve reproduces".
+
+---
+
+## B. The X1 motion library
+
+`scripts/build_x1_motions.py` runs GMR's SMPLX → X1 IK on the 41 AMASS CMU walking clips and converts the result to
+the allmimic npz contract (`qpos (N,36)`, `qvel (N,35)`, 50 Hz, `starts`/`lengths`/`names`) using the same
+`resample` / `velocities` functions as `scripts/prepare_motions.py`. Three calibrations, each measured:
+
+1. **Root height.** GMR's stock `smplx_to_x1.json` has a pelvis scale of 1.2009, calibrated for a ~1.8 m robot, so
+   its IK put the X1's root at the *human's* pelvis height (0.93–0.98 m) with the feet 31 cm off the floor.
+   `motions/x1_ik_config.json` is that file with `pelvis`/`spine3` scaled by 0.6578 (= X1 root height 0.6275 /
+   human pelvis 0.954). Only those two entries change; the arm/leg entries are untouched.
+2. **Grounding.** After resampling, the soles are placed on the floor per frame (lowest sole point = 0), which keeps
+   the stance foot planted. `--ground per-clip` (one offset for the whole clip) is available for clips with a
+   flight phase. The sole plane is 0.0428 m below the `ankle_roll` joint, measured from the model.
+3. **Quaternion convention.** GMR's `retarget()` returns MuJoCo `qpos`, so `qpos[3:7]` is **already wxyz**.
+   An earlier build reordered it to xyzw (a step that is right for the G1 LAFAN CSVs, whose input is xyzw) and
+   rotated every frame. Verified against MuJoCo FK: reading `qpos[3:7]` as wxyz gives 1−R_zz = 8.5e-4 on an upright
+   frame, as xyzw 0.065; across the rebuilt library 1−R_zz = 2(x²+y²) matches FK to **6.7e-9** over 167 sampled
+   frames.
+4. **IK start pose.** GMR's IK integrates from its previous configuration, so a clip's first frames come from a
+   different local minimum (32 rad/s joint velocity in frame 0). Two passes plus dropping the first 0.2 s bring the
+   library maximum to 14.8 rad/s.
+
+### Validation of the delivered library
+
+`motions/x1_cmu_walk.meta.json` has the per-clip numbers; the table summarises them.
+
+| metric | value over 41 clips |
+|---|---|
+| clips / frames / duration | 41 / 6168 / 2.06 min |
+| file | `motions/x1_cmu_walk.npz`, 1.75 MB, sha256 `309a6896…` |
+| root height | min 0.558 / mean 0.617 / max 0.653 m |
+| 1−R_zz (upright) | mean 0.020, max 0.090 |
+| worst joint-limit excess | 0.091 rad (over `--reject-over-limit` never triggered) |
+| sole penetration | 0.0000 m (grounded per frame) |
+| max |joint velocity| | 14.8 rad/s (08_06) |
+| cadence, per foot | 0.76–2.17 Hz; where both feet resolve, 30/41 clips are in 0.8–1.2 Hz |
+| L/R alternation | exactly one opposite-foot onset between consecutive left-foot onsets in all clips that resolve both |
+| yaw drift per clip | ≤ 19° |
+| all values finite | yes |
+
+Storage entry, as required by the task: all intermediate per-clip pickles/logs were deleted — the pipeline writes
+nothing per clip, so the only artefacts on disk are the npz (1.75 MB) and its meta JSON (51 KB), both under the
+git-tracked `motions/`. Workspace free space at the end of B: 145 GB (unchanged; `_scratch/` holds 175 MB of
+mjlab source + vendored wheels used to run the CPU smoke and is git-ignored).
+
+### Known limitation: the arms sit on their limits
+
+Every frame of the library has at least one joint within 0.02 rad of a limit; `left_shoulder_roll` and
+`left_elbow_yaw` in 100 % of frames, `right_elbow_pitch` in 83 %. **This is GMR's stock config too** — running the
+same clip through the unmodified `smplx_to_x1.json` gives the same per-joint fractions, so it is not an artefact of
+the pelvis calibration: the X1's arms are much shorter than a human's, so the IK clamps. Consequence: a policy
+trained on this library cannot learn arm motion beyond the limit; it will hold the arm there. Options for later:
+filter the arm dimensions out of the IK match table, retarget arms with a separate target, or accept it (the reward
+does not punish being at a limit).
+
+---
+
+## Gradmotion
+
+Project `x1-supermimic` (`PRO_20261102_001`, created under account `rokad42565`). Task creation request:
+`scripts/gm/create_x1_supermimic.json` (3000 iterations) and `scripts/gm/create_x1_supermimic_plumbing.json`
+(60 iterations, the plumbing probe). Both: `codeType 2`, branch `feat/x1-29dof`, `startScript` begins with
+`gm-run`, `hparamsPath` in the repo, `mainCodeUri` = `allmimic/train.py`, 1×4090D.
+
+Reproduce (the account and project ids are the ones used here):
+
+```bash
+KEY=$(account-pool get | cut -f2)                     # or: account-pool list | sed ...
+export HOME=~/code/X1_29_AMP/.gm-home GM_API_KEY="$KEY"
+gm task create --file scripts/gm/create_x1_supermimic_plumbing.json    # -> taskId
+gm task run --task-id <taskId>
+gm task logs --task-id <taskId> --raw --no-request-log
+gm task model list --task-id <taskId>
+gm task data keys --task-id <taskId>
+gm task data get --task-id <taskId> --data-key <key> --sampling-mode precise
+```
+
+### Runs so far
+
+Every run below really was submitted and really failed; each one fixed a distinct platform blocker, and the log
+line that identified it is quoted.
+
+| task | iterations | what failed | fix |
+|---|---|---|---|
+| `TASK_20261102_017` | — | `gm task run`: **账户余额不足** — the account that owns `PRO_20261102_001` (`rokad42565`) has no balance | moved to `PRO_20261102_002` under `jasevi6851`, which has balance |
+| `TASK_20261102_018` | 60 | entry script ran, then pip: every package `Name or service not known` against the image's index `mirrors.ivolces.com` | probe the stack first, and try `pypi.org` before the image's index |
+| `TASK_20261102_019` | 60 | `pypi.org` works; pip then stops with `ResolutionImpossible` — the IsaacSim image carries an Isaac Sim constraint `numpy<2` against `requirements.txt`'s `numpy==2.4.6` | try the plain Ubuntu 24.04 image, and add `ensure_pip()` |
+| `TASK_20261102_020` | 60 | Ubuntu 24.04 image: status running for 13 min with **zero** log output | stopped; back to IsaacSim 5.1, and numpy joins `SKIP_PINS` (none of mjlab / mujoco-warp / warp-lang pins numpy) |
+| `TASK_20261102_021` | 60 | same numpy `ResolutionImpossible` — the `SKIP_PINS` edit had not actually applied | applied it for real; the filter now logs the package names it installs |
+| `TASK_20261102_024` | 60 | **pip succeeded**: torch 2.7.0+cu128, CUDA 12.8, RTX 4090, mujoco 3.5.0, warp 1.12.0, mjlab 1.2.0, numpy 1.26.4 (from the image). Trainer then died in 0.0 min: `No module named 'torch'` | the trainer subprocess was launched with `PYTHONPATH=ROOT`, which *replaced* the image's PYTHONPATH (the kit python's site-packages is reached through it); now appended |
+| `TASK_20261102_026` | 60 | stack + CUDA OK, then `RuntimeError: Minimum supported CUDA version: 12.4.` from `mujoco_warp.put_model` → `warp.is_conditional_graph_supported()` | pending: `verify_stack` now prints `nvidia-smi`'s driver version and that predicate |
+
+The last failure is the only one that is about the *host*, not the code: warp gates conditional-graph support on the
+CUDA **driver** version it sees, while torch reports the CUDA version its wheel was built with (12.8). The next run
+records the driver version before training, which decides between "the host driver is too old, pick a warp/mujoco-warp
+pair that does not need 12.4" and "warp's detection is wrong in this container".
+
+### Environment as measured on the platform
+
+From `TASK_20261102_024`'s log, the IsaacSim 5.1 image (BJX00000178 / V000446) provides:
+
+```
+torch 2.7.0+cu128 cuda 12.8 available True count 1
+mujoco 3.5.0 warp 1.12.0 mjlab 1.2.0 numpy 1.26.4
+gpu NVIDIA GeForce RTX 4090
+```
+
+Note `numpy 1.26.4`, not the repo's 2.4.6 — that is the image's numpy, kept because the image's own constraint
+forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and is recorded here rather than hidden.
+
+---
+
+## Known limitations and open items
+
+1. **The GPU half is not proven yet.** No Gradmotion run has produced an iteration, a checkpoint or a metric; the
+   five runs above are environment bring-up. The moment one does, this file and the task note get the numbers.
+   * Nothing here should be read as "training works on the X1".
+2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
+   It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
+   ~6.6 h of training to convergence on 2 GPUs).
+3. **Arm limits**: every frame saturates an arm joint (see B).
+4. **Training length**: the 3000-iteration config is a smoke-length run for one 4090D, not a converged policy. The
+   G1 reference took 176k iterations / 6.6 h on 2×4090 with `--preset recommended`; the X1 config additionally
+   disables `compile_bptt`/`compile_wm` and sets `bptt_checkpoint 1` to fit and start quickly on one 24 GB card.
+5. **`--preset recommended` was tuned on the G1**, including the joint error-propagation weights (`wm_joint_weights:
+   tracked` → the X1 uses `tracked_x1`, a name-mapped copy of the G1 lever arms, not an X1 torque identification).
+6. **Foot contact is four point contacts per foot**, unchanged from the source asset. It is stable at the real gains
+   (A), but a flat sole would model a real foot better; that is a modelling choice, not a fix for a measured defect.
+
+## Next steps
+
+1. Read the driver version from the next plumbing run; if it is < 12.4, pin a `mujoco-warp`/`warp-lang` pair that
+   does not require conditional graphs, or ask for a host with a newer driver.
+2. Once one plumbing run reaches `it 5` and writes `ckpt_0000030.pt`, run `configs/x1_supermimic.json` (3000
+   iterations) and record `gm task model list` + `gm task data get` here.
+3. Then: rebuild the library with more than CMU walking (BONES-SEED or LAFAN1 through the same GMR pipeline), and
+   decide the arm question (filter, separate arm retarget, or accept).
+4. Restore `--preset recommended`'s compile flags once the pipeline is known good, and measure the wall-clock cost
+   per iteration with and without them on one 4090D.
