@@ -201,18 +201,26 @@ def main() -> int:
         smplx_data, body_model, smplx_out, h = load_smplx_file(str(stage), str(GMR_DIR / 'assets' / 'body_models'))
         frames, _ = get_smplx_data_offline_fast(smplx_data, body_model, smplx_out, tgt_fps=src_fps)
         dd = mujoco.MjData(r.model)
+        sh_bid = r.shoulder_bid
+        from tools.x1_arm_fix import D_MAX, D_MIN, RATIO
+
         werr = []
         arm_rom_h = []
         for k in range(min(len(qpos), len(frames))):
-            r.update_targets(frames[k])
-            sd = r.scaled_human_data
+            fr = frames[k]
             dd.qpos[:] = qpos[k]
             mujoco.mj_kinematics(r.model, dd)
             e = []
             for s in ('left', 'right'):
-                e.append(np.linalg.norm(dd.xpos[bid[f'{s}_wrist_roll_link']] - sd[f'{s}_wrist'][0]))
-                fr = frames[k]
-                arm_rom_h.append(np.linalg.norm(np.asarray(fr[f'{s}_wrist'][0]) - np.asarray(fr[f'{s}_shoulder'][0])))
+                # anchored intent target: live shoulder FK + human arm direction at the
+                # arm-length-preserving distance (the same law tools/x1_arm_fix.py solves for)
+                wr_h = np.asarray(fr[f'{s}_wrist'][0], dtype=float)
+                sh_h = np.asarray(fr[f'{s}_shoulder'][0], dtype=float)
+                v = wr_h - sh_h
+                n = np.linalg.norm(v)
+                tgt = dd.xpos[sh_bid[s]] + v * (np.clip(RATIO * n, D_MIN, D_MAX) / n) if n > 1e-6 else dd.xpos[sh_bid[s]]
+                e.append(np.linalg.norm(dd.xpos[bid[f'{s}_wrist_roll_link']] - tgt))
+                arm_rom_h.append(n)
             werr.append(e)
         werr = np.array(werr).max(axis=1)
         arm_rom = float(np.std(arm_rom_h))

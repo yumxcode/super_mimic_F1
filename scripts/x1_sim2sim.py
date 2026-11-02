@@ -111,14 +111,21 @@ def rollout_clip(m, d, kin, task, policy, robot, act_to_joint, lib, clip: int, d
     mujoco.mj_forward(m, d)
 
     hist = task.cfg.history
+    future_off = torch.tensor([float(o) for o in (task.cfg.future_offsets or tuple(range(1, task.cfg.future + 1)))],
+                              device=device, dtype=torch.long)
+
+    def ref_future(fr_idx):
+        idx = fr_idx[:, None] + future_off[None]
+        idx = lib.clamp_to_clip(idx, fr_idx)
+        return lib.frame(idx)
+
     obs_hist = torch.zeros(1, hist, OBS_DIM, device=device)
     enc_bias = torch.zeros(1, len(names), device=device)
     prev_action = torch.zeros(1, len(names), device=device)
     s = state_of(d)
     ref = {k: v for k, v in fr0.items()}
     kin_ref = kin.forward(ref['pos'], ref['rot'], ref['q'], ref['v'], ref['w'], ref['qd'])
-    rf_future = {k: v.unsqueeze(1).expand(-1, task.cfg.future, *v.shape[1:]) for k, v in ref.items()}
-    out = task.analytics(s, ref, kin_ref, rf_future, prev_action, prev_action, enc_bias)
+    out = task.analytics(s, ref, kin_ref, ref_future(idx[:1]), prev_action, prev_action, enc_bias)
     obs_hist[:] = out['obs']
     qpos_track = [d.qpos.copy()]
     errs = []
@@ -140,8 +147,7 @@ def rollout_clip(m, d, kin, task, policy, robot, act_to_joint, lib, clip: int, d
         s = state_of(d)
         ref = lib.frame(idx[k + 1:k + 2])
         kin_ref = kin.forward(ref['pos'], ref['rot'], ref['q'], ref['v'], ref['w'], ref['qd'])
-        rf_future = {kk: vv.unsqueeze(1).expand(-1, task.cfg.future, *vv.shape[1:]) for kk, vv in ref.items()}
-        out = task.analytics(s, ref, kin_ref, rf_future, a, prev_action, enc_bias)
+        out = task.analytics(s, ref, kin_ref, ref_future(idx[k + 1:k + 2]), a, prev_action, enc_bias)
         obs_hist = torch.cat([obs_hist[:, 1:], out['obs'].unsqueeze(1)], dim=1)
         prev_action = a
         # errors: state FK vs reference FK
@@ -190,10 +196,23 @@ def main() -> int:
 
     mjlab_light()  # build() needs mjlab.utils.spec (the light stub), ours above covers sim_env's
     m, d, kin, _, names, robot, act_to_joint = build(x1.X1_XML, device)
+    # match the training env exactly: mjlab SimulationCfg defaults beyond MujocoCfg's
+    # timestep/iterations -- implicitfast integrator (MuJoCo default is Euler), newton/pyramidal/1.0
+    m.opt.integrator = mujoco.mjtIntegrator.mjINT_IMPLICITFAST
+    m.vis.global_.offwidth, m.vis.global_.offheight = 960, 640  # offscreen render buffer
     ck = torch.load(args.ckpt, map_location=device)
+    if 'actor' in ck:
+        policy, meta = load_ppo_policy(args.ckpt, device)
+    elif 'policy' in ck:  # SuperMimic format (wm + policy, e.g. every phase-1/2 run)
+        from allmimic.evaluate import load_supermimic_policy
+
+        pol, _ = load_supermimic_policy(args.ckpt, device)
+        policy = lambda o, g: pol(o, g)
+        meta = {'it': ck['it'], 'hours': ck['train_time'] / 3600, 'env_steps': ck['env_steps']}
+    else:
+        raise SystemExit(f'checkpoint keys {list(ck)[:8]} — neither actor nor policy')
     cfg = task_cfg(ck.get('cfg', {}) or {}, train=False)
     task = make_task(m, kin, robot, device, cfg)
-    policy, meta = load_ppo_policy(args.ckpt, device)
     print(f'ckpt: it={meta["it"]} hours={meta["hours"]:.2f} action={cfg.action} '
           f'res_legs={cfg.res_legs} future={cfg.future}')
 

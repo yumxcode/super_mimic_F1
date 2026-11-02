@@ -192,12 +192,27 @@ def arm_refine(r: StudyRetarget, qpos_seq: np.ndarray, frames: list, margin: flo
     all_tasks = list(tasks_by.values()) + [posture]
 
     def set_targets(frame):
-        r.update_targets(frame)
-        sd = r.scaled_human_data
+        r.update_targets(frame)  # sets GMR's own table tasks to the anchored targets
+        import numpy as _np
         for side in ('left', 'right'):
-            wr = sd[f'{side}_wrist'][0]
-            q_wr = sd[f'{side}_wrist'][1]  # wxyz
-            tasks_by[(side, 'wr')].set_target(mink.SE3.from_rotation_and_translation(mink.SO3(q_wr), wr))
+            # EXPLICIT anchored intent (same law as AnchoredRetarget.update_targets):
+            # sh_fk + unit(human wr-sh) * clip(RATIO*|wr-sh|, D_MIN, D_MAX). Reading
+            # r.scaled_human_data instead would silently re-reference the STOCK
+            # pelvis-relative target (measured: |FK-stock| 6-9 mm vs |FK-anchored|
+            # 11-19 cm -- the refine used to converge to the stock target and only
+            # looked right because the anchored base solve had moved the shoulder).
+            sh_fk = cfg.data.xpos[r.shoulder_bid[side]]
+            wr_h = _np.asarray(frame[f'{side}_wrist'][0], dtype=float)
+            sh_h = _np.asarray(frame[f'{side}_shoulder'][0], dtype=float)
+            v = wr_h - sh_h
+            n = _np.linalg.norm(v)
+            quat = r.scaled_human_data[f'{side}_wrist'][1]  # wxyz orientation target (unused, rot cost 0)
+            if n < 1e-6:
+                pos = sh_fk
+            else:
+                pos = sh_fk + v * (float(_np.clip(RATIO * n, D_MIN, D_MAX)) / n)
+            tasks_by[(side, 'wr')].set_target(
+                mink.SE3.from_rotation_and_translation(mink.SO3(quat), pos))
 
     cfg = mink.Configuration(m)
     out = qpos_seq.copy()

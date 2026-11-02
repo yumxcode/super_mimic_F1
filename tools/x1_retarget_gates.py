@@ -33,8 +33,9 @@ LUMBAR_JOINTS = ('lumbar_yaw_joint', 'lumbar_roll_joint', 'lumbar_pitch_joint')
 
 # gate name -> (limit, comparison, description). A clip passes when every gate passes.
 GATES = {
-    'wrist_err_p50_m': (0.08, '<=', 'median wrist FK-vs-anchored-target error'),
-    'wrist_err_p90_m': (0.15, '<=', 'p90 wrist FK-vs-anchored-target error'),
+    'wrist_err_p50_m': (0.08, '<=', 'median |wrist FK - anchored intent target| (sh_fk + unit(wr-sh)*clip(0.62|wr-sh|)): '
+                                   'arm-length-preserving human wrist position on the robot'),
+    'wrist_err_p90_m': (0.15, '<=', 'p90 of the same'),
     'arm_at_limit_frac': (0.30, '<=', 'frames with an arm joint within 0.02 rad of a limit'),
     'arm_qd_max': (25.0, '<=', 'max |arm joint velocity| (rad/s)'),
     'lumbar_margin_ok': (1.0, '>=', 'fraction of frames with every lumbar joint 0.05 rad inside its range'),
