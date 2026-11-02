@@ -120,8 +120,10 @@ X1_TRACKED_BODIES = (
 )
 X1_ROOT_BODY = 'base_link'
 X1_TORSO_BODY = 'lumbar_pitch_link'
-# Foot contact geoms: four 2 mm corner spheres per foot, the only collision geoms below the ankle in the asset (the
-# vendored MJCF is byte-identical to the source; see assets/x1_29dof/PROVENANCE.md).
+# Foot contact geoms: four 2 mm corner spheres per foot, the only collision geoms below the ankle in the asset. The
+# vendored MJCF has no change to geometry, contact parameters, inertia, joint limits or body poses: it differs from the
+# source only by the mechanical vendoring transform PROVENANCE.md lists (meshdir rewritten, a name added to each
+# unnamed geom).
 X1_FOOT_GEOMS = tuple(f'{s}_foot_{k}_collision' for s in ('left', 'right') for k in (1, 2, 3, 4))
 # Regex the entity's CollisionCfg keys on, built from the tuple above. It has to be derived: when the asset's foot
 # geoms were renamed once, a hand-written regex silently matched nothing, the soles kept the asset's contact defaults

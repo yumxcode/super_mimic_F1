@@ -10,7 +10,7 @@ Status at a glance
 |---|---|---|
 | A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
-| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, finished (status 5), 5 checkpoints, 33 metric keys | see [Gradmotion](#gradmotion) |
+| C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys; its end-of-run evaluation is **0/41 clips** (`norm_return -0.0220`) | see [Gradmotion](#gradmotion) and [the final evaluation](#the-final-evaluation-0-of-41-clips) |
 | D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
 | G1 path | **done: static + runtime (path only)** | `TASK_20261102_067` trained 40 iterations with `--robot g1` (status 5, 0.45 s/iter, 4 checkpoints), fed X1 motion, so it proves the path runs, not G1 quality — see [G1 path](#g1-path) |
 | E this report | **done** (C section updated as runs finish) | |
@@ -264,7 +264,9 @@ not penalise being at a limit).
 
 ## Gradmotion
 
-Project `x1-supermimic` (`PRO_20261102_001`, created under account `rokad42565`). Task creation request:
+Project `x1-supermimic` (**`PRO_20261102_002`**, account `jasevi6851`). Every task that actually ran — 041, 043,
+067 — lives here. `PRO_20261102_001` is the abandoned first attempt under account `rokad42565`: its only task
+(017) sits at status 0 because `gm task run` refused with 账户余额不足, and it was never used again. Creation request:
 `scripts/gm/create_x1_supermimic.json` (3000 iterations) and `scripts/gm/create_x1_supermimic_plumbing.json`
 (60 iterations, the plumbing probe). Both: `codeType 2`, branch `feat/x1-29dof`, `startScript` begins with
 `gm-run`, `hparamsPath` in the repo, `mainCodeUri` = `allmimic/train.py`, 1×4090D.
@@ -380,12 +382,32 @@ Console equivalents at the end: `it 3000 upd 1200 h 0.531 iter 0.552s ret 0.793 
 wm8 0.0657 J 3.009 surv 0.999`. Episodes no longer terminate (`term` 0.000) and the imagined rollouts survive
 (0.999), i.e. the world model and the policy are both working on this robot's data.
 
+### The final evaluation: 0 of 41 clips
+
+`Trainer.run()` evaluates the last checkpoint when training ends (`allmimic/train.py:837`: `if cfg.eval_every and
+self.it % cfg.eval_every != 0: self.run_eval()`), so `ckpt_0003000` *was* evaluated on all 41 clips on the benchmark
+protocol (every clip from its first frame, no randomization, deterministic policy):
+
+```
+EVAL it 3000 h 0.531 norm_return -0.0220 failed 41/41 (31s)
+```
+
+**The policy fails every clip after 3000 iterations.** A normalized return of -0.022 means it does worse than an
+episode of doing nothing (`evaluate` normalizes by each clip's maximum). This is the single most important number in
+this report, and it is not a surprise: 3000 iterations is ~2 % of the G1 reference run, and the healthy-looking
+training curves (`ep_norm_return` 0.79, `img_survival` 0.999) measure the policy's own collected and imagined
+episodes — reset points the sampler chose, 10 s episodes — not whole clips from frame 0.
+
+Evidence trail: the `EVAL` line is quoted from the task log; the console log has since rolled over (the API now
+returns 71 KB ending at the publish line), but three facts confirm the evaluation ran: `eval.jsonl` was created at
+12:16:10 (log), the task ended at 12:16:42 — 32 s later, matching `(31s)` — and `train.py:837` guarantees the call.
+The 60-iteration plumbing run shows the same path one step earlier in its log: `EVAL it 60 h 0.064 norm_return 0.0129
+failed 41/41 (35s)`.
+
 **What this does and does not show.** It shows the whole X1 path runs on the platform: the vendored asset loads in
-mjlab, MuJoCo Warp builds the scene, the 41-clip library is read, PPO + world model train, checkpoints and metrics
-are published. It does **not** show a policy that walks: 3000 iterations is ~2 % of the G1 reference run, and the
-in-run evaluation of the 60-iteration plumbing run reported `failed 41/41` (that run evaluated at iteration 60,
-where nothing is expected to succeed). No evaluation of `ckpt_0003000` has been run on the clips; that is the next
-step, not a result.
+mjlab, MuJoCo Warp builds the scene, the 41-clip library is read, PPO + world model train, checkpoints, metrics and
+the evaluation all run, and nothing crashes. It does **not** show a policy that walks — at this budget it shows the
+opposite, measured as 0/41.
 
 ### Environment as measured on the platform
 
@@ -454,9 +476,11 @@ they reverse.
 
 ## Known limitations and open items
 
-1. **The GPU half now runs, but the policy is not evaluated.** `TASK_20261102_043` completed 3000 iterations
-   (status 5), published five checkpoints and 33 metric keys; nothing has replayed `ckpt_0003000` on the library, so
-   there is no success rate for the X1 yet. Do not read the training curves as "the X1 walks".
+1. **The GPU half runs, and the policy fails every clip.** `TASK_20261102_043` completed 3000 iterations (status 5),
+   published five checkpoints and 33 metric keys, and its end-of-run evaluation reports `norm_return -0.0220 failed
+   41/41 (31s)`: 0 % clip success at this budget. The training curves (`ep_norm_return` 0.79, `img_survival` 0.999)
+   measure the policy's own collected and imagined episodes, not the benchmark. Do not read them as "the X1 walks";
+   the measured answer is 0/41.
 2. **Data is CMU walking only** (41 clips, 2.06 min, one performer family, no running/jumping/turning-in-place).
    It is enough to prove the pipeline; it is not a paper-scale library (BONES-SEED used for the G1 is 306 clips and
    ~6.6 h of training to convergence on 2 GPUs).
@@ -476,9 +500,11 @@ they reverse.
 
 ## Next steps
 
-1. **Evaluate `ckpt_0003000` on the 41 clips** (`tools/eval_allmimic.py`, or `--eval-every` on a resumed run) to get
-   the only number that matters for "does it walk": the clip success rate. Until then this report claims a working
-   pipeline, not a working policy.
+1. **The 0/41 is the baseline to improve, not a missing measurement.** `ckpt_0003000` already has its benchmark
+   number (0 of 41 clips, `norm_return -0.0220`), so the next measurement should be a different one: a longer run
+   evaluated on the same 41 clips, to get the training-length curve, plus a held-out set (other AMASS subsets through
+   the same `scripts/build_x1_motions.py`) so "walks on what it trained on" is not confused with "walks". Nothing here
+   should be quoted as a success rate until that number moves above zero.
 2. **Run to a useful length.** 3000 iterations is ~2 % of the G1 reference run (176k). A first real target is on the
    order of 50k-100k iterations (≈9-18 h at the measured 0.55 s/iter on one 4090D), then re-evaluate.
 3. **Widen the data**: BONES-SEED or LAFAN1 through the same `scripts/build_x1_motions.py` (41 CMU walking clips,

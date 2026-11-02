@@ -156,6 +156,11 @@ python -m allmimic.train --preset recommended --robot x1_29dof \
     --motions motions/x1_cmu_walk.npz --out runs/x1_cmu_walk
 ```
 
+Measured on the platform (1x4090D, 3000 iterations, 0.55 s/iter): the run completes and its end-of-run evaluation is
+**0 of 41 clips** (`norm_return -0.0220`), i.e. this budget does not produce a walking policy — 3000 iterations is
+~2 % of the G1 reference run. The pipeline is proven; the policy is not. See
+`docs/X1_SUPERMIMIC_REPORT.md` for the training curves and why they look better than the benchmark.
+
 | item | where | notes |
 |---|---|---|
 | asset | `assets/x1_29dof/` | vendored MJCF + the 30 STLs it references; `tools/vendor_x1_assets.py` regenerates it and `--check` verifies it. `PROVENANCE.md` has the sha256s |
