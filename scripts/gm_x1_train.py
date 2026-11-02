@@ -119,13 +119,18 @@ def pip_install() -> None:
 
 
 def verify_stack() -> None:
+    # The driver/toolkit pair matters: mujoco_warp.put_model calls warp's is_conditional_graph_supported() and raises
+    # "Minimum supported CUDA version: 12.4." if it returns False, which is about the *driver* warp sees, not the
+    # CUDA version torch was built with. The driver line is printed before training so the log records it either way.
     code = (
-        'import torch, mujoco, warp, mujoco_warp, mjlab, rsl_rl, numpy\n'
+        'import subprocess, torch, mujoco, warp, mujoco_warp, mjlab, rsl_rl, numpy\n'
         'print(f"torch {torch.__version__} cuda {torch.version.cuda} available {torch.cuda.is_available()} '
         'count {torch.cuda.device_count()}") \n'
         'print(f"mujoco {mujoco.__version__} warp {warp.__version__} mjlab {mjlab.__file__} numpy {numpy.__version__}")\n'
-        'assert int(numpy.__version__.split(".")[0]) >= 1\n'
         'print(f"gpu {torch.cuda.get_device_name(0)}")\n'
+        'print("driver:", subprocess.run(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"], '
+        'capture_output=True, text=True).stdout.strip())\n'
+        'print("cond graph supported:", warp.is_conditional_graph_supported())\n'
     )
     r = run([sys.executable, '-c', code], check=False)
     if r.returncode != 0:
