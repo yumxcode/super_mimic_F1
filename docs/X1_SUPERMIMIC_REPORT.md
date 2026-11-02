@@ -437,15 +437,14 @@ nothing about the X1. An earlier revision of this report quoted it as the X1 ben
 The bug is fixed (`af76c5c`): `run_eval` passes `robot=cfg.robot`, the same latent default was removed from
 `adapt.py`, `ppo.py`, `scripts/push_test.py` and `tools/wm_grad_fidelity.py`, `run_eval` now asserts
 `eval_env.robot_cfg.name == cfg.robot`, and `tests/test_eval_robot.py` parses every `make_eval_env` call site and
-fails on a missing or hardcoded robot. Details in [the evaluation-env bug](#the-evaluation-env-bug).
+fails on a missing or hardcoded robot. The same policy in the right env, for contrast, is
+[the X1 evaluation](#the-x1-evaluation-0-of-41-clips-failed) above.
 
-The X1-env number comes from `TASK_20261102_068`, the same config re-run on the fixed code; it is recorded in
-[the final evaluation](#the-x1-evaluation) once measured. Until then this report has **no** X1 clip-success rate.
-
-**What this does and does not show.** The pipeline is real: the vendored X1 asset loads in mjlab, MuJoCo Warp builds
-the scene, the 41-clip library is read, PPO + world model train for 3000 iterations, and checkpoints, metrics and the
-evaluation all run without crashing. Whether the policy walks is a question this report could not answer at the time
-of writing, because the only evaluation that ran used the wrong robot; `TASK_20261102_068` answers it.
+**What this does and does not show.** The pipeline is real end to end: the vendored X1 asset loads in mjlab, MuJoCo
+Warp builds the scene, the 41-clip library is read, PPO + world model train for 3000 iterations, and checkpoints,
+metrics and evaluation all run without crashing. And the policy learned something measurable: in the correct env it
+tracks all 41 training clips (`norm_return 0.9205`, 0 failures). What is not shown is generalization — there is no
+held-out library — or convergence — 3000 iterations is a smoke-length run.
 
 ### Environment as measured on the platform
 
