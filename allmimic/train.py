@@ -474,8 +474,24 @@ class Trainer:
             return None
         from .joint_weights import JOINT_WEIGHTS
 
-        table, c = JOINT_WEIGHTS[self.cfg.wm_joint_weights], self.cfg.wm_joint_weight_clip
-        w = torch.tensor([table[n] for n in self.env.joint_names], device=self.device).clamp(1 / c, c)
+        # --preset recommended names the G1 table ('tracked'). A robot whose joints are not in it (the X1) uses its
+        # own table from the registry instead of dying on a KeyError, and says so, because the two tables mean the
+        # same thing measured on different robots -- this is a name mapping, not a silent downgrade.
+        name = self.cfg.wm_joint_weights
+        joint_names = self.env.joint_names
+        if name in JOINT_WEIGHTS and not set(joint_names) <= set(JOINT_WEIGHTS[name]):
+            fallback = getattr(self.env.robot_cfg, 'wm_joint_weights', '')
+            if fallback and fallback in JOINT_WEIGHTS and set(joint_names) <= set(JOINT_WEIGHTS[fallback]):
+                print(f'wm_joint_weights: {name!r} has no entry for this robot; using the registry table '
+                      f'{fallback!r} ({len(JOINT_WEIGHTS[fallback])} joints)', flush=True)
+                name = fallback
+            else:
+                missing = sorted(set(joint_names) - set(JOINT_WEIGHTS[name]))[:6]
+                raise SystemExit(f'wm_joint_weights={name!r} has no weights for {missing} and the registry table '
+                                 f'{fallback!r} does not cover this robot either; pass --wm-joint-weights or set '
+                                 f'it empty')
+        table, c = JOINT_WEIGHTS[name], self.cfg.wm_joint_weight_clip
+        w = torch.tensor([table[n] for n in joint_names], device=self.device).clamp(1 / c, c)
         w = w / w.mean()
         return torch.cat([torch.ones(12, device=self.device), w, w])
 
