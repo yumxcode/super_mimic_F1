@@ -1,5 +1,5 @@
 {
-  "description": "X1 29-DoF allmimic training run on Gradmotion (1x4090D). Read by scripts/gm_x1_train.py; every key is passed to allmimic.train as --<key> (underscores -> dashes).",
+  "description": "X1 29-DoF allmimic training run on Gradmotion (1x4090D 24GB). Read by scripts/gm_x1_train.py; every non-underscore key becomes --<key> for allmimic.train, and an explicit key overrides the same key in --preset recommended. Two deliberate deviations from the preset, both to get a first end-to-end run through on one 24 GB card: compile_bptt/compile_wm off (the preset's torch.compile + CUDA-graph path needs >15 min and >10 GB host RAM to compile before the first iteration) and bptt_checkpoint 1 (policy-update peak 14.5 -> 7.1 GB at pi_batch 4096). Restore the preset flags once the pipeline is known to run.",
   "robot": "x1_29dof",
   "preset": "recommended",
   "motions": "motions/x1_cmu_walk.npz",
@@ -11,5 +11,8 @@
   "eval_every": 1000000,
   "seed": 0,
   "buffer_steps": 1000,
-  "wall_hours": 6.0
+  "wall_hours": 6.0,
+  "compile_bptt": "",
+  "compile_wm": false,
+  "bptt_checkpoint": 1
 }

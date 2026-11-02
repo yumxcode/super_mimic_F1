@@ -36,6 +36,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REQUIREMENTS = ROOT / 'requirements.txt'
 EXTRA_PIP = ('tensorboardX',)  # metric channel only; not needed to train
+# torch is the one pin the wrapper does not force: the platform's CUDA images already ship a CUDA build (IsaacSim 5.1
+# has torch 2.7, and mjlab 1.2.0 only requires >= 2.7), so reinstalling it costs a ~1 GB download and risks a wheel
+# that does not match the image's driver. requirements.txt keeps the pin for local installs; if the image's torch is
+# missing or CPU-only, the pinned CUDA wheel is installed instead. pytest is test-only, matplotlib is optional.
+SKIP_PINS = ('torch', 'pytest', 'matplotlib')
 
 
 def log(msg: str) -> None:
@@ -49,13 +54,20 @@ def run(cmd, cwd=ROOT, check=True, **kw):
 
 def pip_install() -> None:
     base = [sys.executable, '-m', 'pip', 'install', '--no-input', '--disable-pip-version-check']
-    # torch is pinned to a CUDA 12.6 wheel in requirements.txt's comment; PyPI's default wheel is used first and
-    # the explicit index is only a fallback, so a mirror-configured image still works.
-    r = run([*base, '-r', REQUIREMENTS, *EXTRA_PIP], check=False)
-    if r.returncode != 0:
-        log(f'pip install -r requirements.txt failed ({r.returncode}); retrying torch from the cu126 index')
-        run([*base, 'torch==2.14.1', '--index-url', 'https://download.pytorch.org/whl/cu126'], check=False)
-        run([*base, '-r', REQUIREMENTS, *EXTRA_PIP])
+    req = ROOT / 'runs' / 'requirements.gm.txt'
+    req.parent.mkdir(parents=True, exist_ok=True)
+    req.write_text(''.join(
+        line for line in REQUIREMENTS.read_text().splitlines(keepends=True)
+        if not line.strip().startswith(SKIP_PINS) and not line.strip().startswith('#')
+    ))
+    log(f'filtered requirements -> {req} (torch / pytest / matplotlib left to the image)')
+    run([*base, '-r', req, *EXTRA_PIP])
+    probe = run([sys.executable, '-c', 'import torch; print(torch.cuda.is_available())'], check=False,
+                capture_output=True, text=True)
+    if probe.returncode != 0 or 'True' not in probe.stdout:
+        log('the image has no CUDA torch; installing the pinned wheel from the cu126 index')
+        run([*base, 'torch==2.14.1', '--index-url', 'https://download.pytorch.org/whl/cu126'])
+    log('pip install done')
 
 
 def verify_stack() -> None:
