@@ -52,6 +52,24 @@ def run(cmd, cwd=ROOT, check=True, **kw):
     return subprocess.run([str(c) for c in cmd], cwd=str(cwd), check=check, **kw)
 
 
+# pip indexes, in the order they are tried. The platform images point pip at an internal mirror
+# (mirrors.ivolces.com) that does not resolve from inside the task container -- measured: "Name or service not
+# known" for every package while `git clone` from github.com in the same container works, so the container has
+# outbound network and the mirror host is what is unreachable. pypi.org and the torch wheel index therefore come
+# first, and the image's own default is the last resort.
+PIP_INDEXES = ('https://pypi.org/simple', 'https://download.pytorch.org/whl/cu126', None)
+
+
+def stack_ok() -> bool:
+    code = ('import torch, mujoco, warp, mujoco_warp, mjlab, rsl_rl, numpy\n'
+            'assert torch.cuda.is_available()\n')
+    r = subprocess.run([sys.executable, '-c', code], cwd=str(ROOT), capture_output=True, text=True)
+    if r.returncode == 0:
+        return True
+    log('stack check failed: ' + (r.stderr.strip().splitlines() or ['?'])[-1])
+    return False
+
+
 def pip_install() -> None:
     base = [sys.executable, '-m', 'pip', 'install', '--no-input', '--disable-pip-version-check']
     req = ROOT / 'runs' / 'requirements.gm.txt'
@@ -61,12 +79,18 @@ def pip_install() -> None:
         if not line.strip().startswith(SKIP_PINS) and not line.strip().startswith('#')
     ))
     log(f'filtered requirements -> {req} (torch / pytest / matplotlib left to the image)')
-    run([*base, '-r', req, *EXTRA_PIP])
+    for index in PIP_INDEXES:
+        cmd = [*base, '-r', req, *EXTRA_PIP]
+        if index:
+            cmd += ['--index-url', index]
+        log(f'pip against {index or "the image default index"}')
+        if subprocess.run([str(c) for c in cmd], cwd=str(ROOT)).returncode == 0:
+            break
     probe = run([sys.executable, '-c', 'import torch; print(torch.cuda.is_available())'], check=False,
                 capture_output=True, text=True)
     if probe.returncode != 0 or 'True' not in probe.stdout:
         log('the image has no CUDA torch; installing the pinned wheel from the cu126 index')
-        run([*base, 'torch==2.14.1', '--index-url', 'https://download.pytorch.org/whl/cu126'])
+        run([*base, 'torch==2.14.1', '--index-url', 'https://download.pytorch.org/whl/cu126'], check=False)
     log('pip install done')
 
 
@@ -166,7 +190,11 @@ def main() -> int:
     if args.dry_run:
         return 0
 
-    if not args.skip_install:
+    # The image may already have everything (IsaacSim 5.1 ships torch 2.7 + CUDA); only install what is missing, so a
+    # dead package index cannot fail a run that did not need it.
+    if stack_ok():
+        log('the image already imports the whole stack; skipping pip')
+    elif not args.skip_install:
         pip_install()
     verify_stack()
 
