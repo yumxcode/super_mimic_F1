@@ -132,7 +132,11 @@ def verify_stack() -> str:
         'capture_output=True, text=True).stdout.strip())\n'
         'print("cond graph supported:", warp.is_conditional_graph_supported())\n'
     )
-    r = run([sys.executable, '-c', code], check=False)
+    # captured, then echoed: the driver line has to be both in the log and back in this process (r.stdout is None
+    # when the probe is run without capture, which sent an empty driver string into the >=12.4 decision once).
+    log('$ ' + ' '.join(str(c) for c in [sys.executable, '-c', code.splitlines()[0] + ' ...']))
+    r = subprocess.run([sys.executable, '-c', code], cwd=str(ROOT), capture_output=True, text=True)
+    print((r.stdout or '') + (r.stderr or ''), flush=True)
     if r.returncode != 0:
         raise SystemExit('the X1 stack does not import; see the pip log above')
     m = re.search(r'^driver: (\S+)', r.stdout or '', re.M)
