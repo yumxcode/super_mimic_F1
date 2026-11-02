@@ -12,6 +12,7 @@ Status at a glance
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
 | C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, finished (status 5), 5 checkpoints, 33 metric keys | see [Gradmotion](#gradmotion) |
 | D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
+| G1 path | **done: static + runtime (path only)** | `TASK_20261102_067` trained 40 iterations with `--robot g1` (status 5, 0.45 s/iter, 4 checkpoints), fed X1 motion, so it proves the path runs, not G1 quality — see [G1 path](#g1-path) |
 | E this report | **done** (C section updated as runs finish) | |
 
 ---
@@ -122,12 +123,35 @@ Read off `m` after `spec.compile()` in `check_model`, not assumed from the confi
 
 ### G1 path
 
-Unchanged and still the default: `allmimic/robots/__init__.py: DEFAULT_ROBOT = 'g1'`, `TrainCfg.robot = 'g1'`,
-`evaluate.make_eval_env(..., robot='g1')`. The G1 joint-weight table is byte-identical to upstream `cb334ff`
-(checked by executing both files and comparing the `tracked` table: 29 joints, equal), and the X1 tables are
-additional entries (`tracked_x1`, `axis_sq_x1`). `NJ = 29`, `OBS_DIM = 93` are unchanged, so every network shape
-and every existing command is untouched. No G1 *run* was re-executed (that needs a GPU); the claim is limited to
-"the tables and defaults are unchanged", not "the G1 training curve reproduces".
+**Static.** Unchanged and still the default: `allmimic/robots/__init__.py: DEFAULT_ROBOT = 'g1'`, `TrainCfg.robot =
+'g1'`, `evaluate.make_eval_env(..., robot='g1')`. The G1 joint-weight tables `tracked` and `axis_sq` are identical to
+upstream `cb334ff` (both files executed and the tables compared: 29 joints each, equal), and the X1 tables are
+additional entries (`tracked_x1`, `axis_sq_x1`). `NJ = 29` and `OBS_DIM = 93` are unchanged, so every network shape
+and every existing command is untouched.
+
+**Runtime.** `TASK_20261102_067` — the same entry script, image and branch, `--robot g1`, 40 iterations / 512 envs
+(`configs/g1_path_check.json`, `scripts/gm/create_g1_path_check.json`): status 5, exit 0, 0.45 s/iter, iterations 1-40
+logged, four checkpoints published.
+
+```
+[gm-entry] trainer [... '-m', 'allmimic.train', '--robot', 'g1', '--preset', 'recommended', ...]
+it 10 upd 4 h 0.059 iter 0.465s ret 0.065 len 21.6 term 0.858 wm1 1.4789 wm8 11.2572 J 0.138 surv 0.015
+it 40 upd 16 h 0.063 iter 0.474s ret 0.052 len 23.1 term 0.930 wm1 0.5465 wm8 2.6314 J 0.144 surv 0.058
+[gm-entry] published .../output/x1_supermimic_iter000040.pt
+```
+
+**This is a path test, not a G1 result.** The repository ships no G1 motion library (`data/` is gitignored), so the
+run was fed `motions/x1_cmu_walk.npz`: 36-column X1 qpos read in G1 joint order. The reference is therefore nonsense
+for this robot, which is exactly why the returns sit at 0.05-0.07 with 86-93 % of episodes terminating — the number
+to read is that the path *ran*, not what it scored. What it does prove:
+
+- mjlab's G1 entity, `G1_ACTION_SCALE`, `TRACKED_BODIES`, the `tracked` joint-weight table and `MotionLibrary` all
+  still build and train after the X1 changes;
+- the WM-weight fallback added in `b305b38` does not fire for the G1 — there is no "using the registry table" line in
+  the log, i.e. the G1 used its own `tracked` table directly.
+
+It does **not** show the G1 training curve reproduces (that needs a G1 library and a real run), and the poor returns
+above must not be quoted as a G1 measurement.
 
 ---
 
@@ -438,7 +462,10 @@ they reverse.
 4. **Training length**: the 3000-iteration config is a smoke-length run for one 4090D, not a converged policy. The
    G1 reference took 176k iterations / 6.6 h on 2×4090 with `--preset recommended`; the X1 config additionally
    disables `compile_bptt`/`compile_wm` and sets `bptt_checkpoint 1` to fit and start quickly on one 24 GB card.
-5. **`--preset recommended` was tuned on the G1**, including the joint error-propagation weights (`wm_joint_weights:
+5. **The G1 has no runtime *quality* evidence**, only a path test (`TASK_20261102_067`: it trains, checkpoints,
+   metrics; the data fed to it was X1 motion, so its returns are meaningless). A real G1 regression needs a G1
+   library and is out of scope here.
+6. **`--preset recommended` was tuned on the G1**, including the joint error-propagation weights (`wm_joint_weights:
    tracked` → the X1 uses `tracked_x1`, a name-mapped copy of the G1 lever arms, not an X1 torque identification).
 6. **Foot contact is four point contacts per foot**, unchanged from the source asset. It is stable at the real gains
    (A), but a flat sole would model a real foot better; that is a modelling choice, not a fix for a measured defect.
