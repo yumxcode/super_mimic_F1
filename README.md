@@ -161,6 +161,7 @@ python -m allmimic.train --preset recommended --robot x1_29dof \
 | asset | `assets/x1_29dof/` | vendored MJCF + the 30 STLs it references; `tools/vendor_x1_assets.py` regenerates it and `--check` verifies it. `PROVENANCE.md` has the sha256s |
 | joint table | `docs/x1_29dof_joints.md` | per-joint limits, kp/kd/effort/armature, masses, foot contact geoms; `tools/x1_joint_table.py` regenerates it |
 | motion library | `motions/x1_cmu_walk.npz` | GMR SMPLX→X1 retarget of the 41 CMU walking clips; `scripts/build_x1_motions.py` rebuilds it, `motions/x1_cmu_walk.meta.json` has the per-clip validation numbers |
+| library check | `tools/x1_motion_audit.py`, `tools/x1_gait.py` | re-derives every number from the npz (contract, velocities, FK geometry, gait, heading vs the SMPLX source) instead of trusting the meta; exits non-zero on a hard failure |
 | platform run | `scripts/gm_x1_train.py`, `configs/x1_supermimic.json` | Gradmotion entry: pip-installs `requirements.txt`, verifies CUDA/mjlab, trains, mirrors `log.jsonl` to TensorBoard and publishes the checkpoint |
 
 Three things about this robot are worth knowing before reading the numbers:
@@ -171,10 +172,32 @@ Three things about this robot are worth knowing before reading the numbers:
   *compiled* model rather than assuming the config landed.
 * **Armature has to be written at spec level, before compile** (mjlab's `create_position_actuator` does).
   Setting it on a compiled model leaves `dof_M0` stale and the robot topples in ~2 s with no NaN to warn you.
-* **The X1's arms are much shorter than a human's**, so GMR's IK saturates the arm limits on every CMU frame
-  (`left_shoulder_roll` and `left_elbow_yaw` sit at a limit in 100% of frames, `right_elbow_pitch` in 83%).
-  That is GMR's stock `smplx_to_x1.json` too, not a side effect of the local calibration. The reward does not
-  punish a joint at its limit, but a policy trained on this library cannot learn an arm trajectory beyond it.
+* **The X1's arms are much shorter than a human's**, so GMR's IK saturates the arm limits: 67.2% of the library's
+  frames have a joint within 0.02 rad of a limit (18 of the 41 clips are there in 100% of their frames), and over
+  all frames `left_elbow_pitch` is at a limit 57.8% of the time, `right_elbow_pitch` 37.1%, `left_shoulder_roll`
+  18.1%; `left_elbow_yaw` never is. That is GMR's stock `smplx_to_x1.json` too, not a side effect of the local
+  calibration. The reward does not punish a joint at its limit, but a policy trained on this library cannot learn
+  an arm trajectory beyond it.
+
+What the shipped library is, stated plainly, because the numbers are easy to over-read:
+
+* **41 clips, 6168 frames, 2.06 min, 50 Hz.** Root height 0.558-0.633 m, sole penetration 0, joint-limit excess
+  at most 0.091 rad, max joint velocity 14.8 rad/s, all values finite, `qvel` exactly the finite difference of
+  `qpos`. 29 of 41 clips give a cadence for both feet; of those 8 have both feet in the 0.8-1.2 Hz band a walk
+  should occupy, and 16 clips are unambiguously walk-like (median 0.94 Hz, 1.06 s strides).
+* **The clips are short and the swing foot lifts only 3-9 cm** (because the grounding puts the stance sole at 0
+  every frame), so a foot-height detector cannot resolve a cadence for every clip: 12 of the 41 give one foot only,
+  and 18 of the 29 two-foot clips include a cycle where the feet do not alternate cleanly. That is a property of
+  2-4 s retargeted clips, not a tuning knob; the per-clip numbers are in `motions/x1_cmu_walk.meta.json` and can be
+  re-derived with `tools/x1_motion_audit.py`.
+* **The largest single heading number, 58.4 deg on 08_06, is a turn, not drift.** 14 of the 41 CMU clips are turns
+  in which the human rotates 64-152 deg; the retarget follows the direction (correlation 0.767) but under-rotates
+  (mean |net yaw| 45 deg in the source vs 18 deg here).
+
+Whether those are acceptable is a modelling decision this branch does not make for you: filtering to the 16 clean
+clips would discard 61% of the data to make a table look better, and re-grounding per clip would change the data the
+platform run already trained on. If you need a clean gait library, rebuild with `--reject-*` tightened and a longer
+source clip set (see the report's next steps).
 
 `docs/X1_SUPERMIMIC_REPORT.md` has the full record: what was measured, what failed on the platform, and the
 open items.

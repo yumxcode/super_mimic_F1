@@ -44,6 +44,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from allmimic.robots import x1_29dof as x1  # noqa: E402
 from scripts.prepare_motions import resample, velocities  # noqa: E402
+from tools.x1_gait import gait_summary  # noqa: E402
 
 DEFAULT_AMASS = Path.home() / 'code' / 'X1_29_AMP' / 'data' / 'amass' / 'CMU'
 # smplx.create() appends '/smplx/SMPLX_<gender>.npz' itself, so this is the PARENT of smplx/. The AMASS CMU clips
@@ -52,7 +53,6 @@ DEFAULT_AMASS = Path.home() / 'code' / 'X1_29_AMP' / 'data' / 'amass' / 'CMU'
 DEFAULT_SMPLX = Path.home() / 'code' / 'X1_29_AMP' / '_gmr_local' / 'GMR' / 'assets' / 'body_models'
 DEFAULT_IK = Path(__file__).resolve().parent.parent / 'motions' / 'x1_ik_config.json'
 FPS_OUT = 50.0
-SOLE_CONTACT_Z = 0.02  # m: a foot below this height is in contact (for the cadence metric)
 
 
 def sha256(path: Path) -> str:
@@ -141,44 +141,14 @@ def retarget_clip(path: Path, smplx_dir: Path, make_retargeter, last: dict,
     return qpos, src_fps
 
 
-def debounce_onsets(contact: np.ndarray, min_air: int, min_contact: int) -> np.ndarray:
-    """indices where a contact starts, ignoring bounces: the foot must have been airborne >= min_air frames and the
-    contact must last >= min_contact frames (a real step, not a ground-contact flicker)"""
-    out, i, n = [], 0, len(contact)
-    while i < n:
-        if not contact[i]:
-            j = i
-            while j < n and not contact[j]:
-                j += 1
-            if j - i >= min_air and j < n:
-                m = j
-                while m < n and contact[m]:
-                    m += 1
-                if m - j >= min_contact:
-                    out.append(j)
-            i = j
-        else:
-            i += 1
-    return np.array(out, dtype=int)
-
-
 def metrics(qpos: np.ndarray, qvel: np.ndarray, model: X1Model, sole: np.ndarray, fps: float) -> dict:
     q = qpos[:, 7:]
     over = np.clip(q - model.hi, 0, None)
     under = np.clip(model.lo - q, 0, None)
     worst = np.argmax(np.maximum(over, under).max(0))
     tilt = 2 * (qpos[:, 4] ** 2 + qpos[:, 5] ** 2)  # 1 - R_zz from the wxyz quat
-    contact = sole < SOLE_CONTACT_Z
-    onsets = [debounce_onsets(contact[:, k], min_air=5, min_contact=3) for k in (0, 1)]
-    steps = [len(o) for o in onsets]
-    cadence = []
-    for k in (0, 1):
-        if steps[k] >= 2:
-            cadence.append(float(fps / np.diff(onsets[k]).mean()))
-    # alternation: between two consecutive left-foot onsets there should be one right-foot onset
-    alt = []
-    for a, b in zip(onsets[0][:-1], onsets[0][1:], strict=False):
-        alt.append(int(np.sum((onsets[1] > a) & (onsets[1] < b))))
+    # gait from the sole heights, one implementation shared with tools/x1_motion_audit.py (tools/x1_gait.py)
+    gait = gait_summary(sole, fps)
     yaw = 2 * np.arctan2(qpos[:, 6], qpos[:, 3])
     return {
         'frames': int(len(qpos)),
@@ -196,14 +166,21 @@ def metrics(qpos: np.ndarray, qvel: np.ndarray, model: X1Model, sole: np.ndarray
         'at_limit_joints': sorted({model.names[j] for j in np.flatnonzero(((q >= model.hi - 0.02) | (q <= model.lo + 0.02)).mean(0) > 0.25)}),
         'tilt_max': round(float(tilt.max()), 4),
         'yaw_start_deg': round(float(np.degrees(yaw[0])), 1),
-        'yaw_drift_deg': round(float(np.degrees(np.unwrap(yaw)[-1] - np.unwrap(yaw)[0])), 1),
+        # net heading change over the clip (NOT drift: 14 of the 41 CMU clips turn 45-150 deg, and this is how much
+        # of that the retarget reproduces -- tools/x1_motion_audit.py compares it against the SMPLX source)
+        'yaw_net_change_deg': round(float(np.degrees(np.unwrap(yaw)[-1] - np.unwrap(yaw)[0])), 1),
         'qd_max': round(float(np.abs(qvel[:, 6:]).max()), 2),
         'q_mean': [round(float(v), 3) for v in q.mean(0)],
         'root_vel_max': round(float(np.abs(qvel[:, :3]).max()), 2),
-        'foot_steps': steps,
-        'cadence_hz': [round(c, 2) for c in cadence],
-        'alt_between_left_onsets': sorted(set(alt)),
-        'contact_frac': [round(float(contact[:, k].mean()), 3) for k in (0, 1)],
+        'contact_frac': gait['other_foot_contact_frac'],
+        # gait, verbatim from tools/x1_gait.py: touchdown counts, cadence/stride per foot, alternation, and whether
+        # the clip is interpretable as walking at all (both feet, stride 0.5-1.5 s, alternation mostly 1)
+        'touchdowns': gait['touchdowns'],
+        'cadence_hz': [c for c in gait['cadence_hz'] if c is not None],
+        'stride_s': gait['stride_s'],
+        'alternation_between_left_td': gait['alternation_between_left_td'],
+        'gait_resolved': gait['gait_resolved'],
+        'walk_like': gait['walk_like'],
     }
 
 

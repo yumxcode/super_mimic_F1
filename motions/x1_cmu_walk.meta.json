@@ -68,7 +68,7 @@
  "sole_plane_below_base_m": 0.6275,
  "command": "scripts/build_x1_motions.py --out motions/x1_cmu_walk.npz --report motions/x1_cmu_walk.meta.json",
  "python": "/Users/yumx/code/X1_29_AMP/_gmr_local/venv/bin/python",
- "elapsed_s": 102.3,
+ "elapsed_s": 102.6,
  "clips": [
   {
    "frames": 122,
@@ -97,7 +97,7 @@
    ],
    "tilt_max": 0.0145,
    "yaw_start_deg": 4.5,
-   "yaw_drift_deg": -22.3,
+   "yaw_net_change_deg": -22.3,
    "qd_max": 10.12,
    "q_mean": [
     0.184,
@@ -131,21 +131,28 @@
     0.047
    ],
    "root_vel_max": 1.34,
-   "foot_steps": [
+   "contact_frac": [
+    0.508,
+    0.754
+   ],
+   "touchdowns": [
     3,
     2
    ],
    "cadence_hz": [
     0.93,
-    1.0
+    0.93
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.08,
+    1.08
+   ],
+   "alternation_between_left_td": [
+    1,
     1
    ],
-   "contact_frac": [
-    0.59,
-    0.82
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_01_stageii.npz",
    "src_fps": 120.0
@@ -175,7 +182,7 @@
    ],
    "tilt_max": 0.0265,
    "yaw_start_deg": 20.4,
-   "yaw_drift_deg": -35.6,
+   "yaw_net_change_deg": -35.6,
    "qd_max": 8.1,
    "q_mean": [
     0.145,
@@ -209,21 +216,27 @@
     0.056
    ],
    "root_vel_max": 1.31,
-   "foot_steps": [
-    3,
-    1
+   "contact_frac": [
+    0.417,
+    0.78
+   ],
+   "touchdowns": [
+    2,
+    2
    ],
    "cadence_hz": [
-    0.92
+    0.91,
+    0.91
    ],
-   "alt_between_left_onsets": [
-    0,
+   "stride_s": [
+    1.1,
+    1.1
+   ],
+   "alternation_between_left_td": [
     1
    ],
-   "contact_frac": [
-    0.496,
-    0.835
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_02_stageii.npz",
    "src_fps": 120.0
@@ -254,7 +267,7 @@
    ],
    "tilt_max": 0.0231,
    "yaw_start_deg": -4.1,
-   "yaw_drift_deg": 20.8,
+   "yaw_net_change_deg": 20.8,
    "qd_max": 6.66,
    "q_mean": [
     0.158,
@@ -288,7 +301,11 @@
     0.057
    ],
    "root_vel_max": 0.99,
-   "foot_steps": [
+   "contact_frac": [
+    0.577,
+    0.693
+   ],
+   "touchdowns": [
     3,
     3
    ],
@@ -296,13 +313,16 @@
     0.81,
     0.83
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.23,
+    1.2
+   ],
+   "alternation_between_left_td": [
+    1,
     1
    ],
-   "contact_frac": [
-    0.65,
-    0.779
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_03_stageii.npz",
    "src_fps": 120.0
@@ -332,7 +352,7 @@
    ],
    "tilt_max": 0.0286,
    "yaw_start_deg": -16.1,
-   "yaw_drift_deg": 7.1,
+   "yaw_net_change_deg": 7.1,
    "qd_max": 8.17,
    "q_mean": [
     0.069,
@@ -366,21 +386,24 @@
     0.062
    ],
    "root_vel_max": 1.2,
-   "foot_steps": [
-    2,
+   "contact_frac": [
+    0.427,
+    0.768
+   ],
+   "touchdowns": [
+    1,
     3
    ],
    "cadence_hz": [
-    0.85,
-    0.89
+    0.87
    ],
-   "alt_between_left_onsets": [
-    1
+   "stride_s": [
+    null,
+    1.15
    ],
-   "contact_frac": [
-    0.567,
-    0.848
-   ],
+   "alternation_between_left_td": [],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "07_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_06_stageii.npz",
    "src_fps": 120.0
@@ -410,7 +433,7 @@
    ],
    "tilt_max": 0.0399,
    "yaw_start_deg": 16.3,
-   "yaw_drift_deg": -27.0,
+   "yaw_net_change_deg": -27.0,
    "qd_max": 7.05,
    "q_mean": [
     0.22,
@@ -444,7 +467,11 @@
     0.071
    ],
    "root_vel_max": 1.31,
-   "foot_steps": [
+   "contact_frac": [
+    0.514,
+    0.797
+   ],
+   "touchdowns": [
     3,
     2
    ],
@@ -452,13 +479,16 @@
     0.85,
     0.86
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.18,
+    1.16
+   ],
+   "alternation_between_left_td": [
+    1,
     1
    ],
-   "contact_frac": [
-    0.595,
-    0.824
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_07_stageii.npz",
    "src_fps": 120.0
@@ -488,7 +518,7 @@
    ],
    "tilt_max": 0.0711,
    "yaw_start_deg": -18.5,
-   "yaw_drift_deg": 14.4,
+   "yaw_net_change_deg": 14.4,
    "qd_max": 6.89,
    "q_mean": [
     0.174,
@@ -522,21 +552,27 @@
     0.043
    ],
    "root_vel_max": 1.35,
-   "foot_steps": [
+   "contact_frac": [
+    0.574,
+    0.709
+   ],
+   "touchdowns": [
     2,
     2
    ],
    "cadence_hz": [
-    0.77,
-    0.76
+    0.79,
+    0.81
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.26,
+    1.24
+   ],
+   "alternation_between_left_td": [
     1
    ],
-   "contact_frac": [
-    0.66,
-    0.78
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_08_stageii.npz",
    "src_fps": 120.0
@@ -566,7 +602,7 @@
    ],
    "tilt_max": 0.036,
    "yaw_start_deg": -15.4,
-   "yaw_drift_deg": 24.4,
+   "yaw_net_change_deg": 24.4,
    "qd_max": 8.6,
    "q_mean": [
     0.208,
@@ -600,7 +636,11 @@
     0.034
    ],
    "root_vel_max": 1.52,
-   "foot_steps": [
+   "contact_frac": [
+    0.593,
+    0.669
+   ],
+   "touchdowns": [
     3,
     2
    ],
@@ -608,14 +648,16 @@
     1.89,
     0.94
    ],
-   "alt_between_left_onsets": [
-    0,
-    1
+   "stride_s": [
+    0.53,
+    1.06
    ],
-   "contact_frac": [
-    0.669,
-    0.695
+   "alternation_between_left_td": [
+    1,
+    0
    ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_09_stageii.npz",
    "src_fps": 120.0
@@ -645,7 +687,7 @@
    ],
    "tilt_max": 0.0403,
    "yaw_start_deg": -17.4,
-   "yaw_drift_deg": 18.4,
+   "yaw_net_change_deg": 18.4,
    "qd_max": 8.28,
    "q_mean": [
     0.23,
@@ -679,21 +721,27 @@
     0.036
    ],
    "root_vel_max": 1.54,
-   "foot_steps": [
+   "contact_frac": [
+    0.557,
+    0.687
+   ],
+   "touchdowns": [
     2,
     2
    ],
    "cadence_hz": [
-    0.98,
-    0.96
+    1.0,
+    0.94
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.0,
+    1.06
+   ],
+   "alternation_between_left_td": [
     1
    ],
-   "contact_frac": [
-    0.643,
-    0.704
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_10_stageii.npz",
    "src_fps": 120.0
@@ -721,7 +769,7 @@
    ],
    "tilt_max": 0.0699,
    "yaw_start_deg": 34.9,
-   "yaw_drift_deg": -7.0,
+   "yaw_net_change_deg": -7.0,
    "qd_max": 11.15,
    "q_mean": [
     -0.003,
@@ -755,21 +803,28 @@
     0.184
    ],
    "root_vel_max": 1.44,
-   "foot_steps": [
-    2,
+   "contact_frac": [
+    0.457,
+    0.752
+   ],
+   "touchdowns": [
+    3,
     2
    ],
    "cadence_hz": [
-    0.98,
-    1.0
+    2.56,
+    0.98
    ],
-   "alt_between_left_onsets": [
-    1
+   "stride_s": [
+    0.39,
+    1.02
    ],
-   "contact_frac": [
-    0.648,
-    0.829
+   "alternation_between_left_td": [
+    1,
+    0
    ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "08_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_01_stageii.npz",
    "src_fps": 120.0
@@ -797,7 +852,7 @@
    ],
    "tilt_max": 0.0575,
    "yaw_start_deg": -22.7,
-   "yaw_drift_deg": 42.6,
+   "yaw_net_change_deg": 42.6,
    "qd_max": 12.04,
    "q_mean": [
     0.003,
@@ -831,21 +886,27 @@
     0.165
    ],
    "root_vel_max": 1.37,
-   "foot_steps": [
+   "contact_frac": [
+    0.639,
+    0.655
+   ],
+   "touchdowns": [
     2,
-    3
+    2
    ],
    "cadence_hz": [
     1.0,
-    0.97
+    0.96
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.0,
+    1.04
+   ],
+   "alternation_between_left_td": [
     1
    ],
-   "contact_frac": [
-    0.748,
-    0.739
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "08_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_02_stageii.npz",
    "src_fps": 120.0
@@ -873,7 +934,7 @@
    ],
    "tilt_max": 0.0619,
    "yaw_start_deg": -26.0,
-   "yaw_drift_deg": 49.0,
+   "yaw_net_change_deg": 49.0,
    "qd_max": 12.85,
    "q_mean": [
     -0.026,
@@ -907,21 +968,28 @@
     0.183
    ],
    "root_vel_max": 1.42,
-   "foot_steps": [
-    2,
-    2
+   "contact_frac": [
+    0.584,
+    0.686
+   ],
+   "touchdowns": [
+    3,
+    3
    ],
    "cadence_hz": [
-    0.98,
-    0.89
+    1.45,
+    0.96
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.69,
+    1.04
+   ],
+   "alternation_between_left_td": [
+    0,
     1
    ],
-   "contact_frac": [
-    0.693,
-    0.796
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "08_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_03_stageii.npz",
    "src_fps": 120.0
@@ -949,7 +1017,7 @@
    ],
    "tilt_max": 0.0679,
    "yaw_start_deg": 30.9,
-   "yaw_drift_deg": -58.4,
+   "yaw_net_change_deg": -58.4,
    "qd_max": 14.75,
    "q_mean": [
     0.024,
@@ -983,21 +1051,27 @@
     0.161
    ],
    "root_vel_max": 1.53,
-   "foot_steps": [
-    3,
+   "contact_frac": [
+    0.469,
+    0.814
+   ],
+   "touchdowns": [
+    2,
     2
    ],
    "cadence_hz": [
-    1.1,
-    1.09
+    0.57,
+    1.11
    ],
-   "alt_between_left_onsets": [
-    1
+   "stride_s": [
+    1.74,
+    0.9
    ],
-   "contact_frac": [
-    0.593,
-    0.867
+   "alternation_between_left_td": [
+    2
    ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "08_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_06_stageii.npz",
    "src_fps": 120.0
@@ -1025,7 +1099,7 @@
    ],
    "tilt_max": 0.0692,
    "yaw_start_deg": -8.9,
-   "yaw_drift_deg": 45.2,
+   "yaw_net_change_deg": 45.2,
    "qd_max": 14.29,
    "q_mean": [
     -0.08,
@@ -1059,20 +1133,24 @@
     0.19
    ],
    "root_vel_max": 1.57,
-   "foot_steps": [
-    2,
-    1
+   "contact_frac": [
+    0.463,
+    0.694
+   ],
+   "touchdowns": [
+    0,
+    3
    ],
    "cadence_hz": [
-    1.14
+    1.11
    ],
-   "alt_between_left_onsets": [
-    0
+   "stride_s": [
+    null,
+    0.9
    ],
-   "contact_frac": [
-    0.648,
-    0.88
-   ],
+   "alternation_between_left_td": [],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "08_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_08_stageii.npz",
    "src_fps": 120.0
@@ -1100,7 +1178,7 @@
    ],
    "tilt_max": 0.072,
    "yaw_start_deg": -28.3,
-   "yaw_drift_deg": 48.8,
+   "yaw_net_change_deg": 48.8,
    "qd_max": 13.25,
    "q_mean": [
     0.009,
@@ -1134,20 +1212,27 @@
     0.201
    ],
    "root_vel_max": 1.67,
-   "foot_steps": [
+   "contact_frac": [
+    0.509,
+    0.679
+   ],
+   "touchdowns": [
     2,
-    0
+    2
    ],
    "cadence_hz": [
+    1.43,
     1.06
    ],
-   "alt_between_left_onsets": [
-    0
+   "stride_s": [
+    0.7,
+    0.94
    ],
-   "contact_frac": [
-    0.714,
-    0.866
+   "alternation_between_left_td": [
+    1
    ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "08_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_09_stageii.npz",
    "src_fps": 120.0
@@ -1175,7 +1260,7 @@
    ],
    "tilt_max": 0.0903,
    "yaw_start_deg": -71.7,
-   "yaw_drift_deg": -31.0,
+   "yaw_net_change_deg": -31.0,
    "qd_max": 10.55,
    "q_mean": [
     -0.041,
@@ -1209,20 +1294,29 @@
     0.101
    ],
    "root_vel_max": 1.48,
-   "foot_steps": [
+   "contact_frac": [
+    0.715,
+    0.677
+   ],
+   "touchdowns": [
+    4,
+    4
+   ],
+   "cadence_hz": [
+    3.12,
+    0.89
+   ],
+   "stride_s": [
+    0.32,
+    1.12
+   ],
+   "alternation_between_left_td": [
+    0,
     3,
     0
    ],
-   "cadence_hz": [
-    0.81
-   ],
-   "alt_between_left_onsets": [
-    0
-   ],
-   "contact_frac": [
-    0.871,
-    0.86
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "103_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/103_07_stageii.npz",
    "src_fps": 60.0
@@ -1249,7 +1343,7 @@
    ],
    "tilt_max": 0.0765,
    "yaw_start_deg": -12.5,
-   "yaw_drift_deg": 25.0,
+   "yaw_net_change_deg": 25.0,
    "qd_max": 10.83,
    "q_mean": [
     -0.044,
@@ -1283,20 +1377,28 @@
     0.056
    ],
    "root_vel_max": 1.2,
-   "foot_steps": [
-    2,
-    0
+   "contact_frac": [
+    0.647,
+    0.683
+   ],
+   "touchdowns": [
+    3,
+    2
    ],
    "cadence_hz": [
-    0.88
+    1.32,
+    0.89
    ],
-   "alt_between_left_onsets": [
-    0
+   "stride_s": [
+    0.76,
+    1.12
    ],
-   "contact_frac": [
-    0.806,
-    0.957
+   "alternation_between_left_td": [
+    1,
+    1
    ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_01_stageii.npz",
    "src_fps": 120.0
@@ -1323,7 +1425,7 @@
    ],
    "tilt_max": 0.0711,
    "yaw_start_deg": -7.5,
-   "yaw_drift_deg": 15.5,
+   "yaw_net_change_deg": 15.5,
    "qd_max": 10.43,
    "q_mean": [
     -0.008,
@@ -1357,20 +1459,30 @@
     0.04
    ],
    "root_vel_max": 1.17,
-   "foot_steps": [
-    4,
-    0
+   "contact_frac": [
+    0.597,
+    0.723
+   ],
+   "touchdowns": [
+    5,
+    2
    ],
    "cadence_hz": [
-    1.32
+    1.75,
+    0.54
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.57,
+    1.86
+   ],
+   "alternation_between_left_td": [
+    0,
+    1,
+    0,
     0
    ],
-   "contact_frac": [
-    0.774,
-    0.95
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_02_stageii.npz",
    "src_fps": 120.0
@@ -1397,7 +1509,7 @@
    ],
    "tilt_max": 0.0743,
    "yaw_start_deg": -10.5,
-   "yaw_drift_deg": 7.8,
+   "yaw_net_change_deg": 7.8,
    "qd_max": 10.95,
    "q_mean": [
     -0.018,
@@ -1431,22 +1543,31 @@
     0.04
    ],
    "root_vel_max": 1.18,
-   "foot_steps": [
+   "contact_frac": [
+    0.631,
+    0.667
+   ],
+   "touchdowns": [
     6,
-    2
+    3
    ],
    "cadence_hz": [
-    1.68,
-    0.86
+    1.43,
+    1.85
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.7,
+    0.54
+   ],
+   "alternation_between_left_td": [
     0,
-    1
+    1,
+    1,
+    1,
+    0
    ],
-   "contact_frac": [
-    0.768,
-    0.893
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_03_stageii.npz",
    "src_fps": 120.0
@@ -1473,7 +1594,7 @@
    ],
    "tilt_max": 0.0709,
    "yaw_start_deg": 10.2,
-   "yaw_drift_deg": -0.6,
+   "yaw_net_change_deg": -0.6,
    "qd_max": 10.1,
    "q_mean": [
     -0.013,
@@ -1507,20 +1628,28 @@
     0.053
    ],
    "root_vel_max": 1.26,
-   "foot_steps": [
-    3,
-    0
+   "contact_frac": [
+    0.594,
+    0.812
+   ],
+   "touchdowns": [
+    4,
+    1
    ],
    "cadence_hz": [
-    1.08
+    1.39
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.72,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.782,
-    0.953
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_04",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_04_stageii.npz",
    "src_fps": 120.0
@@ -1545,7 +1674,7 @@
    "at_limit_joints": [],
    "tilt_max": 0.068,
    "yaw_start_deg": -0.8,
-   "yaw_drift_deg": 11.4,
+   "yaw_net_change_deg": 11.4,
    "qd_max": 9.35,
    "q_mean": [
     0.015,
@@ -1579,21 +1708,31 @@
     0.062
    ],
    "root_vel_max": 1.16,
-   "foot_steps": [
+   "contact_frac": [
+    0.577,
+    0.726
+   ],
+   "touchdowns": [
     6,
-    1
+    3
    ],
    "cadence_hz": [
-    1.63
+    1.32,
+    0.88
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.76,
+    1.14
+   ],
+   "alternation_between_left_td": [
+    1,
+    0,
+    1,
     0,
     1
    ],
-   "contact_frac": [
-    0.708,
-    0.946
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_05",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_05_stageii.npz",
    "src_fps": 120.0
@@ -1618,7 +1757,7 @@
    "at_limit_joints": [],
    "tilt_max": 0.0629,
    "yaw_start_deg": 9.7,
-   "yaw_drift_deg": -3.1,
+   "yaw_net_change_deg": -3.1,
    "qd_max": 11.28,
    "q_mean": [
     -0.01,
@@ -1652,20 +1791,29 @@
     0.054
    ],
    "root_vel_max": 1.12,
-   "foot_steps": [
-    4,
-    0
+   "contact_frac": [
+    0.595,
+    0.74
+   ],
+   "touchdowns": [
+    5,
+    1
    ],
    "cadence_hz": [
-    1.56
+    1.75
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.57,
+    null
+   ],
+   "alternation_between_left_td": [
+    1,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.769,
-    0.96
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_06_stageii.npz",
    "src_fps": 120.0
@@ -1692,7 +1840,7 @@
    ],
    "tilt_max": 0.0757,
    "yaw_start_deg": -13.3,
-   "yaw_drift_deg": 25.8,
+   "yaw_net_change_deg": 25.8,
    "qd_max": 11.31,
    "q_mean": [
     -0.018,
@@ -1726,20 +1874,28 @@
     0.071
    ],
    "root_vel_max": 1.22,
-   "foot_steps": [
+   "contact_frac": [
+    0.586,
+    0.779
+   ],
+   "touchdowns": [
     4,
     0
    ],
    "cadence_hz": [
-    2.05
+    2.78
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.36,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.714,
-    0.964
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_07_stageii.npz",
    "src_fps": 120.0
@@ -1766,7 +1922,7 @@
    ],
    "tilt_max": 0.0541,
    "yaw_start_deg": 12.7,
-   "yaw_drift_deg": -1.6,
+   "yaw_net_change_deg": -1.6,
    "qd_max": 10.36,
    "q_mean": [
     -0.022,
@@ -1800,20 +1956,30 @@
     0.059
    ],
    "root_vel_max": 1.11,
-   "foot_steps": [
-    7,
-    0
+   "contact_frac": [
+    0.578,
+    0.706
+   ],
+   "touchdowns": [
+    6,
+    1
    ],
    "cadence_hz": [
-    1.8
+    2.63
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.38,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.717,
-    0.939
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_08_stageii.npz",
    "src_fps": 120.0
@@ -1840,7 +2006,7 @@
    ],
    "tilt_max": 0.0523,
    "yaw_start_deg": 2.8,
-   "yaw_drift_deg": -13.2,
+   "yaw_net_change_deg": -13.2,
    "qd_max": 9.36,
    "q_mean": [
     -0.049,
@@ -1874,21 +2040,30 @@
     0.059
    ],
    "root_vel_max": 1.09,
-   "foot_steps": [
-    6,
-    1
+   "contact_frac": [
+    0.533,
+    0.707
+   ],
+   "touchdowns": [
+    5,
+    2
    ],
    "cadence_hz": [
-    1.92
+    1.82,
+    0.91
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.55,
+    1.1
+   ],
+   "alternation_between_left_td": [
     0,
-    1
+    1,
+    0,
+    0
    ],
-   "contact_frac": [
-    0.673,
-    0.887
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_09_stageii.npz",
    "src_fps": 120.0
@@ -1915,7 +2090,7 @@
    ],
    "tilt_max": 0.0609,
    "yaw_start_deg": -10.5,
-   "yaw_drift_deg": 1.1,
+   "yaw_net_change_deg": 1.1,
    "qd_max": 9.8,
    "q_mean": [
     -0.035,
@@ -1949,20 +2124,29 @@
     0.064
    ],
    "root_vel_max": 1.14,
-   "foot_steps": [
+   "contact_frac": [
+    0.618,
+    0.676
+   ],
+   "touchdowns": [
     5,
-    0
+    1
    ],
    "cadence_hz": [
-    1.33
+    1.35
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.74,
+    null
+   ],
+   "alternation_between_left_td": [
+    1,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.776,
-    0.947
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_10_stageii.npz",
    "src_fps": 120.0
@@ -1989,7 +2173,7 @@
    ],
    "tilt_max": 0.0472,
    "yaw_start_deg": 5.0,
-   "yaw_drift_deg": -15.0,
+   "yaw_net_change_deg": -15.0,
    "qd_max": 8.61,
    "q_mean": [
     -0.008,
@@ -2023,21 +2207,31 @@
     0.04
    ],
    "root_vel_max": 1.11,
-   "foot_steps": [
+   "contact_frac": [
+    0.607,
+    0.707
+   ],
+   "touchdowns": [
     6,
-    1
+    2
    ],
    "cadence_hz": [
-    1.91
+    2.63,
+    0.88
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.38,
+    1.14
+   ],
+   "alternation_between_left_td": [
     0,
-    1
+    1,
+    0,
+    1,
+    0
    ],
-   "contact_frac": [
-    0.76,
-    0.913
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_11",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_11_stageii.npz",
    "src_fps": 120.0
@@ -2064,7 +2258,7 @@
    ],
    "tilt_max": 0.0552,
    "yaw_start_deg": 7.7,
-   "yaw_drift_deg": -18.8,
+   "yaw_net_change_deg": -18.8,
    "qd_max": 9.53,
    "q_mean": [
     -0.017,
@@ -2098,20 +2292,30 @@
     0.054
    ],
    "root_vel_max": 1.08,
-   "foot_steps": [
+   "contact_frac": [
+    0.548,
+    0.787
+   ],
+   "touchdowns": [
     6,
     0
    ],
    "cadence_hz": [
-    1.89
+    2.5
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.4,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.697,
-    0.955
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_12",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_12_stageii.npz",
    "src_fps": 120.0
@@ -2138,7 +2342,7 @@
    ],
    "tilt_max": 0.0597,
    "yaw_start_deg": 11.5,
-   "yaw_drift_deg": -21.6,
+   "yaw_net_change_deg": -21.6,
    "qd_max": 10.06,
    "q_mean": [
     -0.018,
@@ -2172,20 +2376,31 @@
     0.057
    ],
    "root_vel_max": 1.12,
-   "foot_steps": [
+   "contact_frac": [
+    0.626,
+    0.704
+   ],
+   "touchdowns": [
     6,
-    0
+    3
    ],
    "cadence_hz": [
-    1.71
+    1.39,
+    0.92
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.72,
+    1.09
+   ],
+   "alternation_between_left_td": [
+    0,
+    1,
+    0,
+    1,
     0
    ],
-   "contact_frac": [
-    0.771,
-    0.922
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_13_stageii.npz",
    "src_fps": 120.0
@@ -2210,7 +2425,7 @@
    "at_limit_joints": [],
    "tilt_max": 0.0681,
    "yaw_start_deg": 10.0,
-   "yaw_drift_deg": -2.1,
+   "yaw_net_change_deg": -2.1,
    "qd_max": 10.01,
    "q_mean": [
     0.009,
@@ -2244,20 +2459,29 @@
     0.057
    ],
    "root_vel_max": 1.14,
-   "foot_steps": [
+   "contact_frac": [
+    0.602,
+    0.714
+   ],
+   "touchdowns": [
     5,
     1
    ],
    "cadence_hz": [
-    1.77
+    1.75
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.57,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.714,
-    0.932
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_14",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_14_stageii.npz",
    "src_fps": 120.0
@@ -2284,7 +2508,7 @@
    ],
    "tilt_max": 0.0557,
    "yaw_start_deg": 9.5,
-   "yaw_drift_deg": -8.4,
+   "yaw_net_change_deg": -8.4,
    "qd_max": 10.15,
    "q_mean": [
     -0.017,
@@ -2318,20 +2542,31 @@
     0.065
    ],
    "root_vel_max": 1.13,
-   "foot_steps": [
+   "contact_frac": [
+    0.572,
+    0.723
+   ],
+   "touchdowns": [
     6,
-    0
+    2
    ],
    "cadence_hz": [
-    1.89
+    2.63,
+    0.89
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.38,
+    1.12
+   ],
+   "alternation_between_left_td": [
+    0,
+    1,
+    0,
+    1,
     0
    ],
-   "contact_frac": [
-    0.698,
-    0.918
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_15",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_15_stageii.npz",
    "src_fps": 120.0
@@ -2358,7 +2593,7 @@
    ],
    "tilt_max": 0.0448,
    "yaw_start_deg": 10.4,
-   "yaw_drift_deg": -3.5,
+   "yaw_net_change_deg": -3.5,
    "qd_max": 10.4,
    "q_mean": [
     -0.009,
@@ -2392,20 +2627,31 @@
     0.066
    ],
    "root_vel_max": 1.13,
-   "foot_steps": [
+   "contact_frac": [
+    0.554,
+    0.737
+   ],
+   "touchdowns": [
     6,
-    0
+    2
    ],
    "cadence_hz": [
-    1.89
+    2.5,
+    0.89
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.4,
+    1.12
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
+    1,
     0
    ],
-   "contact_frac": [
-    0.691,
-    0.931
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_16",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_16_stageii.npz",
    "src_fps": 120.0
@@ -2432,7 +2678,7 @@
    ],
    "tilt_max": 0.0652,
    "yaw_start_deg": 5.7,
-   "yaw_drift_deg": -0.1,
+   "yaw_net_change_deg": -0.1,
    "qd_max": 9.27,
    "q_mean": [
     0.007,
@@ -2466,20 +2712,29 @@
     0.04
    ],
    "root_vel_max": 1.08,
-   "foot_steps": [
+   "contact_frac": [
+    0.579,
+    0.762
+   ],
+   "touchdowns": [
     5,
     0
    ],
    "cadence_hz": [
-    1.77
+    1.75
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.57,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
     0
    ],
-   "contact_frac": [
-    0.726,
-    0.97
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_28",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_28_stageii.npz",
    "src_fps": 120.0
@@ -2506,7 +2761,7 @@
    ],
    "tilt_max": 0.0537,
    "yaw_start_deg": -12.1,
-   "yaw_drift_deg": 4.5,
+   "yaw_net_change_deg": 4.5,
    "qd_max": 9.34,
    "q_mean": [
     -0.046,
@@ -2540,22 +2795,29 @@
     0.036
    ],
    "root_vel_max": 1.15,
-   "foot_steps": [
+   "contact_frac": [
+    0.698,
+    0.648
+   ],
+   "touchdowns": [
     4,
-    2
+    6
    ],
    "cadence_hz": [
-    1.46,
-    0.79
+    1.25,
+    2.5
    ],
-   "alt_between_left_onsets": [
-    0,
+   "stride_s": [
+    0.8,
+    0.4
+   ],
+   "alternation_between_left_td": [
+    1,
+    1,
     1
    ],
-   "contact_frac": [
-    0.833,
-    0.84
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_30",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_30_stageii.npz",
    "src_fps": 120.0
@@ -2582,7 +2844,7 @@
    ],
    "tilt_max": 0.0614,
    "yaw_start_deg": -12.7,
-   "yaw_drift_deg": 5.9,
+   "yaw_net_change_deg": 5.9,
    "qd_max": 8.93,
    "q_mean": [
     -0.063,
@@ -2616,20 +2878,29 @@
     0.057
    ],
    "root_vel_max": 1.11,
-   "foot_steps": [
+   "contact_frac": [
+    0.642,
+    0.648
+   ],
+   "touchdowns": [
     5,
-    0
+    1
    ],
    "cadence_hz": [
-    1.71
+    1.72
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.58,
+    null
+   ],
+   "alternation_between_left_td": [
+    0,
+    1,
+    0,
     0
    ],
-   "contact_frac": [
-    0.806,
-    0.939
-   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "35_31",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_31_stageii.npz",
    "src_fps": 120.0
@@ -2656,7 +2927,7 @@
    ],
    "tilt_max": 0.0483,
    "yaw_start_deg": 9.1,
-   "yaw_drift_deg": -24.2,
+   "yaw_net_change_deg": -24.2,
    "qd_max": 9.0,
    "q_mean": [
     -0.005,
@@ -2690,20 +2961,31 @@
     0.053
    ],
    "root_vel_max": 1.24,
-   "foot_steps": [
-    4,
-    0
+   "contact_frac": [
+    0.562,
+    0.784
+   ],
+   "touchdowns": [
+    6,
+    2
    ],
    "cadence_hz": [
-    1.58
+    2.5,
+    2.38
    ],
-   "alt_between_left_onsets": [
-    0
+   "stride_s": [
+    0.4,
+    0.42
    ],
-   "contact_frac": [
-    0.758,
-    0.941
+   "alternation_between_left_td": [
+    0,
+    0,
+    0,
+    1,
+    1
    ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_32",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_32_stageii.npz",
    "src_fps": 120.0
@@ -2730,7 +3012,7 @@
    ],
    "tilt_max": 0.0734,
    "yaw_start_deg": -3.2,
-   "yaw_drift_deg": 16.8,
+   "yaw_net_change_deg": 16.8,
    "qd_max": 10.51,
    "q_mean": [
     0.003,
@@ -2764,22 +3046,30 @@
     0.049
    ],
    "root_vel_max": 1.25,
-   "foot_steps": [
+   "contact_frac": [
+    0.636,
+    0.697
+   ],
+   "touchdowns": [
     5,
     2
    ],
    "cadence_hz": [
-    1.32,
-    1.52
+    1.35,
+    1.39
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.74,
+    0.72
+   ],
+   "alternation_between_left_td": [
     0,
-    1
+    1,
+    1,
+    0
    ],
-   "contact_frac": [
-    0.782,
-    0.909
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_33",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_33_stageii.npz",
    "src_fps": 120.0
@@ -2806,7 +3096,7 @@
    ],
    "tilt_max": 0.0624,
    "yaw_start_deg": -10.3,
-   "yaw_drift_deg": 2.2,
+   "yaw_net_change_deg": 2.2,
    "qd_max": 9.89,
    "q_mean": [
     -0.03,
@@ -2840,21 +3130,30 @@
     0.058
    ],
    "root_vel_max": 1.2,
-   "foot_steps": [
-    4,
-    1
+   "contact_frac": [
+    0.65,
+    0.736
+   ],
+   "touchdowns": [
+    5,
+    2
    ],
    "cadence_hz": [
-    1.33
+    1.79,
+    2.38
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.56,
+    0.42
+   ],
+   "alternation_between_left_td": [
     0,
-    1
+    1,
+    1,
+    0
    ],
-   "contact_frac": [
-    0.785,
-    0.945
-   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "35_34",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_34_stageii.npz",
    "src_fps": 120.0
@@ -2882,7 +3181,7 @@
    ],
    "tilt_max": 0.0375,
    "yaw_start_deg": -28.4,
-   "yaw_drift_deg": 48.2,
+   "yaw_net_change_deg": 48.2,
    "qd_max": 8.86,
    "q_mean": [
     -0.048,
@@ -2916,7 +3215,11 @@
     0.165
    ],
    "root_vel_max": 1.31,
-   "foot_steps": [
+   "contact_frac": [
+    0.467,
+    0.73
+   ],
+   "touchdowns": [
     2,
     3
    ],
@@ -2924,13 +3227,15 @@
     0.88,
     0.91
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    1.14,
+    1.1
+   ],
+   "alternation_between_left_td": [
     1
    ],
-   "contact_frac": [
-    0.584,
-    0.781
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "38_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/38_01_stageii.npz",
    "src_fps": 120.0
@@ -2958,7 +3263,7 @@
    ],
    "tilt_max": 0.0355,
    "yaw_start_deg": -14.2,
-   "yaw_drift_deg": -6.1,
+   "yaw_net_change_deg": -6.1,
    "qd_max": 11.33,
    "q_mean": [
     -0.029,
@@ -2992,22 +3297,29 @@
     0.1
    ],
    "root_vel_max": 1.49,
-   "foot_steps": [
+   "contact_frac": [
+    0.424,
+    0.794
+   ],
+   "touchdowns": [
     4,
-    2
+    3
    ],
    "cadence_hz": [
-    2.17,
-    0.96
+    1.19,
+    0.95
    ],
-   "alt_between_left_onsets": [
+   "stride_s": [
+    0.84,
+    1.05
+   ],
+   "alternation_between_left_td": [
     0,
+    1,
     1
    ],
-   "contact_frac": [
-    0.606,
-    0.909
-   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "38_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/38_02_stageii.npz",
    "src_fps": 120.0
@@ -3035,7 +3347,7 @@
    ],
    "tilt_max": 0.0521,
    "yaw_start_deg": 109.7,
-   "yaw_drift_deg": -8.6,
+   "yaw_net_change_deg": -8.6,
    "qd_max": 12.04,
    "q_mean": [
     -0.018,
@@ -3069,16 +3381,26 @@
     0.128
    ],
    "root_vel_max": 1.43,
-   "foot_steps": [
-    1,
-    0
-   ],
-   "cadence_hz": [],
-   "alt_between_left_onsets": [],
    "contact_frac": [
-    0.829,
-    0.899
+    0.601,
+    0.759
    ],
+   "touchdowns": [
+    2,
+    1
+   ],
+   "cadence_hz": [
+    0.72
+   ],
+   "stride_s": [
+    1.38,
+    null
+   ],
+   "alternation_between_left_td": [
+    1
+   ],
+   "gait_resolved": false,
+   "walk_like": false,
    "clip": "82_12",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_12_stageii.npz",
    "src_fps": 120.0
@@ -3106,7 +3428,7 @@
    ],
    "tilt_max": 0.0471,
    "yaw_start_deg": 119.6,
-   "yaw_drift_deg": -12.6,
+   "yaw_net_change_deg": -12.6,
    "qd_max": 11.59,
    "q_mean": [
     -0.021,
@@ -3140,16 +3462,27 @@
     0.128
    ],
    "root_vel_max": 1.4,
-   "foot_steps": [
-    1,
-    1
-   ],
-   "cadence_hz": [],
-   "alt_between_left_onsets": [],
    "contact_frac": [
-    0.846,
-    0.883
+    0.617,
+    0.753
    ],
+   "touchdowns": [
+    2,
+    2
+   ],
+   "cadence_hz": [
+    0.79,
+    3.85
+   ],
+   "stride_s": [
+    1.26,
+    0.26
+   ],
+   "alternation_between_left_td": [
+    0
+   ],
+   "gait_resolved": true,
+   "walk_like": false,
    "clip": "82_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_13_stageii.npz",
    "src_fps": 120.0

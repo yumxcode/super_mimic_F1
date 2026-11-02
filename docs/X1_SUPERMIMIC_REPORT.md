@@ -8,7 +8,7 @@ Status at a glance
 
 | step | result | evidence |
 |---|---|---|
-| A asset + config numerically stable | **done** | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; asset byte-identical to source |
+| A asset + config numerically stable | **done** | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
 | C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, finished (status 5), 5 checkpoints, 33 metric keys | see [Gradmotion](#gradmotion) |
 | D commits + push | **done** | `feat/x1-29dof` pushed; every commit is in the log below |
@@ -34,9 +34,13 @@ model the way the training env does and comparing field by field:
 
 The first two are harness/build artifacts, not properties of the robot. With both fixed, **the asset's own four
 2 mm sole spheres stand at the real PD gains.** Since the contract says to modify the asset only if the asset is
-the defect, the sole box was reverted: `assets/x1_29dof/x1_29dof.xml` is byte-identical to the source again
-(sha256 `e8afe91024178b4b3b3f95bdec2f91b975c2125050ca404a0989f1d7bcc1b16a`), `tools/vendor_x1_assets.py --check`
-passes, and `PROVENANCE.md` no longer lists a fourth change.
+the defect, the sole box was reverted. The vendored XML now differs from the source only by the mechanical
+transform `tools/vendor_x1_assets.py` documents: `meshdir` rewritten to the flat mesh layout, and a `name` added to
+each unnamed geom. **No geometry, contact parameter, inertia, joint limit or body pose differs from the source** —
+that is the accurate statement rather than "byte-identical", since the file is not byte-identical to the source, it is
+identical after those two documented transforms (vendored sha256 `e8afe910…`). `tools/vendor_x1_assets.py --check`
+re-derives the transform and diffs it against the vendored copy (OK), and `PROVENANCE.md` lists exactly three changes
+with no fourth entry for the reverted box.
 
 A second, real defect was in the **configuration** layer, the layer that actually decides what the simulator uses:
 
@@ -130,36 +134,86 @@ the allmimic npz contract (`qpos (N,36)`, `qvel (N,35)`, 50 Hz, `starts`/`length
 
 ### Validation of the delivered library
 
-`motions/x1_cmu_walk.meta.json` has the per-clip numbers; the table summarises them.
+Every number below comes from `tools/x1_motion_audit.py`, which re-derives the metrics from the npz alone (MuJoCo FK
+on the vendored model, the SMPLX sources for heading) instead of trusting the meta; the two agree clip for clip
+because the gait analysis lives in one module (`tools/x1_gait.py`) that both the build and the audit import. That
+was not true when this report was first written: it quoted the previous 38-clip build's numbers (yaw ≤ 19°, 30/41
+in the cadence band, "every frame" at a limit), which the final 41-clip library does not support.
 
-| metric | value over 41 clips |
+```
+PYTHONPATH=. python tools/x1_motion_audit.py --npz motions/x1_cmu_walk.npz --amass ~/code/X1_29_AMP/data/amass/CMU
+```
+
+| metric | value over the 41 clips |
 |---|---|
 | clips / frames / duration | 41 / 6168 / 2.06 min |
 | file | `motions/x1_cmu_walk.npz`, 1.75 MB, sha256 `309a6896…` |
-| root height | min 0.558 / mean 0.617 / max 0.653 m |
+| contract | qpos (6168,36), qvel (6168,35), 50 Hz, starts = cumsum(lengths), quat norm dev 6.0e-8, 0 sign flips, all finite |
+| qvel vs finite differences of qpos | max abs error 0.0 (exact; joint max 9.5e-7 in the reviewer's independent check) |
+| root height | 0.558 min / 0.618 mean of clip means / 0.633 max |
 | 1−R_zz (upright) | mean 0.020, max 0.090 |
-| worst joint-limit excess | 0.091 rad (over `--reject-over-limit` never triggered) |
+| worst joint-limit excess | 0.0906 rad |
 | sole penetration | 0.0000 m (grounded per frame) |
-| max |joint velocity| | 14.8 rad/s (08_06) |
-| cadence, per foot | 0.76–2.17 Hz; where both feet resolve, 30/41 clips are in 0.8–1.2 Hz |
-| L/R alternation | exactly one opposite-foot onset between consecutive left-foot onsets in all clips that resolve both |
-| yaw drift per clip | ≤ 19° |
-| all values finite | yes |
+| swing-foot clearance | 0.032–0.092 m, median 0.044 m |
+| max joint velocity | 14.8 rad/s (08_06) |
+| **net yaw change** | max 58.4° (08_06); see the heading paragraph below |
+| **both feet resolve a cadence** | 29/41 clips |
+| **of those, both feet in 0.8–1.2 Hz** | 8/29 |
+| **L/R alternation exactly one opposite step** | 11/29; the other 18 include a cycle with 0 |
+| **walk-like clips** (both feet, stride 0.5–1.5 s, alternation mostly 1) | 16/41; their cadence 0.79–1.89 Hz (median 0.94), stride 0.53–1.26 s (median 1.06) |
 
-Storage entry, as required by the task: all intermediate per-clip pickles/logs were deleted — the pipeline writes
-nothing per clip, so the only artefacts on disk are the npz (1.75 MB) and its meta JSON (51 KB), both under the
-git-tracked `motions/`. Workspace free space at the end of B: 145 GB (unchanged; `_scratch/` holds 175 MB of
-mjlab source + vendored wheels used to run the CPU smoke and is git-ignored).
+**Heading: 58.4° is the clips turning, not drift.** 14 of the 41 CMU clips are turns, and the human turns 64–152°
+in them. The retarget follows the same direction (correlation 0.767 over the 41 clips) but under-rotates: mean
+|net yaw| 45° in the source vs 18° in the X1 data, mean |difference| 35°, worst 125° (07_07, human −152° vs robot
+−27°). So the largest single number, 58.4° on 08_06, is the retarget reproducing part of a −94° human turn. It is
+recorded as `yaw_net_change_deg` for that reason; an earlier version of this build called the same quantity
+`yaw_drift_deg`, which invited exactly the misreading.
+
+**Gait: the clips are short and the swing is low, and that limits what the detector can resolve.** Each clip is
+2.1–3.9 s, so a clip holds 2–4 strides; the swing foot lifts only 3–9 cm (median 4.4 cm) because the grounding puts
+the stance sole at 0 every frame. With a 1–2 cm hysteresis band, 29 of 41 clips give a cadence for both feet and 12
+only for one. Of the 29, 8 have both feet in the 0.8–1.2 Hz band a walk should occupy, and 11 show clean one-step
+alternation. Clips that do resolve both feet mostly do so consistently: the 16 walk-like ones sit at median 0.94 Hz
+with 1.06 s strides, which is walking. What the table cannot claim is that all 41 clips are cleanly interpretable
+walking — they are not, and the per-clip numbers are in the meta.
+
+I did not tune the remaining clips away. Options that were considered and rejected: tightening the reject filter
+until only the 16 clean clips survive (throws away 61 % of the data to make a table look better), and switching the
+grounding to per-clip so the swing clearance grows (that changes the training data, and the npz that the platform
+run already trained on is the one delivered — see the storage note). The honest statement is that the library is
+41 clips of retargeted CMU motion in which 16 are unambiguously walk-like and the rest are usable but partly
+ambiguous to a foot-height detector.
+
+### Storage accounting
+
+The pipeline writes nothing per clip — no pickle, no per-clip log — so the artefacts under the git-tracked `motions/`
+are exactly these three:
+
+| file | size | why it stays |
+|---|---|---|
+| `motions/x1_cmu_walk.npz` | 1.75 MB | the training library; this is what the platform clones |
+| `motions/x1_cmu_walk.meta.json` | 54 KB | per-clip validation numbers + the exact `args` that produced the npz |
+| `motions/x1_ik_config.json` | 8.2 KB | the calibrated SMPLX→X1 IK config; without it the npz cannot be reproduced |
+
+`motions/` totals 1.8 MB. Intermediate per-clip pickles and logs were deleted as they were produced; nothing else from
+the retarget survives. Workspace free space at the end of B: 145 GB of 228 GB. `_scratch/` (175 MB: an unpacked mjlab
+for the CPU smoke plus vendored wheels), `logs/`, `runs/` and `output/` are git-ignored.
 
 ### Known limitation: the arms sit on their limits
 
-Every frame of the library has at least one joint within 0.02 rad of a limit; `left_shoulder_roll` and
-`left_elbow_yaw` in 100 % of frames, `right_elbow_pitch` in 83 %. **This is GMR's stock config too** — running the
-same clip through the unmodified `smplx_to_x1.json` gives the same per-joint fractions, so it is not an artefact of
-the pelvis calibration: the X1's arms are much shorter than a human's, so the IK clamps. Consequence: a policy
-trained on this library cannot learn arm motion beyond the limit; it will hold the arm there. Options for later:
-filter the arm dimensions out of the IK match table, retarget arms with a separate target, or accept it (the reward
-does not punish being at a limit).
+67.2 % of the library's 6168 frames have at least one joint within 0.02 rad of its limit, and 18 of the 41 clips are
+there in 100 % of their frames. Per joint, over all frames: `left_elbow_pitch` 57.8 %, `right_elbow_pitch` 37.1 %,
+`left_shoulder_roll` 18.1 %, `left_shoulder_pitch` 17.8 %, `left_knee_pitch` 9.9 %, `right_knee_pitch` 7.1 %;
+`left_elbow_yaw` never reaches a limit. (An earlier version of this section said "every frame", with
+`left_shoulder_roll`/`left_elbow_yaw` at 100 % and `right_elbow_pitch` at 83 %; those were the previous 38-clip
+build's numbers and are wrong for the delivered library.)
+
+The cause is the robot, not the calibration: replaying one clip through GMR's unmodified `smplx_to_x1.json` gives the
+same per-joint fractions, so the pelvis scale is not responsible — the X1's arms are much shorter than a human's and
+the IK clamps at the reachable limit. Consequence: a policy trained on this library cannot learn arm motion beyond
+the limit; it will hold the arm there, and elbow pitch (57.8 %) is where that happens most. Options for later: filter
+the arm entries out of the IK match table, retarget the arms against a separate target, or accept it (the reward does
+not penalise being at a limit).
 
 ---
 
