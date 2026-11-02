@@ -1,4 +1,8 @@
-"""Batched G1 motion-tracking simulator on MuJoCo Warp (via mjlab Scene/Simulation).
+"""Batched motion-tracking simulator on MuJoCo Warp (via mjlab Scene/Simulation).
+
+The robot is selected by name through allmimic.robots (default 'g1', the upstream Unitree G1; 'x1_29dof' for the
+X1 29-DoF humanoid). Everything robot-specific -- entity config, action scale, reward bodies, root / torso body,
+foot contact geoms -- comes from that one registry entry.
 
 The env owns the simulator, domain randomization (sim context xi), reset sampling
 and the noisy observation history the policy sees. Reward and termination come from
@@ -12,7 +16,6 @@ from dataclasses import dataclass
 import mujoco
 import torch
 
-from mjlab.asset_zoo.robots import G1_ACTION_SCALE, get_g1_robot_cfg
 from mjlab.managers.event_manager import RecomputeLevel
 from mjlab.scene import Scene, SceneCfg
 from mjlab.sim import MujocoCfg, SimulationCfg
@@ -21,10 +24,11 @@ from mjlab.terrains import TerrainEntityCfg
 
 from .kinematics import FastTreeKinematics
 from .motion_lib import MotionLibrary
+from .robots import get_robot
 from .rotations import quat_from_euler_xyz, quat_mul, quat_normalize, quat_to_mat
 from .task import NJ, OBS_DIM, XI_DIM, Task, TaskCfg
 
-FOOT_GEOM_RE = r'^(left|right)_foot[1-7]_collision$'
+DEFAULT_ROBOT = 'g1'
 
 
 @dataclass
@@ -39,6 +43,7 @@ class EnvCfg:
     njmax: int | None = 250
     set_const_every: int = 50
     compile: bool = True
+    robot: str = DEFAULT_ROBOT
     # Reset sampling mixture (uniform, low-return softmax, past-softmax).
     p_uniform: float = 0.5
     p_softmax: float = 0.4
@@ -98,10 +103,11 @@ class TrackingSimEnv:
         self.device = device
         self.num_envs = n = cfg.num_envs
         self.gamma = gamma
+        self.robot_cfg = get_robot(cfg.robot)
         scene_cfg = SceneCfg(
             terrain=TerrainEntityCfg(terrain_type='plane'),
             num_envs=n,
-            entities={'robot': get_g1_robot_cfg()},
+            entities={'robot': self.robot_cfg.entity_cfg()},
         )
         self.scene = Scene(scene_cfg, device=device)
         sim_cfg = SimulationCfg(
@@ -117,7 +123,7 @@ class TrackingSimEnv:
         self.decimation = 4
 
         # Robot-only kinematic tree (the scene adds a prefix to names).
-        root_body = self._find_body('pelvis')
+        root_body = self._find_body(self.robot_cfg.root_body)
         self.kin = FastTreeKinematics(m, device, root_body=root_body)
         self.kin_c = torch.compile(self.kin.forward, dynamic=False) if cfg.compile else self.kin.forward
         self.root_qadr = m.jnt_qposadr[m.body_jntadr[root_body]]
@@ -133,6 +139,11 @@ class TrackingSimEnv:
         rcfg = self.robot
         names = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) for j in hinge_ids]
         self.joint_names = [nm.split('/')[-1] for nm in names]
+        if self.robot_cfg.joint_order is not None and tuple(self.joint_names) != self.robot_cfg.joint_order:
+            raise RuntimeError(
+                f'{self.robot_cfg.name}: compiled joint order {self.joint_names} != '
+                f'allmimic.robots.{self.robot_cfg.name} joint_order {list(self.robot_cfg.joint_order)}'
+            )
         q0 = torch.tensor(rcfg.data.default_joint_pos[0].cpu().numpy(), device=device)
         rob_joint_names = [nm.split('/')[-1] for nm in rcfg.joint_names]
         perm = [rob_joint_names.index(nm) for nm in self.joint_names]
@@ -142,24 +153,37 @@ class TrackingSimEnv:
         import re
 
         for k, nm in enumerate(self.joint_names):
-            for pat, val in G1_ACTION_SCALE.items():
+            for pat, val in self.robot_cfg.action_scale.items():
                 if re.fullmatch(pat, nm):
                     scale[k] = val
         assert (scale > 0).all()
         self.action_scale = scale.to(device)
         self.task = Task(
-            self.kin, self.q0, lim, self.action_scale, task_cfg, device, compile_sizes=(n,) if cfg.compile else ()
+            self.kin,
+            self.q0,
+            lim,
+            self.action_scale,
+            task_cfg,
+            device,
+            compile_sizes=(n,) if cfg.compile else (),
+            tracked_bodies=self.robot_cfg.tracked_bodies,
         )
         self.tcfg = task_cfg
         self.task.set_joint_names(self.joint_names)  # residual joint groups (TaskCfg.res_legs / res_scale_legs)
 
         # Domain randomization fields.
+        want_geoms = set(self.robot_cfg.foot_geoms)
         self.foot_geoms = torch.tensor(
-            [g for g in range(m.ngeom) if _match(FOOT_GEOM_RE, mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g))],
+            [
+                g
+                for g in range(m.ngeom)
+                if (nm := mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g)) is not None
+                and nm.split('/')[-1] in want_geoms
+            ],
             device=device,
         )
-        assert len(self.foot_geoms) == 14, len(self.foot_geoms)
-        self.torso_body = self._find_body('torso_link')
+        assert len(self.foot_geoms) == len(want_geoms), f'{len(self.foot_geoms)} != {len(want_geoms)} foot geoms'
+        self.torso_body = self._find_body(self.robot_cfg.torso_body)
         if cfg.domain_rand:
             self.sim.expand_model_fields(('geom_friction', 'body_ipos'))
         self.default_torso_ipos = torch.tensor(m.body_ipos[self.torso_body], dtype=torch.float32, device=device)
@@ -481,8 +505,3 @@ class TrackingSimEnv:
         g = self.gamma
         return self.tcfg.max_step_reward * (1 - g**horizon) / (1 - g)
 
-
-def _match(pattern, name):
-    import re
-
-    return name is not None and re.fullmatch(pattern, name.split('/')[-1]) is not None

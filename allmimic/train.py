@@ -36,6 +36,7 @@ from .task import GOAL_FRAME_DIM, NJ, OBS_DIM, XI_DIM, flat_to_state, state_to_f
 
 @dataclasses.dataclass
 class TrainCfg:
+    robot: str = 'g1'  # allmimic.robots entry (g1 upstream, x1_29dof); saved in the checkpoint cfg
     motions: str = 'data/processed/lafan1_50hz.npz'
     clip_prefixes: str = ''  # e.g. "walk,run,sprint" for the Fig. 4b subset
     clip_list: str = ''  # file with one clip name per line to keep (feasible whitelist); empty = all clips
@@ -320,7 +321,12 @@ class Trainer:
     def _make_env(self):
         return TrackingSimEnv(
             self.lib,
-            EnvCfg(num_envs=self.cfg.num_envs, softmax_cap=self.cfg.softmax_cap, retire_g=self.cfg.retire_g),
+            EnvCfg(
+                num_envs=self.cfg.num_envs,
+                softmax_cap=self.cfg.softmax_cap,
+                retire_g=self.cfg.retire_g,
+                robot=self.cfg.robot,
+            ),
             self.tcfg,
             self.device,
             gamma=self.cfg.gamma,
@@ -629,7 +635,10 @@ class Trainer:
         cfg, task = self.cfg, self.task
         if self.gap_env is None:
             n = cfg.gap_envs
-            ecfg = EnvCfg(num_envs=n, episode_length_s=1e9, obs_noise=False, reset_noise=False, domain_rand=True)
+            ecfg = EnvCfg(
+                num_envs=n, episode_length_s=1e9, obs_noise=False, reset_noise=False, domain_rand=True,
+                robot=self.cfg.robot,
+            )  # fmt: skip
             self.gap_env = TrackingSimEnv(self.lib, ecfg, self.tcfg, self.device, gamma=cfg.gamma)
             self.gap_env.eval_mode = True
             self.gap_env.reset()

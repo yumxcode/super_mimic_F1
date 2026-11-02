@@ -22,14 +22,20 @@ from .task import GOAL_FRAME_DIM, OBS_DIM, TaskCfg, task_cfg
 EVAL_CONTACT_POOL = 256 * 35  # contact slots of the whole eval env (= 256 worlds at EnvCfg.nconmax 35)
 
 
-def make_eval_env(lib, num_envs, device, tcfg: TaskCfg | None = None):
+def make_eval_env(lib, num_envs, device, tcfg: TaskCfg | None = None, robot: str = 'g1'):
     # mujoco_warp pools nconmax * num_envs contacts and drops the overflow: a 1-world env (adapt's eval of one clip)
     # had 35 slots and overflowed on 10 of 20 LAFAN1 clips in an adaptation test (broadphase pairs up to 67). Only adds
     # capacity below 256 worlds, so batch evals are unchanged (CHANGES #22). The per-world njmax = 250 cap also
     # overflows in crawl / falls (up to 281 rows); raising it changes every eval, so it is left as is (known issue).
     nconmax = max(EnvCfg.nconmax, -(-EVAL_CONTACT_POOL // num_envs))
     cfg = EnvCfg(
-        num_envs=num_envs, episode_length_s=1e9, obs_noise=False, reset_noise=False, domain_rand=True, nconmax=nconmax
+        num_envs=num_envs,
+        episode_length_s=1e9,
+        obs_noise=False,
+        reset_noise=False,
+        domain_rand=True,
+        nconmax=nconmax,
+        robot=robot,
     )
     env = TrackingSimEnv(lib, cfg, tcfg or TaskCfg(), device)
     env.eval_mode = True
@@ -126,7 +132,7 @@ def main():
     first = sorted(glob.glob(os.path.join(args.run, 'ckpt_*.pt')))
     run_cfg = torch.load(first[0], map_location='cpu')['cfg'] if first and args.kind == 'supermimic' else {}
     # goal_pos_noise is training-only; evaluation always sees the clean goal
-    env = make_eval_env(lib, n, device, task_cfg(run_cfg, train=False))
+    env = make_eval_env(lib, n, device, task_cfg(run_cfg, train=False), robot=run_cfg.get('robot', 'g1'))
     out_path = os.path.join(args.run, args.out)
     done = set()
     if os.path.exists(out_path):

@@ -130,11 +130,13 @@ class FastTreeKinematics(TreeKinematics):
                 self.joint_list[i] = j
         ax = self.axes.cpu()
         self.axis_k = [0] * self.nb
+        self.axis_sign = [1.0] * self.nb  # hinge axis is +/- a principal axis (X1 has both signs)
         for b in range(1, self.nb):
             k = int(ax[b].abs().argmax())
             assert torch.allclose(ax[b].abs(), torch.nn.functional.one_hot(torch.tensor(k), 3).float())
-            assert ax[b, k] > 0
+            assert abs(ax[b, k]) > 0.5
             self.axis_k[b] = k
+            self.axis_sign[b] = 1.0 if ax[b, k] > 0 else -1.0
         self.O = [self.offset_rot[b] for b in range(self.nb)]
         self.off = [self.offset_pos[b] for b in range(self.nb)]
 
@@ -155,8 +157,10 @@ class FastTreeKinematics(TreeKinematics):
             W = [root_ang_vel] + [None] * (self.nb - 1)
         for b in range(1, self.nb):
             p, j, k = self.parent_list[b], self.joint_list[b], self.axis_k[b]
+            sg = self.axis_sign[b]
             Rp = R[p]
-            c, s = torch.cos(q[..., j]), torch.sin(q[..., j])
+            qj = q[..., j] if sg > 0 else -q[..., j]  # Rot(-e_k, q) == Rot(e_k, -q)
+            c, s = torch.cos(qj), torch.sin(qj)
             O = self.O[b]
             # A = O @ Rot_k(q): column k unchanged, the other two rotate.
             i1, i2 = [(1, 2), (2, 0), (0, 1)][k]
@@ -170,7 +174,7 @@ class FastTreeKinematics(TreeKinematics):
             Pc = P[p] + self._mv(Rp, self.off[b])
             P[b], R[b] = Pc, Rc
             if with_vel:
-                Wc = W[p] + Rc[..., :, k] * qd[..., j : j + 1]
+                Wc = W[p] + (Rc[..., :, k] * qd[..., j : j + 1] if sg > 0 else -Rc[..., :, k] * qd[..., j : j + 1])
                 Vc = V[p] + torch.cross(W[p], Pc - P[p], dim=-1)
                 V[b], W[b] = Vc, Wc
         out = (torch.stack(P, -2), torch.stack(R, -3))

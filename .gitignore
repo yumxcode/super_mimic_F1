@@ -2,5 +2,10 @@ __pycache__/
 *.pyc
 data/
 runs/
+logs/
+output/
+_scratch/
+.meta-agent/
+MUJOCO_LOG.TXT
 *.tmp
 *.tmp.npz

@@ -1,6 +1,7 @@
 """Per-joint error-propagation weights for the G1 (Holden, "Joint Error Propagation", theorangeduck.com 2024).
 
   python tools/joint_error_weights.py [--out joint_weights.csv]     # CPU, needs mujoco (+ mjlab for the G1 MJCF)
+  python tools/joint_error_weights.py --xml assets/x1_29dof/x1_29dof.xml --robot x1_29dof --emit-python x1
 
 A small error dq at hinge j moves every point x of its subtree by dq * |a_j x (x - p_j)| (a_j: hinge axis, p_j: joint
 anchor, rest pose = qpos0). Weights per joint, all normalized to mean 1 over the 29 actuated joints (loss scale kept):
@@ -23,6 +24,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from filter_infeasible import g1_xml  # noqa: E402
+
+X1_TRACKED = ('base_link', 'left_hip_roll_link', 'left_knee_pitch_link', 'left_ankle_roll_link',
+              'right_hip_roll_link', 'right_knee_pitch_link', 'right_ankle_roll_link', 'lumbar_pitch_link',
+              'left_shoulder_roll_link', 'left_elbow_pitch_link', 'left_wrist_roll_link',
+              'right_shoulder_roll_link', 'right_elbow_pitch_link', 'right_wrist_roll_link')  # fmt: skip
 
 TRACKED = ('pelvis', 'left_hip_roll_link', 'left_knee_link', 'left_ankle_roll_link', 'right_hip_roll_link',
            'right_knee_link', 'right_ankle_roll_link', 'torso_link', 'left_shoulder_roll_link', 'left_elbow_link',
@@ -63,12 +69,20 @@ def mesh_points(m, d):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--out', type=Path, default=Path('joint_weights.csv'))
+    ap.add_argument('--xml', default=None, help='robot MJCF (default: mjlab G1); the weights are per robot')
+    ap.add_argument('--robot', default='g1', choices=['g1', 'x1_29dof'], help='which tracked-body set to use')
+    ap.add_argument('--emit-python', default='', metavar='NAME',
+                    help="print a JOINT_WEIGHTS['NAME'] dict literal (tracked / axis_sq) to paste into allmimic/joint_weights.py")
     args = ap.parse_args(argv)
-    m = mujoco.MjModel.from_xml_path(g1_xml())
+    tracked_names = TRACKED if args.robot == 'g1' else X1_TRACKED
+    m = mujoco.MjModel.from_xml_path(args.xml or g1_xml())
     d = mujoco.MjData(m)
     mujoco.mj_kinematics(m, d)
     pts, area, pbody = mesh_points(m, d)
-    tracked = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, n) for n in TRACKED]
+    tracked = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, n) for n in tracked_names]
+    missing = [n for n, b in zip(tracked_names, tracked) if b < 0]
+    if missing:
+        raise SystemExit(f'tracked bodies not in {args.xml or g1_xml()}: {missing}')
     rows = []
     for j in range(m.njnt):
         if m.jnt_type[j] != mujoco.mjtJoint.mjJNT_HINGE:
@@ -104,6 +118,13 @@ def main(argv=None):
     for k in ('mesh_lin', 'axis_lin', 'axis_sq', 'tracked_sq'):
         v = np.array([r[k] for r in rows])
         print(f'{k:10s} max/min {v.max() / v.min():8.1f}   max {v.max():.2f}   min {v.min():.3f}')
+    if args.emit_python:
+        for k in ('tracked_sq', 'axis_sq'):
+            key = 'tracked' if k == 'tracked_sq' else k
+            print(f"    '{key if args.emit_python == 'g1' else key + '_x1'}': {{")
+            for r in rows:
+                print(f"        '{r['joint']}': {r[k]:.4f},")
+            print('    },')
     return 0
 
 

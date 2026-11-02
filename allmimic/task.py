@@ -34,6 +34,8 @@ from .rotations import (
     yaw_mat,
 )
 
+# Reward bodies of the upstream robot (Unitree G1). A robot with a different tree passes its own list to
+# Task(tracked_bodies=...) -- see allmimic/robots/.
 TRACKED_BODIES = (
     'pelvis',
     'left_hip_roll_link',
@@ -169,7 +171,17 @@ def state_to_flat(s: dict) -> torch.Tensor:
 
 
 class Task:
-    def __init__(self, kin: TreeKinematics, q0, soft_limits, action_scale, cfg: TaskCfg, device, compile_sizes=()):
+    def __init__(
+        self,
+        kin: TreeKinematics,
+        q0,
+        soft_limits,
+        action_scale,
+        cfg: TaskCfg,
+        device,
+        compile_sizes=(),
+        tracked_bodies=None,
+    ):
         if cfg.heading not in ('xaxis', 'twist'):
             raise ValueError(f'unknown heading {cfg.heading!r}')
         if cfg.rot_repr not in ('6d', 'tripoint'):
@@ -185,8 +197,9 @@ class Task:
         self.qmax = soft_limits[:, 1].to(device)
         self.action_scale = action_scale.to(device)
         self.set_joint_names(None)
-        self.tracked = torch.tensor(kin.body_index(TRACKED_BODIES), device=device)
-        self.root = 0  # pelvis
+        self.tracked_bodies = tuple(tracked_bodies or TRACKED_BODIES)
+        self.tracked = torch.tensor(kin.body_index(self.tracked_bodies), device=device)
+        self.root = 0  # root body of the kinematic tree (pelvis / base_link)
         self.obs_noise = torch.cat(
             [
                 torch.full((NJ,), cfg.noise_q),

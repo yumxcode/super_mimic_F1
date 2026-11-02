@@ -70,7 +70,7 @@ def main(argv=None):
             continue
         t0 = time.time()
         lib = MotionLibrary(str(path), device)
-        env = make_eval_env(lib, min(lib.num_clips, args.num_envs), device, tcfg)
+        env = make_eval_env(lib, min(lib.num_clips, args.num_envs), device, tcfg, ck.get('cfg', {}).get('robot', 'g1'))
         with torch.no_grad():
             res = evaluate(lambda o, g: pol(o, g), lib, env)
         frames = lib.lengths.tolist()
