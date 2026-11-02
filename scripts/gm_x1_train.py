@@ -183,11 +183,16 @@ class MetricMirror(threading.Thread):
         while not self.stop.is_set():
             try:
                 if self.log_path.exists():
-                    with open(self.log_path) as f:
+                    # binary + explicit cursor: iterating a text file and calling f.tell() in the loop raises
+                    # "OSError: telling position disabled by next() call", which is what left the first plumbing run
+                    # (TASK_20261102_041) with an empty TensorBoard directory and `gm task data keys` == [].
+                    with open(self.log_path, 'rb') as f:
                         f.seek(self.written)
-                        for line in f:
-                            self.written = f.tell()
-                            rec = json.loads(line)
+                        for raw in f:
+                            if not raw.endswith(b'\n'):  # partial line: a writer may be mid-flush, retry next tick
+                                break
+                            self.written += len(raw)
+                            rec = json.loads(raw)
                             step = int(rec.get('it', rec.get('updates', 0)))
                             for k, v in rec.items():
                                 if isinstance(v, bool) or not isinstance(v, (int, float)):
