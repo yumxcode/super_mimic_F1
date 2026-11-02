@@ -221,7 +221,10 @@ def publish_checkpoint(out_dir: Path, out_pub: Path) -> Path | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--hparams', type=Path, default=ROOT / 'configs' / 'x1_supermimic.json')
+    ap.add_argument('--hparams', type=Path, default=ROOT / 'configs' / 'x1_supermimic_phase2.json',
+                    help='phase-2 default (60k iter, 289-clip library); the platform startScript '
+                         'also passes --hparams explicitly — TASK_222 silently ran the phase-1 '
+                         '3000-iter default because neither was set')
     ap.add_argument('--skip-install', action='store_true', help='do not pip install (stack already present)')
     ap.add_argument('--dry-run', action='store_true', help='print the plan and exit')
     args, extra = ap.parse_known_args()

@@ -1,0 +1,26 @@
+{
+  "taskBaseInfo": {
+    "projectId": "PRO_20261102_002",
+    "taskType": "1",
+    "trainType": "1",
+    "taskName": "x1-supermimic-phase2-60k",
+    "taskDescription": "X1 phase-2 full training: 289-clip multi-activity library (walk/turn/dance/jog, arm fix baked into the retarget pipeline), 60k iterations, 4096 envs, 1x4090D, wall_hours cap 10 (~Y58 max). Budget mapping in docs/X1_PHASE2_DATASET.md. Entry scripts/gm_x1_train.py with configs/x1_supermimic_phase2.json; eval every 2h against the in-sample library; mirrors log.jsonl to TensorBoard under logs/x1_phase2/ and publishes the newest checkpoint to output/.",
+    "taskTag": ["x1", "supermimic", "allmimic", "phase2"],
+    "goodsId": "ESKU000001",
+    "imageId": "BJX00000178",
+    "imageVersion": "V000446",
+    "personalDataPath": ""
+  },
+  "taskCodeInfo": {
+    "codeType": "2",
+    "codeUrl": "[{\"codeUrl\":\"https://github.com/yumxcode/super_mimic_F1.git\",\"versionType\":\"1\",\"versionName\":\"feat/x1-29dof\"}]",
+    "mainCodeUri": "super_mimic_F1/allmimic/train.py",
+    "hparamsPath": "super_mimic_F1/configs/x1_supermimic_phase2.json",
+    "startScript": "gm-run super_mimic_F1/scripts/gm_x1_train.py --hparams super_mimic_F1/configs/x1_supermimic_phase2.json",
+    "isOpen": "1"
+  },
+  "runtimeReminderConfig": {
+    "enableRuntimeReminder": false,
+    "reminderDurations": []
+  }
+}
