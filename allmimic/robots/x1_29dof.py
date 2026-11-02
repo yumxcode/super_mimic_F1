@@ -191,7 +191,7 @@ def x1_actuator_cfgs():
 
 
 def x1_collision_cfgs():
-    """(CollisionCfg,) for the entity -- the sole boxes get condim 3 + friction + priority + the 200 Hz solref.
+    """(CollisionCfg,) for the entity -- the sole geoms get condim 3 + friction + priority + the 200 Hz solref.
 
     Kept separate from get_x1_robot_cfg() so scripts/x1_smoke.py can apply the *same* object to a real MjSpec and
     assert the compiled geoms carry these values: this is the layer that decides what the simulator actually uses,
@@ -200,7 +200,8 @@ def x1_collision_cfgs():
     from mjlab.utils.spec_config import CollisionCfg
 
     foot = X1_FOOT_GEOM_RE
-    # Everything that is not a foot keeps condim 1 (the asset only gives the base and the torso a collision mesh).
+    # Everything that is not a foot keeps condim 1 (the asset gives only the base, the torso and the soles
+    # collision geoms; all of them match '.*_collision').
     return (
         CollisionCfg(
             geom_names_expr=('.*_collision',),

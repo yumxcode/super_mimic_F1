@@ -21,7 +21,7 @@ Checks
   4. with --motions: the same, but reset from the first frame of a motion library clip and tracking its reference
 
   PYTHONPATH=. python scripts/x1_smoke.py --steps 200                  # the X1's own PD gains
-  PYTHONPATH=. python scripts/x1_smoke.py --steps 200 --ankle-gain 8    # numerically sound stance
+  PYTHONPATH=. python scripts/x1_smoke.py --steps 200 --ankle-gain 8    # 8x ankle stiffness, robustness probe
   PYTHONPATH=. python scripts/x1_smoke.py --motions motions/x1_cmu_walk.npz --clip 0
 Needs mujoco + torch (no GPU). Exits non-zero when a check fails.
 
@@ -38,16 +38,15 @@ them was a defect of the asset, and each is checked here:
     (0.6275 m; a flat 0.66 leaves the soles 3.2 cm in the air and turns the start into an impact).
 
 Zero action means "hold the rest pose with the X1's own PD gains", and at those gains the stance is stable: the
-soles' contact patch is wide enough that the centre of pressure can move under the centre of mass, so the ankle
-servo (kp 50 Nm/rad) does not have to carry m*g*h = 233 Nm/rad on its own. Measured here: 4 s at 0.6275 -> 0.6256 m,
-tilt 0.0036, |qd| 0.16 rad/s. --ankle-gain scales only the two ankle kp values and is kept as a robustness probe
-(8x is the version that also survives a build whose inertia is wrong).
+four sole spheres per foot span 0.14 x 0.06 m, wide enough that the centre of pressure can move under the centre of
+mass, so the ankle servo (kp 50 Nm/rad) does not have to hold m*g*h = 233 Nm/rad on its own. Measured here: 4 s,
+root 0.6275 -> 0.6256 m, tilt 0.0036, |qd| 0.16 rad/s, sole penetration -0.4 mm, no QACC/NaN. (An earlier version of
+this docstring argued the opposite -- m*g*h > kp, so the stance must be open loop unstable and only --ankle-gain 8
+could stand. That was measured on a model built the wrong way: armature applied after compile, see above. With the
+build fixed the argument does not hold, and the real gains are what --expect stand grades.)
 
-Zero action means "hold the rest pose with the X1's own PD gains", and that pose is an inverted pendulum on the
-ankles: m*g*h = 35 * 9.81 * 0.686 = 233 Nm/rad while the ankle servo stiffness is kp = 50 Nm/rad, so the
-straight-leg stance is open loop unstable (measured time constant ~0.3 s, it topples after ~2 s). --ankle-gain
-scales only the two ankle kp values, which is how the asset's numerical soundness is tested separately from the
-controller: with --ankle-gain 8 (kp 400 > m*g*h) the same model stands for the whole run at zero action.
+--ankle-gain scales only the two ankle kp values. It is kept as a robustness probe: 8x also survives the broken
+build, which is how the inertia effect was first noticed.
 """
 
 from __future__ import annotations
@@ -113,7 +112,7 @@ def build(xml: Path, device: str, iters=SOLVER_ITERS, ankle_gain: float = 1.0, e
     spec.assets = {f'{spec.meshdir}/{p.name}': p.read_bytes() for p in sorted(x1.MESH_DIR.iterdir()) if p.is_file()}
     for actuator in list(spec.actuators):  # the asset ships 29 <motor>s; mjlab replaces them with position servos
         spec.delete(actuator)
-    if entity_cfg:  # mjlab EntityCfg.collisions: condim / priority / friction / solref on the sole boxes
+    if entity_cfg:  # mjlab EntityCfg.collisions: condim / priority / friction / solref on the sole geoms
         for cfg in x1.x1_collision_cfgs():
             cfg.edit_spec(spec)
     floor = spec.worldbody.add_geom()
@@ -393,7 +392,7 @@ def main() -> int:
     ap.add_argument('--clip', type=int, default=0)
     ap.add_argument('--device', default='cpu')
     ap.add_argument('--ankle-gain', type=float, default=1.0,
-                    help='scale the two ankle kp values (1 = the X1 PD gains; >~5 makes the stance stable)')
+                    help='scale the two ankle kp values; 1 = the X1 PD gains (a robustness probe, not a fix)')
     ap.add_argument('--iters', default=f'{SOLVER_ITERS[0]},{SOLVER_ITERS[1]}', help='solver iterations,ls_iterations')
     ap.add_argument('--expect', default='auto', choices=('auto', 'stability', 'stand'),
                     help='stability: no blow-up, no penetration; stand: also holds the pose for the whole run; '
