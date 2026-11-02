@@ -1,10 +1,10 @@
 {
  "out": "motions/x1_cmu_walk.npz",
- "out_sha256": "62e105237dc5a189e846bf848657262f16db6853002cbd186c49cc852c44ce41",
- "out_bytes": 1610856,
- "clips_kept": 38,
- "frames": 5662,
- "hours": 0.0315,
+ "out_sha256": "309a6896110c3ba584f9c9e69eb2765afe24a54a4ba3e80b799a138a84cf38bd",
+ "out_bytes": 1754832,
+ "clips_kept": 41,
+ "frames": 6168,
+ "hours": 0.0343,
  "fps": 50.0,
  "joint_order": [
   "lumbar_yaw_joint",
@@ -37,19 +37,46 @@
   "right_ankle_pitch_joint",
   "right_ankle_roll_joint"
  ],
- "asset_sha256": "0d84bef67e800705f7b1c1e3736396b0c6872335d5a1822233adc3d966a90169",
- "pipeline": "GMR smplx->x1 IK at the source fps, one vertical grounding offset per clip, prepare_motions.resample to 50 Hz, prepare_motions.velocities (np.gradient / quat)",
+ "asset_sha256": "e8afe91024178b4b3b3f95bdec2f91b975c2125050ca404a0989f1d7bcc1b16a",
+ "pipeline": "GMR smplx->x1 IK (motions/x1_ik_config.json) at the source fps, prepare_motions.resample to 50 Hz, grounding on the resampled frames, prepare_motions.velocities (np.gradient / quat) recomputed after grounding",
+ "args": {
+  "input": "/Users/yumx/code/X1_29_AMP/data/amass/CMU",
+  "smplx": "/Users/yumx/code/X1_29_AMP/_gmr_local/GMR/assets/body_models",
+  "out": "motions/x1_cmu_walk.npz",
+  "report": "motions/x1_cmu_walk.meta.json",
+  "limit": 0,
+  "fps_out": 50.0,
+  "ik_config": "/Users/yumx/code/super_mimic_F1/motions/x1_ik_config.json",
+  "ground": "per-frame",
+  "ik_passes": 2,
+  "drop_head_s": 0.2,
+  "reject_over_limit": 0.35,
+  "reject_root_z": 0.45,
+  "reject_tilt": 0.35,
+  "reject_qd": 25.0
+ },
+ "foot_geoms": [
+  "left_foot_1_collision",
+  "left_foot_2_collision",
+  "left_foot_3_collision",
+  "left_foot_4_collision",
+  "right_foot_1_collision",
+  "right_foot_2_collision",
+  "right_foot_3_collision",
+  "right_foot_4_collision"
+ ],
+ "sole_plane_below_base_m": 0.6275,
  "command": "scripts/build_x1_motions.py --out motions/x1_cmu_walk.npz --report motions/x1_cmu_walk.meta.json",
  "python": "/Users/yumx/code/X1_29_AMP/_gmr_local/venv/bin/python",
- "elapsed_s": 103.6,
+ "elapsed_s": 102.3,
  "clips": [
   {
    "frames": 122,
    "seconds": 2.44,
    "root_z": [
-    0.5705,
-    0.6227,
-    0.6661
+    0.6106,
+    0.6287,
+    0.6437
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -59,9 +86,18 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0911,
-   "yaw_start_deg": 179.6,
-   "yaw_drift_deg": -0.7,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_knee_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint",
+    "right_knee_pitch_joint"
+   ],
+   "tilt_max": 0.0145,
+   "yaw_start_deg": 4.5,
+   "yaw_drift_deg": -22.3,
    "qd_max": 10.12,
    "q_mean": [
     0.184,
@@ -96,19 +132,19 @@
    ],
    "root_vel_max": 1.34,
    "foot_steps": [
-    2,
+    3,
     2
    ],
    "cadence_hz": [
-    0.94,
-    0.76
+    0.93,
+    1.0
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.566,
-    0.705
+    0.59,
+    0.82
    ],
    "clip": "07_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_01_stageii.npz",
@@ -118,9 +154,9 @@
    "frames": 127,
    "seconds": 2.54,
    "root_z": [
-    0.5364,
-    0.6211,
-    0.6702
+    0.6143,
+    0.63,
+    0.6459
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -130,9 +166,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0918,
-   "yaw_start_deg": 185.0,
-   "yaw_drift_deg": -10.4,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0265,
+   "yaw_start_deg": 20.4,
+   "yaw_drift_deg": -35.6,
    "qd_max": 8.1,
    "q_mean": [
     0.145,
@@ -167,19 +210,19 @@
    ],
    "root_vel_max": 1.31,
    "foot_steps": [
-    4,
+    3,
     1
    ],
    "cadence_hz": [
-    1.38
+    0.92
    ],
    "alt_between_left_onsets": [
     0,
     1
    ],
    "contact_frac": [
-    0.48,
-    0.803
+    0.496,
+    0.835
    ],
    "clip": "07_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_02_stageii.npz",
@@ -189,9 +232,9 @@
    "frames": 163,
    "seconds": 3.26,
    "root_z": [
-    0.5629,
-    0.624,
-    0.6704
+    0.6216,
+    0.6334,
+    0.6462
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -201,9 +244,17 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0592,
-   "yaw_start_deg": 177.6,
-   "yaw_drift_deg": 2.6,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_knee_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0231,
+   "yaw_start_deg": -4.1,
+   "yaw_drift_deg": 20.8,
    "qd_max": 6.66,
    "q_mean": [
     0.158,
@@ -239,17 +290,18 @@
    "root_vel_max": 0.99,
    "foot_steps": [
     3,
-    1
+    3
    ],
    "cadence_hz": [
-    1.32
+    0.81,
+    0.83
    ],
    "alt_between_left_onsets": [
-    0
+    1
    ],
    "contact_frac": [
-    0.54,
-    0.957
+    0.65,
+    0.779
    ],
    "clip": "07_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_03_stageii.npz",
@@ -259,9 +311,9 @@
    "frames": 164,
    "seconds": 3.28,
    "root_z": [
-    0.5461,
-    0.6181,
-    0.6689
+    0.611,
+    0.6288,
+    0.6491
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -271,9 +323,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0973,
-   "yaw_start_deg": 177.6,
-   "yaw_drift_deg": -2.2,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0286,
+   "yaw_start_deg": -16.1,
+   "yaw_drift_deg": 7.1,
    "qd_max": 8.17,
    "q_mean": [
     0.069,
@@ -309,18 +368,18 @@
    "root_vel_max": 1.2,
    "foot_steps": [
     2,
-    2
+    3
    ],
    "cadence_hz": [
-    0.86,
-    0.88
+    0.85,
+    0.89
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.378,
-    0.915
+    0.567,
+    0.848
    ],
    "clip": "07_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_06_stageii.npz",
@@ -330,9 +389,9 @@
    "frames": 148,
    "seconds": 2.96,
    "root_z": [
-    0.5157,
-    0.6033,
-    0.6588
+    0.6021,
+    0.6247,
+    0.6491
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -342,9 +401,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1169,
-   "yaw_start_deg": 186.1,
-   "yaw_drift_deg": -13.0,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0399,
+   "yaw_start_deg": 16.3,
+   "yaw_drift_deg": -27.0,
    "qd_max": 7.05,
    "q_mean": [
     0.22,
@@ -379,20 +445,19 @@
    ],
    "root_vel_max": 1.31,
    "foot_steps": [
-    5,
+    3,
     2
    ],
    "cadence_hz": [
-    1.69,
+    0.85,
     0.86
    ],
    "alt_between_left_onsets": [
-    0,
     1
    ],
    "contact_frac": [
-    0.358,
-    0.912
+    0.595,
+    0.824
    ],
    "clip": "07_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_07_stageii.npz",
@@ -402,9 +467,9 @@
    "frames": 141,
    "seconds": 2.82,
    "root_z": [
-    0.5035,
-    0.5966,
-    0.6554
+    0.5912,
+    0.6175,
+    0.6445
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -414,9 +479,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1747,
-   "yaw_start_deg": 175.2,
-   "yaw_drift_deg": 7.2,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0711,
+   "yaw_start_deg": -18.5,
+   "yaw_drift_deg": 14.4,
    "qd_max": 6.89,
    "q_mean": [
     0.174,
@@ -451,19 +523,19 @@
    ],
    "root_vel_max": 1.35,
    "foot_steps": [
-    5,
-    1
+    2,
+    2
    ],
    "cadence_hz": [
-    1.59
+    0.77,
+    0.76
    ],
    "alt_between_left_onsets": [
-    0,
     1
    ],
    "contact_frac": [
-    0.284,
-    0.943
+    0.66,
+    0.78
    ],
    "clip": "07_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_08_stageii.npz",
@@ -473,9 +545,9 @@
    "frames": 118,
    "seconds": 2.36,
    "root_z": [
-    0.509,
-    0.6064,
-    0.6536
+    0.5995,
+    0.6251,
+    0.6449
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -485,9 +557,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1047,
-   "yaw_start_deg": 172.0,
-   "yaw_drift_deg": 11.2,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.036,
+   "yaw_start_deg": -15.4,
+   "yaw_drift_deg": 24.4,
    "qd_max": 8.6,
    "q_mean": [
     0.208,
@@ -522,19 +601,20 @@
    ],
    "root_vel_max": 1.52,
    "foot_steps": [
-    2,
-    3
+    3,
+    2
    ],
    "cadence_hz": [
-    0.94,
+    1.89,
     0.94
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.559,
-    0.839
+    0.669,
+    0.695
    ],
    "clip": "07_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_09_stageii.npz",
@@ -544,9 +624,9 @@
    "frames": 115,
    "seconds": 2.3,
    "root_z": [
-    0.5235,
-    0.6055,
-    0.6496
+    0.595,
+    0.6226,
+    0.6459
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -556,9 +636,16 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.107,
-   "yaw_start_deg": 174.0,
-   "yaw_drift_deg": 11.2,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0403,
+   "yaw_start_deg": -17.4,
+   "yaw_drift_deg": 18.4,
    "qd_max": 8.28,
    "q_mean": [
     0.23,
@@ -593,20 +680,19 @@
    ],
    "root_vel_max": 1.54,
    "foot_steps": [
-    4,
+    2,
     2
    ],
    "cadence_hz": [
-    2.17,
-    1.0
+    0.98,
+    0.96
    ],
    "alt_between_left_onsets": [
-    0,
     1
    ],
    "contact_frac": [
-    0.417,
-    0.791
+    0.643,
+    0.704
    ],
    "clip": "07_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_10_stageii.npz",
@@ -616,9 +702,9 @@
    "frames": 105,
    "seconds": 2.1,
    "root_z": [
-    0.5576,
-    0.6332,
-    0.6819
+    0.5764,
+    0.626,
+    0.6499
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -628,9 +714,14 @@
    "joint_over_limit_max_rad": 0.0702,
    "joint_over_limit_worst": "right_ankle_roll_joint: +0.570 (limit -0.50..+0.50)",
    "joint_over_limit_n": 3,
-   "tilt_max": 0.1816,
-   "yaw_start_deg": 179.8,
-   "yaw_drift_deg": 5.1,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0699,
+   "yaw_start_deg": 34.9,
+   "yaw_drift_deg": -7.0,
    "qd_max": 11.15,
    "q_mean": [
     -0.003,
@@ -669,15 +760,15 @@
     2
    ],
    "cadence_hz": [
-    1.0,
-    0.98
+    0.98,
+    1.0
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.505,
-    0.552
+    0.648,
+    0.829
    ],
    "clip": "08_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_01_stageii.npz",
@@ -687,9 +778,9 @@
    "frames": 119,
    "seconds": 2.38,
    "root_z": [
-    0.5811,
-    0.638,
-    0.6787
+    0.5881,
+    0.6263,
+    0.651
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -699,9 +790,14 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "lumbar_yaw_joint: +0.516 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1688,
-   "yaw_start_deg": 168.1,
-   "yaw_drift_deg": 10.9,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0575,
+   "yaw_start_deg": -22.7,
+   "yaw_drift_deg": 42.6,
    "qd_max": 12.04,
    "q_mean": [
     0.003,
@@ -740,15 +836,15 @@
     3
    ],
    "cadence_hz": [
-    0.96,
+    1.0,
     0.97
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.538,
-    0.504
+    0.748,
+    0.739
    ],
    "clip": "08_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_02_stageii.npz",
@@ -758,9 +854,9 @@
    "frames": 137,
    "seconds": 2.74,
    "root_z": [
-    0.5713,
-    0.6389,
-    0.6846
+    0.5836,
+    0.6252,
+    0.6504
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -770,9 +866,14 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "lumbar_yaw_joint: +0.571 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1754,
-   "yaw_start_deg": 174.5,
-   "yaw_drift_deg": 10.1,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0619,
+   "yaw_start_deg": -26.0,
+   "yaw_drift_deg": 49.0,
    "qd_max": 12.85,
    "q_mean": [
     -0.026,
@@ -808,18 +909,18 @@
    "root_vel_max": 1.42,
    "foot_steps": [
     2,
-    3
+    2
    ],
    "cadence_hz": [
     0.98,
-    0.97
+    0.89
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.482,
-    0.555
+    0.693,
+    0.796
    ],
    "clip": "08_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_03_stageii.npz",
@@ -830,8 +931,8 @@
    "seconds": 2.26,
    "root_z": [
     0.5757,
-    0.6361,
-    0.6837
+    0.6253,
+    0.6498
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -841,9 +942,14 @@
    "joint_over_limit_max_rad": 0.0301,
    "joint_over_limit_worst": "right_ankle_roll_joint: +0.530 (limit -0.50..+0.50)",
    "joint_over_limit_n": 1,
-   "tilt_max": 0.1712,
-   "yaw_start_deg": 184.2,
-   "yaw_drift_deg": -8.9,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0679,
+   "yaw_start_deg": 30.9,
+   "yaw_drift_deg": -58.4,
    "qd_max": 14.75,
    "q_mean": [
     0.024,
@@ -876,21 +982,21 @@
     -0.11,
     0.161
    ],
-   "root_vel_max": 1.61,
+   "root_vel_max": 1.53,
    "foot_steps": [
     3,
     2
    ],
    "cadence_hz": [
-    1.09,
-    1.11
+    1.1,
+    1.09
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.531,
-    0.513
+    0.593,
+    0.867
    ],
    "clip": "08_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_06_stageii.npz",
@@ -900,9 +1006,9 @@
    "frames": 108,
    "seconds": 2.16,
    "root_z": [
-    0.5567,
-    0.6362,
-    0.6796
+    0.5801,
+    0.6256,
+    0.6526
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -912,9 +1018,14 @@
    "joint_over_limit_max_rad": 0.0639,
    "joint_over_limit_worst": "right_ankle_roll_joint: +0.564 (limit -0.50..+0.50)",
    "joint_over_limit_n": 2,
-   "tilt_max": 0.1953,
-   "yaw_start_deg": 170.3,
-   "yaw_drift_deg": 8.3,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0692,
+   "yaw_start_deg": -8.9,
+   "yaw_drift_deg": 45.2,
    "qd_max": 14.29,
    "q_mean": [
     -0.08,
@@ -950,18 +1061,17 @@
    "root_vel_max": 1.57,
    "foot_steps": [
     2,
-    2
-   ],
-   "cadence_hz": [
-    1.11,
-    1.11
-   ],
-   "alt_between_left_onsets": [
     1
    ],
+   "cadence_hz": [
+    1.14
+   ],
+   "alt_between_left_onsets": [
+    0
+   ],
    "contact_frac": [
-    0.472,
-    0.574
+    0.648,
+    0.88
    ],
    "clip": "08_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_08_stageii.npz",
@@ -971,9 +1081,9 @@
    "frames": 112,
    "seconds": 2.24,
    "root_z": [
-    0.5474,
-    0.6279,
-    0.672
+    0.576,
+    0.625,
+    0.6486
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -983,9 +1093,14 @@
    "joint_over_limit_max_rad": 0.0677,
    "joint_over_limit_worst": "right_ankle_roll_joint: +0.568 (limit -0.50..+0.50)",
    "joint_over_limit_n": 3,
-   "tilt_max": 0.1569,
-   "yaw_start_deg": 173.1,
-   "yaw_drift_deg": 6.2,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.072,
+   "yaw_start_deg": -28.3,
+   "yaw_drift_deg": 48.8,
    "qd_max": 13.25,
    "q_mean": [
     0.009,
@@ -1021,18 +1136,17 @@
    "root_vel_max": 1.67,
    "foot_steps": [
     2,
-    3
+    0
    ],
    "cadence_hz": [
-    1.06,
-    1.09
+    1.06
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.554,
-    0.491
+    0.714,
+    0.866
    ],
    "clip": "08_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_09_stageii.npz",
@@ -1042,21 +1156,26 @@
    "frames": 186,
    "seconds": 3.72,
    "root_z": [
-    -0.2651,
-    0.0952,
-    0.3777
+    0.5626,
+    0.6119,
+    0.6381
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
-    0.104
+    0.0
    ],
    "joint_over_limit_max_rad": 0.0906,
    "joint_over_limit_worst": "right_ankle_roll_joint: +0.591 (limit -0.50..+0.50)",
    "joint_over_limit_n": 7,
-   "tilt_max": 1.4566,
-   "yaw_start_deg": 185.2,
-   "yaw_drift_deg": 19.4,
+   "at_limit_frame_frac": 0.737,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0903,
+   "yaw_start_deg": -71.7,
+   "yaw_drift_deg": -31.0,
    "qd_max": 10.55,
    "q_mean": [
     -0.041,
@@ -1089,16 +1208,20 @@
     -0.099,
     0.101
    ],
-   "root_vel_max": 2.43,
+   "root_vel_max": 1.48,
    "foot_steps": [
-    0,
+    3,
     0
    ],
-   "cadence_hz": [],
-   "alt_between_left_onsets": [],
+   "cadence_hz": [
+    0.81
+   ],
+   "alt_between_left_onsets": [
+    0
+   ],
    "contact_frac": [
-    1.0,
-    0.0
+    0.871,
+    0.86
    ],
    "clip": "103_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/103_07_stageii.npz",
@@ -1108,9 +1231,9 @@
    "frames": 139,
    "seconds": 2.78,
    "root_z": [
-    0.5107,
-    0.6033,
-    0.6634
+    0.5617,
+    0.6082,
+    0.6254
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1120,9 +1243,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.093,
-   "yaw_start_deg": 169.9,
-   "yaw_drift_deg": 15.5,
+   "at_limit_frame_frac": 0.388,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0765,
+   "yaw_start_deg": -12.5,
+   "yaw_drift_deg": 25.0,
    "qd_max": 10.83,
    "q_mean": [
     -0.044,
@@ -1155,21 +1282,20 @@
     -0.078,
     0.056
    ],
-   "root_vel_max": 2.22,
+   "root_vel_max": 1.2,
    "foot_steps": [
     2,
-    3
+    0
    ],
    "cadence_hz": [
-    0.91,
-    0.89
+    0.88
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.504,
-    0.547
+    0.806,
+    0.957
    ],
    "clip": "35_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_01_stageii.npz",
@@ -1179,9 +1305,9 @@
    "frames": 159,
    "seconds": 3.18,
    "root_z": [
-    0.5158,
-    0.6075,
-    0.6623
+    0.5709,
+    0.6106,
+    0.6276
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1191,9 +1317,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.085,
-   "yaw_start_deg": 184.8,
-   "yaw_drift_deg": -0.9,
+   "at_limit_frame_frac": 0.421,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0711,
+   "yaw_start_deg": -7.5,
+   "yaw_drift_deg": 15.5,
    "qd_max": 10.43,
    "q_mean": [
     -0.008,
@@ -1226,21 +1356,20 @@
     -0.107,
     0.04
    ],
-   "root_vel_max": 1.68,
+   "root_vel_max": 1.17,
    "foot_steps": [
-    2,
-    3
+    4,
+    0
    ],
    "cadence_hz": [
-    0.89,
-    0.88
+    1.32
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.566,
-    0.484
+    0.774,
+    0.95
    ],
    "clip": "35_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_02_stageii.npz",
@@ -1250,9 +1379,9 @@
    "frames": 168,
    "seconds": 3.36,
    "root_z": [
-    0.5102,
-    0.6014,
-    0.6642
+    0.5642,
+    0.6076,
+    0.6273
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1262,9 +1391,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0958,
-   "yaw_start_deg": 185.2,
-   "yaw_drift_deg": 2.6,
+   "at_limit_frame_frac": 0.458,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0743,
+   "yaw_start_deg": -10.5,
+   "yaw_drift_deg": 7.8,
    "qd_max": 10.95,
    "q_mean": [
     -0.018,
@@ -1297,21 +1430,22 @@
     -0.115,
     0.04
    ],
-   "root_vel_max": 1.95,
+   "root_vel_max": 1.18,
    "foot_steps": [
-    2,
-    3
+    6,
+    2
    ],
    "cadence_hz": [
-    0.89,
-    0.88
+    1.68,
+    0.86
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.53,
-    0.506
+    0.768,
+    0.893
    ],
    "clip": "35_03",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_03_stageii.npz",
@@ -1321,9 +1455,9 @@
    "frames": 170,
    "seconds": 3.4,
    "root_z": [
-    0.5168,
-    0.6041,
-    0.6636
+    0.5637,
+    0.6081,
+    0.6322
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1333,9 +1467,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0841,
-   "yaw_start_deg": 183.4,
-   "yaw_drift_deg": -3.1,
+   "at_limit_frame_frac": 0.329,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0709,
+   "yaw_start_deg": 10.2,
+   "yaw_drift_deg": -0.6,
    "qd_max": 10.1,
    "q_mean": [
     -0.013,
@@ -1368,21 +1506,20 @@
     -0.125,
     0.053
    ],
-   "root_vel_max": 1.95,
+   "root_vel_max": 1.26,
    "foot_steps": [
     3,
-    3
+    0
    ],
    "cadence_hz": [
-    0.89,
-    0.88
+    1.08
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.524,
-    0.535
+    0.782,
+    0.953
    ],
    "clip": "35_04",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_04_stageii.npz",
@@ -1392,9 +1529,9 @@
    "frames": 168,
    "seconds": 3.36,
    "root_z": [
-    0.5261,
-    0.612,
-    0.667
+    0.5695,
+    0.6133,
+    0.629
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1404,9 +1541,11 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.084,
-   "yaw_start_deg": 187.9,
-   "yaw_drift_deg": 2.1,
+   "at_limit_frame_frac": 0.363,
+   "at_limit_joints": [],
+   "tilt_max": 0.068,
+   "yaw_start_deg": -0.8,
+   "yaw_drift_deg": 11.4,
    "qd_max": 9.35,
    "q_mean": [
     0.015,
@@ -1439,21 +1578,21 @@
     -0.121,
     0.062
    ],
-   "root_vel_max": 1.71,
+   "root_vel_max": 1.16,
    "foot_steps": [
-    3,
-    3
+    6,
+    1
    ],
    "cadence_hz": [
-    0.87,
-    0.87
+    1.63
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.542,
-    0.506
+    0.708,
+    0.946
    ],
    "clip": "35_05",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_05_stageii.npz",
@@ -1463,9 +1602,9 @@
    "frames": 173,
    "seconds": 3.46,
    "root_z": [
-    0.511,
-    0.6076,
-    0.665
+    0.5811,
+    0.6113,
+    0.6311
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1475,9 +1614,11 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.071,
-   "yaw_start_deg": 178.4,
-   "yaw_drift_deg": 0.5,
+   "at_limit_frame_frac": 0.324,
+   "at_limit_joints": [],
+   "tilt_max": 0.0629,
+   "yaw_start_deg": 9.7,
+   "yaw_drift_deg": -3.1,
    "qd_max": 11.28,
    "q_mean": [
     -0.01,
@@ -1510,21 +1651,20 @@
     -0.145,
     0.054
    ],
-   "root_vel_max": 1.37,
+   "root_vel_max": 1.12,
    "foot_steps": [
-    3,
-    3
+    4,
+    0
    ],
    "cadence_hz": [
-    0.87,
-    0.88
+    1.56
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.52,
-    0.526
+    0.769,
+    0.96
    ],
    "clip": "35_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_06_stageii.npz",
@@ -1534,9 +1674,9 @@
    "frames": 140,
    "seconds": 2.8,
    "root_z": [
-    0.5072,
-    0.6063,
-    0.6659
+    0.5701,
+    0.6112,
+    0.6306
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1546,9 +1686,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0998,
-   "yaw_start_deg": 174.3,
-   "yaw_drift_deg": 8.0,
+   "at_limit_frame_frac": 0.457,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0757,
+   "yaw_start_deg": -13.3,
+   "yaw_drift_deg": 25.8,
    "qd_max": 11.31,
    "q_mean": [
     -0.018,
@@ -1581,21 +1725,20 @@
     -0.094,
     0.071
    ],
-   "root_vel_max": 2.07,
+   "root_vel_max": 1.22,
    "foot_steps": [
-    2,
-    3
+    4,
+    0
    ],
    "cadence_hz": [
-    0.91,
-    0.92
+    2.05
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.529,
-    0.521
+    0.714,
+    0.964
    ],
    "clip": "35_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_07_stageii.npz",
@@ -1605,9 +1748,9 @@
    "frames": 180,
    "seconds": 3.6,
    "root_z": [
-    0.5133,
-    0.6132,
-    0.6663
+    0.5845,
+    0.6136,
+    0.6331
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1617,9 +1760,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0653,
-   "yaw_start_deg": 176.6,
-   "yaw_drift_deg": 11.7,
+   "at_limit_frame_frac": 0.567,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0541,
+   "yaw_start_deg": 12.7,
+   "yaw_drift_deg": -1.6,
    "qd_max": 10.36,
    "q_mean": [
     -0.022,
@@ -1652,21 +1799,20 @@
     -0.129,
     0.059
    ],
-   "root_vel_max": 1.37,
+   "root_vel_max": 1.11,
    "foot_steps": [
-    3,
-    3
+    7,
+    0
    ],
    "cadence_hz": [
-    0.9,
-    0.89
+    1.8
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.483,
-    0.561
+    0.717,
+    0.939
    ],
    "clip": "35_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_08_stageii.npz",
@@ -1676,9 +1822,9 @@
    "frames": 150,
    "seconds": 3.0,
    "root_z": [
-    0.5231,
-    0.6103,
-    0.6639
+    0.5859,
+    0.6149,
+    0.6302
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1688,9 +1834,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0589,
-   "yaw_start_deg": 175.3,
-   "yaw_drift_deg": 0.6,
+   "at_limit_frame_frac": 0.513,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0523,
+   "yaw_start_deg": 2.8,
+   "yaw_drift_deg": -13.2,
    "qd_max": 9.36,
    "q_mean": [
     -0.049,
@@ -1723,21 +1873,21 @@
     -0.126,
     0.059
    ],
-   "root_vel_max": 1.36,
+   "root_vel_max": 1.09,
    "foot_steps": [
-    3,
-    2
+    6,
+    1
    ],
    "cadence_hz": [
-    0.91,
-    0.91
+    1.92
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.467,
-    0.573
+    0.673,
+    0.887
    ],
    "clip": "35_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_09_stageii.npz",
@@ -1747,9 +1897,9 @@
    "frames": 170,
    "seconds": 3.4,
    "root_z": [
-    0.5092,
-    0.6093,
-    0.6688
+    0.5755,
+    0.6123,
+    0.6282
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1759,9 +1909,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0611,
-   "yaw_start_deg": 183.3,
-   "yaw_drift_deg": 1.0,
+   "at_limit_frame_frac": 0.4,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0609,
+   "yaw_start_deg": -10.5,
+   "yaw_drift_deg": 1.1,
    "qd_max": 9.8,
    "q_mean": [
     -0.035,
@@ -1794,21 +1948,20 @@
     -0.127,
     0.064
    ],
-   "root_vel_max": 1.43,
+   "root_vel_max": 1.14,
    "foot_steps": [
-    2,
-    3
+    5,
+    0
    ],
    "cadence_hz": [
-    0.88,
-    0.88
+    1.33
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.506,
-    0.529
+    0.776,
+    0.947
    ],
    "clip": "35_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_10_stageii.npz",
@@ -1818,9 +1971,9 @@
    "frames": 150,
    "seconds": 3.0,
    "root_z": [
-    0.5225,
-    0.614,
-    0.6637
+    0.5934,
+    0.612,
+    0.6299
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1830,9 +1983,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0598,
-   "yaw_start_deg": 180.2,
-   "yaw_drift_deg": -10.3,
+   "at_limit_frame_frac": 0.533,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0472,
+   "yaw_start_deg": 5.0,
+   "yaw_drift_deg": -15.0,
    "qd_max": 8.61,
    "q_mean": [
     -0.008,
@@ -1865,21 +2022,21 @@
     -0.2,
     0.04
    ],
-   "root_vel_max": 1.4,
+   "root_vel_max": 1.11,
    "foot_steps": [
-    3,
-    2
+    6,
+    1
    ],
    "cadence_hz": [
-    0.88,
-    0.88
+    1.91
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.52,
-    0.547
+    0.76,
+    0.913
    ],
    "clip": "35_11",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_11_stageii.npz",
@@ -1889,9 +2046,9 @@
    "frames": 155,
    "seconds": 3.1,
    "root_z": [
-    0.5172,
-    0.6133,
-    0.6648
+    0.584,
+    0.614,
+    0.6323
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1901,9 +2058,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0722,
-   "yaw_start_deg": 175.3,
-   "yaw_drift_deg": -4.2,
+   "at_limit_frame_frac": 0.452,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0552,
+   "yaw_start_deg": 7.7,
+   "yaw_drift_deg": -18.8,
    "qd_max": 9.53,
    "q_mean": [
     -0.017,
@@ -1936,21 +2097,20 @@
     -0.163,
     0.054
    ],
-   "root_vel_max": 1.29,
+   "root_vel_max": 1.08,
    "foot_steps": [
-    3,
-    2
+    6,
+    0
    ],
    "cadence_hz": [
-    0.89,
-    0.89
+    1.89
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.497,
-    0.561
+    0.697,
+    0.955
    ],
    "clip": "35_12",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_12_stageii.npz",
@@ -1960,9 +2120,9 @@
    "frames": 179,
    "seconds": 3.58,
    "root_z": [
-    0.5284,
-    0.6106,
-    0.6608
+    0.5811,
+    0.6138,
+    0.6374
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1972,9 +2132,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0732,
-   "yaw_start_deg": 182.5,
-   "yaw_drift_deg": 2.8,
+   "at_limit_frame_frac": 0.469,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0597,
+   "yaw_start_deg": 11.5,
+   "yaw_drift_deg": -21.6,
    "qd_max": 10.06,
    "q_mean": [
     -0.018,
@@ -2007,21 +2171,20 @@
     -0.125,
     0.057
    ],
-   "root_vel_max": 1.49,
+   "root_vel_max": 1.12,
    "foot_steps": [
-    3,
-    3
+    6,
+    0
    ],
    "cadence_hz": [
-    0.92,
-    0.91
+    1.71
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.492,
-    0.559
+    0.771,
+    0.922
    ],
    "clip": "35_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_13_stageii.npz",
@@ -2031,9 +2194,9 @@
    "frames": 161,
    "seconds": 3.22,
    "root_z": [
-    0.511,
-    0.6105,
-    0.6663
+    0.5736,
+    0.6133,
+    0.6319
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2043,9 +2206,11 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0791,
-   "yaw_start_deg": 187.7,
-   "yaw_drift_deg": -10.3,
+   "at_limit_frame_frac": 0.385,
+   "at_limit_joints": [],
+   "tilt_max": 0.0681,
+   "yaw_start_deg": 10.0,
+   "yaw_drift_deg": -2.1,
    "qd_max": 10.01,
    "q_mean": [
     0.009,
@@ -2078,21 +2243,20 @@
     -0.127,
     0.057
    ],
-   "root_vel_max": 1.64,
+   "root_vel_max": 1.14,
    "foot_steps": [
-    3,
-    3
-   ],
-   "cadence_hz": [
-    0.88,
-    0.88
-   ],
-   "alt_between_left_onsets": [
+    5,
     1
    ],
+   "cadence_hz": [
+    1.77
+   ],
+   "alt_between_left_onsets": [
+    0
+   ],
    "contact_frac": [
-    0.578,
-    0.484
+    0.714,
+    0.932
    ],
    "clip": "35_14",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_14_stageii.npz",
@@ -2102,9 +2266,9 @@
    "frames": 159,
    "seconds": 3.18,
    "root_z": [
-    0.516,
-    0.6104,
-    0.6647
+    0.5798,
+    0.6131,
+    0.6291
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2114,9 +2278,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0603,
-   "yaw_start_deg": 179.8,
-   "yaw_drift_deg": -5.6,
+   "at_limit_frame_frac": 0.371,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0557,
+   "yaw_start_deg": 9.5,
+   "yaw_drift_deg": -8.4,
    "qd_max": 10.15,
    "q_mean": [
     -0.017,
@@ -2149,21 +2317,20 @@
     -0.164,
     0.065
    ],
-   "root_vel_max": 1.4,
+   "root_vel_max": 1.13,
    "foot_steps": [
-    3,
-    2
+    6,
+    0
    ],
    "cadence_hz": [
-    0.88,
-    0.89
+    1.89
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.541,
-    0.497
+    0.698,
+    0.918
    ],
    "clip": "35_15",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_15_stageii.npz",
@@ -2173,9 +2340,9 @@
    "frames": 175,
    "seconds": 3.5,
    "root_z": [
-    0.5107,
-    0.6131,
-    0.667
+    0.5951,
+    0.6146,
+    0.6322
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2185,9 +2352,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0728,
-   "yaw_start_deg": 176.3,
-   "yaw_drift_deg": 1.8,
+   "at_limit_frame_frac": 0.474,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0448,
+   "yaw_start_deg": 10.4,
+   "yaw_drift_deg": -3.5,
    "qd_max": 10.4,
    "q_mean": [
     -0.009,
@@ -2220,21 +2391,20 @@
     -0.158,
     0.066
    ],
-   "root_vel_max": 1.3,
+   "root_vel_max": 1.13,
    "foot_steps": [
-    3,
-    3
+    6,
+    0
    ],
    "cadence_hz": [
-    0.89,
-    0.88
+    1.89
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.514,
-    0.543
+    0.691,
+    0.931
    ],
    "clip": "35_16",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_16_stageii.npz",
@@ -2244,9 +2414,9 @@
    "frames": 164,
    "seconds": 3.28,
    "root_z": [
-    0.5004,
-    0.5948,
-    0.6618
+    0.5697,
+    0.6082,
+    0.6306
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2256,9 +2426,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0758,
-   "yaw_start_deg": 189.8,
-   "yaw_drift_deg": -10.3,
+   "at_limit_frame_frac": 0.555,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0652,
+   "yaw_start_deg": 5.7,
+   "yaw_drift_deg": -0.1,
    "qd_max": 9.27,
    "q_mean": [
     0.007,
@@ -2291,21 +2465,20 @@
     -0.143,
     0.04
    ],
-   "root_vel_max": 1.57,
+   "root_vel_max": 1.08,
    "foot_steps": [
-    3,
-    3
+    5,
+    0
    ],
    "cadence_hz": [
-    0.88,
-    0.88
+    1.77
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.543,
-    0.506
+    0.726,
+    0.97
    ],
    "clip": "35_28",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_28_stageii.npz",
@@ -2315,9 +2488,9 @@
    "frames": 162,
    "seconds": 3.24,
    "root_z": [
-    0.5146,
-    0.6086,
-    0.669
+    0.5849,
+    0.6112,
+    0.6253
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2327,9 +2500,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0713,
-   "yaw_start_deg": 171.1,
-   "yaw_drift_deg": 13.4,
+   "at_limit_frame_frac": 0.648,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0537,
+   "yaw_start_deg": -12.1,
+   "yaw_drift_deg": 4.5,
    "qd_max": 9.34,
    "q_mean": [
     -0.046,
@@ -2362,21 +2539,22 @@
     -0.12,
     0.036
    ],
-   "root_vel_max": 1.4,
+   "root_vel_max": 1.15,
    "foot_steps": [
-    2,
-    3
+    4,
+    2
    ],
    "cadence_hz": [
-    0.82,
-    0.81
+    1.46,
+    0.79
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.463,
-    0.568
+    0.833,
+    0.84
    ],
    "clip": "35_30",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_30_stageii.npz",
@@ -2386,9 +2564,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.531,
-    0.6132,
-    0.6676
+    0.5804,
+    0.613,
+    0.6287
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2398,9 +2576,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0615,
-   "yaw_start_deg": 175.0,
-   "yaw_drift_deg": 8.5,
+   "at_limit_frame_frac": 0.364,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0614,
+   "yaw_start_deg": -12.7,
+   "yaw_drift_deg": 5.9,
    "qd_max": 8.93,
    "q_mean": [
     -0.063,
@@ -2433,21 +2615,20 @@
     -0.121,
     0.057
    ],
-   "root_vel_max": 1.32,
+   "root_vel_max": 1.11,
    "foot_steps": [
-    2,
-    3
+    5,
+    0
    ],
    "cadence_hz": [
-    0.85,
-    0.84
+    1.71
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.491,
-    0.558
+    0.806,
+    0.939
    ],
    "clip": "35_31",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_31_stageii.npz",
@@ -2457,9 +2638,9 @@
    "frames": 153,
    "seconds": 3.06,
    "root_z": [
-    0.5051,
-    0.611,
-    0.665
+    0.5864,
+    0.6103,
+    0.6318
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2469,9 +2650,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0714,
-   "yaw_start_deg": 179.4,
-   "yaw_drift_deg": -9.3,
+   "at_limit_frame_frac": 0.438,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0483,
+   "yaw_start_deg": 9.1,
+   "yaw_drift_deg": -24.2,
    "qd_max": 9.0,
    "q_mean": [
     -0.005,
@@ -2504,21 +2689,20 @@
     -0.188,
     0.053
    ],
-   "root_vel_max": 1.28,
+   "root_vel_max": 1.24,
    "foot_steps": [
-    3,
-    2
+    4,
+    0
    ],
    "cadence_hz": [
-    0.88,
-    0.86
+    1.58
    ],
    "alt_between_left_onsets": [
-    1
+    0
    ],
    "contact_frac": [
-    0.503,
-    0.529
+    0.758,
+    0.941
    ],
    "clip": "35_32",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_32_stageii.npz",
@@ -2528,9 +2712,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.5009,
-    0.6055,
-    0.6652
+    0.558,
+    0.6095,
+    0.6299
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2540,9 +2724,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1223,
-   "yaw_start_deg": 187.4,
-   "yaw_drift_deg": 2.1,
+   "at_limit_frame_frac": 0.455,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0734,
+   "yaw_start_deg": -3.2,
+   "yaw_drift_deg": 16.8,
    "qd_max": 10.51,
    "q_mean": [
     0.003,
@@ -2575,21 +2763,22 @@
     -0.133,
     0.049
    ],
-   "root_vel_max": 2.02,
+   "root_vel_max": 1.25,
    "foot_steps": [
-    2,
-    3
+    5,
+    2
    ],
    "cadence_hz": [
-    0.86,
-    0.87
+    1.32,
+    1.52
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.552,
-    0.497
+    0.782,
+    0.909
    ],
    "clip": "35_33",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_33_stageii.npz",
@@ -2599,9 +2788,9 @@
    "frames": 163,
    "seconds": 3.26,
    "root_z": [
-    0.5297,
-    0.608,
-    0.6666
+    0.571,
+    0.6092,
+    0.6291
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2611,9 +2800,13 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.0842,
-   "yaw_start_deg": 174.5,
-   "yaw_drift_deg": 10.8,
+   "at_limit_frame_frac": 0.46,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0624,
+   "yaw_start_deg": -10.3,
+   "yaw_drift_deg": 2.2,
    "qd_max": 9.89,
    "q_mean": [
     -0.03,
@@ -2646,21 +2839,21 @@
     -0.112,
     0.058
    ],
-   "root_vel_max": 1.6,
+   "root_vel_max": 1.2,
    "foot_steps": [
-    2,
-    3
+    4,
+    1
    ],
    "cadence_hz": [
-    0.89,
-    0.87
+    1.33
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.509,
-    0.534
+    0.785,
+    0.945
    ],
    "clip": "35_34",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_34_stageii.npz",
@@ -2670,9 +2863,9 @@
    "frames": 137,
    "seconds": 2.74,
    "root_z": [
-    0.5447,
-    0.62,
-    0.6833
+    0.6004,
+    0.6304,
+    0.6439
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2682,9 +2875,14 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "lumbar_yaw_joint: +0.371 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1201,
-   "yaw_start_deg": 172.0,
-   "yaw_drift_deg": 5.0,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0375,
+   "yaw_start_deg": -28.4,
+   "yaw_drift_deg": 48.2,
    "qd_max": 8.86,
    "q_mean": [
     -0.048,
@@ -2723,15 +2921,15 @@
     3
    ],
    "cadence_hz": [
-    0.89,
-    0.88
+    0.88,
+    0.91
    ],
    "alt_between_left_onsets": [
     1
    ],
    "contact_frac": [
-    0.54,
-    0.511
+    0.584,
+    0.781
    ],
    "clip": "38_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/38_01_stageii.npz",
@@ -2741,9 +2939,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.5987,
-    0.6362,
-    0.6623
+    0.5867,
+    0.6246,
+    0.6399
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2753,9 +2951,14 @@
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "right_knee_pitch_joint: -0.000 (limit -0.00..+2.70)",
    "joint_over_limit_n": 0,
-   "tilt_max": 0.1265,
-   "yaw_start_deg": 174.9,
-   "yaw_drift_deg": 1.5,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0355,
+   "yaw_start_deg": -14.2,
+   "yaw_drift_deg": -6.1,
    "qd_max": 11.33,
    "q_mean": [
     -0.029,
@@ -2790,19 +2993,20 @@
    ],
    "root_vel_max": 1.49,
    "foot_steps": [
-    3,
-    3
+    4,
+    2
    ],
    "cadence_hz": [
-    0.99,
-    0.94
+    2.17,
+    0.96
    ],
    "alt_between_left_onsets": [
+    0,
     1
    ],
    "contact_frac": [
-    0.552,
-    0.515
+    0.606,
+    0.909
    ],
    "clip": "38_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/38_02_stageii.npz",
@@ -2812,21 +3016,26 @@
    "frames": 158,
    "seconds": 3.16,
    "root_z": [
-    -0.1287,
-    0.2398,
-    0.6257
+    0.5838,
+    0.6267,
+    0.6496
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
-    0.2214,
+    0.0,
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "lumbar_yaw_joint: -0.490 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 1.5332,
-   "yaw_start_deg": 171.7,
-   "yaw_drift_deg": 1.7,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0521,
+   "yaw_start_deg": 109.7,
+   "yaw_drift_deg": -8.6,
    "qd_max": 12.04,
    "q_mean": [
     -0.018,
@@ -2859,16 +3068,16 @@
     0.022,
     0.128
    ],
-   "root_vel_max": 3.77,
+   "root_vel_max": 1.43,
    "foot_steps": [
-    0,
+    1,
     0
    ],
    "cadence_hz": [],
    "alt_between_left_onsets": [],
    "contact_frac": [
-    0.0,
-    1.0
+    0.829,
+    0.899
    ],
    "clip": "82_12",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_12_stageii.npz",
@@ -2878,21 +3087,26 @@
    "frames": 162,
    "seconds": 3.24,
    "root_z": [
-    -0.0887,
-    0.2455,
-    0.6227
+    0.5847,
+    0.6258,
+    0.6487
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
-    0.2403,
+    0.0,
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
    "joint_over_limit_worst": "lumbar_yaw_joint: -0.579 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "tilt_max": 1.5476,
-   "yaw_start_deg": 174.2,
-   "yaw_drift_deg": -2.9,
+   "at_limit_frame_frac": 1.0,
+   "at_limit_joints": [
+    "left_elbow_pitch_joint",
+    "right_elbow_pitch_joint"
+   ],
+   "tilt_max": 0.0471,
+   "yaw_start_deg": 119.6,
+   "yaw_drift_deg": -12.6,
    "qd_max": 11.59,
    "q_mean": [
     -0.021,
@@ -2925,16 +3139,16 @@
     0.006,
     0.128
    ],
-   "root_vel_max": 3.28,
+   "root_vel_max": 1.4,
    "foot_steps": [
-    0,
-    0
+    1,
+    1
    ],
    "cadence_hz": [],
    "alt_between_left_onsets": [],
    "contact_frac": [
-    0.0,
-    1.0
+    0.846,
+    0.883
    ],
    "clip": "82_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_13_stageii.npz",

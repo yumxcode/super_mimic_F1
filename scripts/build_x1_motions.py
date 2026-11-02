@@ -75,22 +75,31 @@ class X1Model:
         assert tuple(self.names) == x1.X1_JOINT_ORDER, 'vendored model joint order != X1_JOINT_ORDER'
         self.lo = np.array([self.m.jnt_range[j, 0] for j in range(1, self.m.njnt)])
         self.hi = np.array([self.m.jnt_range[j, 1] for j in range(1, self.m.njnt)])
-        self.soles = [mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_GEOM, g) for g in x1.X1_FOOT_GEOMS]
-        self.side = [0 if g.startswith('left') else 1 for g in x1.X1_FOOT_GEOMS]
+        # per foot, the contact geoms that belong to it (4 spheres, or a sole box if the asset ever changes again)
+        self.soles = {0: [], 1: []}
+        for g in x1.X1_FOOT_GEOMS:
+            gid = mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_GEOM, g)
+            self.soles[0 if g.startswith('left') else 1].append(gid)
 
     def sole_z(self, qpos: np.ndarray) -> np.ndarray:
-        """(N, 2) lowest sole height per foot, root at the clip's own height"""
+        """(N, 2) lowest sole point per foot, with the root at the clip's own height"""
         out = np.zeros((len(qpos), 2))
         for i, row in enumerate(qpos):
             self.d.qpos[:] = row
             mujoco.mj_kinematics(self.m, self.d)
-            for k, gid in enumerate(self.soles):
-                rot = self.d.geom_xmat[gid].reshape(3, 3)
-                s = self.m.geom_size[gid]
-                corners = [self.d.geom_xpos[gid] + rot @ (s * np.array([a, b, c]))
-                           for a in (-1, 1) for b in (-1, 1) for c in (-1, 1)]
-                out[i, k] = min(c[2] for c in corners)
+            for side, gids in self.soles.items():
+                out[i, side] = min(lowest_point(self.m, self.d, gid) for gid in gids)
         return out
+
+
+def lowest_point(m, d, gid: int) -> float:
+    """world z of the lowest point of a geom (box: its 8 corners; sphere/capsule: centre - radius)"""
+    if m.geom_type[gid] == mujoco.mjtGeom.mjGEOM_BOX:
+        rot = d.geom_xmat[gid].reshape(3, 3)
+        half = m.geom_size[gid]
+        return float(min((d.geom_xpos[gid] + rot @ (half * np.array([sx, sy, sz])))[2]
+                         for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)))
+    return float(d.geom_xpos[gid][2] - m.geom_size[gid][0])
 
 
 def retargeter(human_height: float):
@@ -125,7 +134,10 @@ def retarget_clip(path: Path, smplx_dir: Path, make_retargeter, last: dict,
     qpos = None
     for _ in range(max(1, passes)):
         qpos = np.array([last['r'].retarget(f).copy() for f in frames], dtype=np.float64)
-    qpos[:, 3:7] = qpos[:, [4, 5, 6, 3]]  # GMR xyzw -> wxyz
+    # no quaternion reorder: GMR returns MuJoCo qpos, whose free-joint quat is already wxyz -- the order the allmimic
+    # contract uses (scripts/prepare_motions.py converts the G1 CSVs from xyzw *because* that format is xyzw).
+    # Verified against MuJoCo FK: reading qpos[3:7] as wxyz gives 1 - R_zz = 1e-4 for an upright walking frame,
+    # reading it as xyzw gives 0.065.
     return qpos, src_fps
 
 
@@ -178,6 +190,10 @@ def metrics(qpos: np.ndarray, qvel: np.ndarray, model: X1Model, sole: np.ndarray
         'joint_over_limit_worst': f'{model.names[worst]}: {float(q[:, worst][np.argmax(np.maximum(over, under)[:, worst])]):+.3f} '
                                   f'(limit {model.lo[worst]:+.2f}..{model.hi[worst]:+.2f})',
         'joint_over_limit_n': int((np.maximum(over, under) > 0.02).sum()),
+        # share of frames within 0.02 rad of any joint limit, and the joints that are there most often: the X1's arms
+        # are far shorter than a human's, so the IK saturates the shoulder/elbow limits on some clips
+        'at_limit_frame_frac': round(float(((q >= model.hi - 0.02) | (q <= model.lo + 0.02)).any(axis=1).mean()), 3),
+        'at_limit_joints': sorted({model.names[j] for j in np.flatnonzero(((q >= model.hi - 0.02) | (q <= model.lo + 0.02)).mean(0) > 0.25)}),
         'tilt_max': round(float(tilt.max()), 4),
         'yaw_start_deg': round(float(np.degrees(yaw[0])), 1),
         'yaw_drift_deg': round(float(np.degrees(np.unwrap(yaw)[-1] - np.unwrap(yaw)[0])), 1),
@@ -297,8 +313,12 @@ def main() -> int:
         'fps': args.fps_out,
         'joint_order': list(x1.X1_JOINT_ORDER),
         'asset_sha256': sha256(x1.X1_XML),
-        'pipeline': 'GMR smplx->x1 IK at the source fps, one vertical grounding offset per clip, '
-                    'prepare_motions.resample to 50 Hz, prepare_motions.velocities (np.gradient / quat)',
+        'pipeline': ('GMR smplx->x1 IK (motions/x1_ik_config.json) at the source fps, '
+                     'prepare_motions.resample to 50 Hz, grounding on the resampled frames, '
+                     'prepare_motions.velocities (np.gradient / quat) recomputed after grounding'),
+        'args': {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()},
+        'foot_geoms': list(x1.X1_FOOT_GEOMS),
+        'sole_plane_below_base_m': round(float(x1.X1_INIT_HEIGHT), 4),
         'command': ' '.join(sys.argv),
         'python': sys.executable,
         'elapsed_s': round(time.time() - t0, 1),
