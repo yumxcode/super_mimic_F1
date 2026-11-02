@@ -185,23 +185,77 @@ gm task data get --task-id <taskId> --data-key <key> --sampling-mode precise
 
 ### Runs so far
 
-Every run below really was submitted and really failed; each one fixed a distinct platform blocker, and the log
-line that identified it is quoted.
+Every run below really was submitted and really failed or ran; each fixed a distinct blocker, quoted with the log
+line that identified it. The plumbing task (60 iterations, 1024 envs) exists so that these could be found for
+minutes of GPU time instead of inside a 3000-iteration run.
 
-| task | iterations | what failed | fix |
+| task | iterations | what happened | fix |
 |---|---|---|---|
-| `TASK_20261102_017` | — | `gm task run`: **账户余额不足** — the account that owns `PRO_20261102_001` (`rokad42565`) has no balance | moved to `PRO_20261102_002` under `jasevi6851`, which has balance |
+| `TASK_20261102_017` | — | `gm task run`: **账户余额不足** — the account that owns `PRO_20261102_001` (`rokad42565`) has no balance | moved to `PRO_20261102_002` (`jasevi6851`), which has balance |
 | `TASK_20261102_018` | 60 | entry script ran, then pip: every package `Name or service not known` against the image's index `mirrors.ivolces.com` | probe the stack first, and try `pypi.org` before the image's index |
-| `TASK_20261102_019` | 60 | `pypi.org` works; pip then stops with `ResolutionImpossible` — the IsaacSim image carries an Isaac Sim constraint `numpy<2` against `requirements.txt`'s `numpy==2.4.6` | try the plain Ubuntu 24.04 image, and add `ensure_pip()` |
-| `TASK_20261102_020` | 60 | Ubuntu 24.04 image: status running for 13 min with **zero** log output | stopped; back to IsaacSim 5.1, and numpy joins `SKIP_PINS` (none of mjlab / mujoco-warp / warp-lang pins numpy) |
-| `TASK_20261102_021` | 60 | same numpy `ResolutionImpossible` — the `SKIP_PINS` edit had not actually applied | applied it for real; the filter now logs the package names it installs |
-| `TASK_20261102_024` | 60 | **pip succeeded**: torch 2.7.0+cu128, CUDA 12.8, RTX 4090, mujoco 3.5.0, warp 1.12.0, mjlab 1.2.0, numpy 1.26.4 (from the image). Trainer then died in 0.0 min: `No module named 'torch'` | the trainer subprocess was launched with `PYTHONPATH=ROOT`, which *replaced* the image's PYTHONPATH (the kit python's site-packages is reached through it); now appended |
-| `TASK_20261102_026` | 60 | stack + CUDA OK, then `RuntimeError: Minimum supported CUDA version: 12.4.` from `mujoco_warp.put_model` → `warp.is_conditional_graph_supported()` | pending: `verify_stack` now prints `nvidia-smi`'s driver version and that predicate |
+| `TASK_20261102_019` | 60 | `pypi.org` resolves; pip then stops with `ResolutionImpossible` — the IsaacSim image carries an Isaac Sim constraint `numpy<2` against `requirements.txt`'s `numpy==2.4.6` | try the plain Ubuntu 24.04 image, and add `ensure_pip()` |
+| `TASK_20261102_020` | 60 | Ubuntu 24.04 image: status running for 13 min with **zero** log output | stopped; back to IsaacSim 5.1, numpy joins `SKIP_PINS` (none of mjlab / mujoco-warp / warp-lang pins numpy) |
+| `TASK_20261102_021` | 60 | same numpy `ResolutionImpossible` — the `SKIP_PINS` edit had not actually applied | applied it; the filter now logs the package names it installs |
+| `TASK_20261102_024` | 60 | **pip succeeded**: torch 2.7.0+cu128, CUDA 12.8, RTX 4090, mujoco 3.5.0, warp 1.12.0, mjlab 1.2.0, numpy 1.26.4. Trainer died in 0.0 min: `No module named 'torch'` | the trainer subprocess was launched with `PYTHONPATH=ROOT`, *replacing* the image's PYTHONPATH (the kit python's site-packages is reached through it); now appended |
+| `TASK_20261102_026` | 60 | stack + CUDA fine, then `RuntimeError: Minimum supported CUDA version: 12.4.` from `mujoco_warp.put_model` → `warp.is_conditional_graph_supported()` | print `nvidia-smi`'s driver and that predicate before training |
+| `TASK_20261102_027` | 60 | measured: driver **535.183.01** (warp prints "CUDA Toolkit 12.9, Driver 12.2"), `cond graph supported: False` | `scripts/gm_compat.py`: a logged no-op guard, since mjlab already disables CUDA graphs below driver 12.4 and mujoco-warp 3.5.0 never uses conditional graphs |
+| `TASK_20261102_029`, `_037` | 60 | shim still not applied: the switch compared `nvidia-smi`'s driver number against a CUDA *version* threshold, and then a rewrite of that switch silently did not land | the switch now comes from the predicate itself (`cond graph supported:`), asserted against the platform's own probe text |
+| `TASK_20261102_040` | 60 | **simulator built, warp kernels compiled**, then `KeyError: 'lumbar_yaw_joint'` in `_wm_error_weights` | `--preset recommended` hardcodes the G1 table `tracked` and nothing read `Robot.wm_joint_weights`; the config now falls back to the robot's own table and names the missing joints if that fails too |
+| `TASK_20261102_041` | 60 | **ran to completion, exit 0**: `it 5 … it 60`, `ret 0.21`, `wm1 0.94 → 0.63`, three checkpoints in `gm task model list`, `EVAL it 60 … failed 41/41`. `gm task data keys` was empty | metric mirror raised `OSError: telling position disabled by next() call` (iterating a text file + `f.tell()`); now binary with an explicit byte cursor |
 
-The last failure is the only one that is about the *host*, not the code: warp gates conditional-graph support on the
-CUDA **driver** version it sees, while torch reports the CUDA version its wheel was built with (12.8). The next run
-records the driver version before training, which decides between "the host driver is too old, pick a warp/mujoco-warp
-pair that does not need 12.4" and "warp's detection is wrong in this container".
+### The run that works
+
+`TASK_20261102_043` — 3000 iterations, 4096 envs, `configs/x1_supermimic.json`, 1×4090D, branch `feat/x1-29dof`.
+
+Log excerpt (`gm task logs --task-id TASK_20261102_043 --raw`), environment build → iteration progress:
+
+```
+[gm-entry] repo /workspace/isaaclab/super_mimic_F1
+[gm-entry] stack check failed: ModuleNotFoundError: No module named 'mujoco'      <- image lacks the stack, so pip
+[gm-entry] filtered requirements -> runs/requirements.gm.txt: ['mjlab', 'mujoco', 'mujoco-warp', 'warp-lang',
+           'rsl-rl-lib', 'tensordict', 'scipy', 'trimesh', 'prettytable', 'tyro', 'mediapy']
+           (left to the image: torch, pytest, matplotlib, numpy)
+[gm-entry] pip against https://pypi.org/simple
+Successfully installed ... mjlab-1.2.0 ... mujoco-3.5.0 ... mujoco-warp-3.5.0 ... warp-lang-1.12.0 ...
+torch 2.7.0+cu128 cuda 12.8 available True count 1
+mujoco 3.5.0 warp 1.12.0 mjlab .../site-packages/mjlab/__init__.py numpy 1.26.4
+gpu NVIDIA GeForce RTX 4090
+driver: 535.183.01
+cond graph supported: False
+[gm-entry] driver 535.183.01 conditional graphs -> bypassing mujoco_warp's >=12.4 gate (gm_compat)
+[gm-compat] patched mujoco_warp._src.warp_util.check_toolkit_driver
+[gm-compat] driver (12, 2): mujoco_warp 3.5.0 refuses to run below driver 12.4 because of conditional CUDA graphs;
+           the gate is bypassed because mjlab disables CUDA graphs on this driver ...
+[WARNING] CUDA Graphs disabled: driver 12.2 < 12.4          <- mjlab's own handling of the same limit
+it 50 upd 20 h 0.062 iter 0.547s ret 0.205 len 30.6 term 0.814 wm1 0.7050 wm8 4.9014 J 0.399 surv 0.141
+it 75 upd 30 h 0.066 iter 0.539s ret 0.225 len 29.7 term 0.807 wm1 0.6047 wm8 3.8242 J 0.529 surv 0.165
+it 125 upd 50 h 0.074 iter 0.540s ret 0.234 len 30.2 term 0.809 wm1 0.5362 wm8 2.8624 J 0.551 surv 0.177
+it 175 upd 70 h 0.082 iter 0.623s ret 0.244 len 32.7 term 0.802 wm1 0.4910 wm8 2.5823 J 0.620 surv 0.230
+it 225 upd 90 h 0.090 iter 0.540s ret 0.268 len 36.6 term 0.767 wm1 0.4365 wm8 2.0606 J 0.689 surv 0.296
+```
+
+`gm task data get` (the platform's chart API, so the metric channel is proven, not just the console log):
+
+| key | points | first | last |
+|---|---|---|---|
+| `Train/ep_return` | 9 | it 25 → 0.8535 | it 225 → 1.5628 |
+| `Train/ep_norm_return` | 9 | it 25 → 0.3125 | it 225 → 0.2684 |
+| `Train/wm_err1` | 9 | it 25 → 1.0748 | it 225 → 0.4365 |
+
+33 keys in total (`gm task data keys`: `Train/wm_loss`, `Train/pi_J`, `Train/img_survival`, the per-term imagined
+rewards, ...).
+
+Checkpoints, `gm task model list`:
+
+| checkpoint | policUrl |
+|---|---|
+| `0000060` | `upload/2026/11/2/ckpt_0000060_20261102113441A712.pt` |
+| `0000030` | `upload/2026/11/2/ckpt_0000030_20261102113419A751.pt` |
+| (last) | `upload/2026/11/2/last_20261102113435A797.pt` |
+
+Those three are from the plumbing run `TASK_20261102_041`, which completed 60 iterations, exited 0 and published
+`output/x1_supermimic_iter000060.pt`. `TASK_20261102_043`'s own checkpoints and final evaluation are appended below
+once it finishes.
 
 ### Environment as measured on the platform
 
