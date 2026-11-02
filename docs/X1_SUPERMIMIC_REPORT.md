@@ -8,7 +8,7 @@ Status at a glance
 
 | step | result | evidence |
 |---|---|---|
-| A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
+| A asset + config numerically stable | **done, with one stated deviation pending your acceptance** — see [the 0.657 m question](#the-0657-m-target-unreachable-as-specified) | `scripts/x1_smoke.py --steps 200`: 5/5 verdict checks pass, no QACC/NaN; no contact/geometry change beyond the documented vendoring |
 | B GMR → 50 Hz training library | **done** | `motions/x1_cmu_walk.npz` (41 clips, 6168 frames, 1.75 MB) + `motions/x1_cmu_walk.meta.json` |
 | C Gradmotion run | **done** — `TASK_20261102_043`, 3000 iterations, status 5, 5 checkpoints, 33 metric keys. Its end-of-run eval ran in the **G1** env (a bug, fixed in `af76c5c`), so it is not an X1 number; the X1 result comes from `TASK_20261102_068` | see [Gradmotion](#gradmotion) and [the X1 evaluation](#the-x1-evaluation) |
 | D commits + push | **done** | `git ls-remote origin feat/x1-29dof` → the branch head; `git log --oneline cb334ff..feat/x1-29dof` lists the commits. No force push; each push printed an old..new range (see [Commits and pushes](#commits-and-pushes)) |
@@ -136,7 +136,10 @@ upstream `cb334ff` (both files executed and the tables compared: 29 joints each,
 additional entries (`tracked_x1`, `axis_sq_x1`). `NJ = 29` and `OBS_DIM = 93` are unchanged, so every network shape
 and every existing command is untouched.
 
-**Runtime.** `TASK_20261102_067` — the same entry script, image and branch, `--robot g1`, 40 iterations / 512 envs
+**Runtime.** Re-run on the fixed code as `TASK_20261102_069` (status 5, 40 iterations, 0.47 s/iter, 4 checkpoints,
+`EVAL it 40 h 0.061 norm_return 0.0135 failed 41/41 (30s)` — evaluated in the G1 env, which is the correct robot for
+this run, so the eval-env fix changes nothing for the G1 and the path still works). The first run was
+`TASK_20261102_067` — the same entry script, image and branch, `--robot g1`, 40 iterations / 512 envs
 (`configs/g1_path_check.json`, `scripts/gm/create_g1_path_check.json`): status 5, exit 0, 0.45 s/iter, iterations 1-40
 logged, four checkpoints published.
 
@@ -309,7 +312,7 @@ minutes of GPU time instead of inside a 3000-iteration run.
 | `TASK_20261102_027` | 60 | measured: driver **535.183.01** (warp prints "CUDA Toolkit 12.9, Driver 12.2"), `cond graph supported: False` | `scripts/gm_compat.py`: a logged no-op guard, since mjlab already disables CUDA graphs below driver 12.4 and mujoco-warp 3.5.0 never uses conditional graphs |
 | `TASK_20261102_029`, `_037` | 60 | shim still not applied: the switch compared `nvidia-smi`'s driver number against a CUDA *version* threshold, and then a rewrite of that switch silently did not land | the switch now comes from the predicate itself (`cond graph supported:`), asserted against the platform's own probe text |
 | `TASK_20261102_040` | 60 | **simulator built, warp kernels compiled**, then `KeyError: 'lumbar_yaw_joint'` in `_wm_error_weights` | `--preset recommended` hardcodes the G1 table `tracked` and nothing read `Robot.wm_joint_weights`; the config now falls back to the robot's own table and names the missing joints if that fails too |
-| `TASK_20261102_041` | 60 | **ran to completion, exit 0**: `it 5 … it 60`, `ret 0.21`, `wm1 0.94 → 0.63`, three checkpoints in `gm task model list`, `EVAL it 60 … failed 41/41`. `gm task data keys` was empty | metric mirror raised `OSError: telling position disabled by next() call` (iterating a text file + `f.tell()`); now binary with an explicit byte cursor |
+| `TASK_20261102_041` | 60 | **ran to completion, exit 0**: `it 5 … it 60`, `ret 0.21`, `wm1 0.94 → 0.63`, three checkpoints in `gm task model list`, `EVAL it 60 … failed 41/41` — that eval also used the pre-`af76c5c` G1 env, so its number is a wrong-robot artifact too. `gm task data keys` was empty | metric mirror raised `OSError: telling position disabled by next() call` (iterating a text file + `f.tell()`); now binary with an explicit byte cursor |
 
 ### The run that works
 
@@ -437,9 +440,9 @@ forbids numpy 2 (see run 019). This is a deviation from `requirements.txt` and i
 
 ## Commits and pushes
 
-The branch carries a linear series of commits after the upstream `cb334ff`. The listing below is a snapshot; the
-authoritative check is the command in its header (`git ls-remote origin feat/x1-29dof` for the live head), and a
-later docs commit naturally adds one more line than the snapshot shows.
+The branch carries a linear series of commits after the upstream `cb334ff`. The listing below was captured at
+`087d76b` and later commits (`2c483e9`, `087d76b`… `af76c5c`, and the docs commits after it) sit on top of it; the
+authoritative head is `git ls-remote origin feat/x1-29dof`, never this list.
 
 Nothing was force-pushed and no remote ref was rewritten. The network to github.com:443 dropped repeatedly (TCP
 timeouts, `Empty reply from server`, HTTP/2 framing errors), so several pushes were retried — each successful one
@@ -507,7 +510,7 @@ they reverse.
    library and is out of scope here.
 6. **`--preset recommended` was tuned on the G1**, including the joint error-propagation weights (`wm_joint_weights:
    tracked` → the X1 uses `tracked_x1`, a name-mapped copy of the G1 lever arms, not an X1 torque identification).
-6. **Foot contact is four point contacts per foot**, unchanged from the source asset. It is stable at the real gains
+7. **Foot contact is four point contacts per foot**, unchanged from the source asset. It is stable at the real gains
    (A), but a flat sole would model a real foot better; that is a modelling choice, not a fix for a measured defect.
 
 ## Next steps
