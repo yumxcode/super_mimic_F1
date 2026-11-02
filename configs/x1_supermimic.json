@@ -1,0 +1,15 @@
+{
+  "description": "X1 29-DoF allmimic training run on Gradmotion (1x4090D). Read by scripts/gm_x1_train.py; every key is passed to allmimic.train as --<key> (underscores -> dashes).",
+  "robot": "x1_29dof",
+  "preset": "recommended",
+  "motions": "motions/x1_cmu_walk.npz",
+  "out": "runs/x1_cmu_walk",
+  "iterations": 3000,
+  "num_envs": 4096,
+  "log_every": 25,
+  "ckpt_every": 1000,
+  "eval_every": 1000000,
+  "seed": 0,
+  "buffer_steps": 1000,
+  "wall_hours": 6.0
+}

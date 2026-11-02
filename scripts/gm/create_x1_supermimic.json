@@ -1,0 +1,26 @@
+{
+  "taskBaseInfo": {
+    "projectId": "__PROJECT_ID__",
+    "taskType": "1",
+    "trainType": "1",
+    "taskName": "x1-supermimic-cmu-walk-3k",
+    "taskDescription": "X1 29-DoF allmimic (SuperMimic re-implementation) on the 41-clip CMU walking library: 3000 iterations, 4096 envs, 1x4090D. Entry scripts/gm_x1_train.py pip-installs requirements.txt, verifies CUDA/mjlab, trains with configs/x1_supermimic.json, mirrors runs/x1_cmu_walk/log.jsonl to TensorBoard under logs/x1_supermimic/, and publishes the newest checkpoint to output/.",
+    "taskTag": ["x1", "supermimic", "allmimic", "cmu-walk"],
+    "goodsId": "ESKU000001",
+    "imageId": "BJX00000178",
+    "imageVersion": "V000446",
+    "personalDataPath": ""
+  },
+  "taskCodeInfo": {
+    "codeType": "2",
+    "codeUrl": "[{\"codeUrl\":\"https://github.com/yumxcode/super_mimic_F1.git\",\"versionType\":\"1\",\"versionName\":\"feat/x1-29dof\"}]",
+    "mainCodeUri": "super_mimic_F1/allmimic/train.py",
+    "hparamsPath": "super_mimic_F1/configs/x1_supermimic.json",
+    "startScript": "gm-run super_mimic_F1/scripts/gm_x1_train.py",
+    "isOpen": "1"
+  },
+  "runtimeReminderConfig": {
+    "enableRuntimeReminder": false,
+    "reminderDurations": []
+  }
+}
