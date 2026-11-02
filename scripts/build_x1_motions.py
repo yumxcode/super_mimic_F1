@@ -105,7 +105,12 @@ def lowest_point(m, d, gid: int) -> float:
 def retargeter(human_height: float):
     from general_motion_retargeting import GeneralMotionRetargeting as GMR
 
-    return GMR(src_human='smplx', tgt_robot='x1', actual_human_height=human_height, verbose=False)
+    from tools.x1_arm_fix import make_retargeter
+
+    # AnchoredRetarget: wrist targets re-anchored on the robot's live shoulder FK
+    # (phase-2 arm fix; see tools/x1_arm_fix.py for the measured rationale).
+    return make_retargeter(GMR)(src_human='smplx', tgt_robot='x1',
+                                actual_human_height=human_height, verbose=False)
 
 
 def use_ik_config(path: Path) -> None:
@@ -116,7 +121,7 @@ def use_ik_config(path: Path) -> None:
 
 
 def retarget_clip(path: Path, smplx_dir: Path, make_retargeter, last: dict,
-                  passes: int = 2) -> tuple[np.ndarray, float]:
+                  passes: int = 2, arm_mode: str = 'refine') -> tuple[np.ndarray, float]:
     """(N, 36) qpos in wxyz order, at the clip's own fps.
 
     GMR's IK integrates from the model's current configuration, so a single pass starts the clip from q=0 and the
@@ -134,6 +139,10 @@ def retarget_clip(path: Path, smplx_dir: Path, make_retargeter, last: dict,
     qpos = None
     for _ in range(max(1, passes)):
         qpos = np.array([last['r'].retarget(f).copy() for f in frames], dtype=np.float64)
+    if arm_mode == 'refine':
+        from tools.x1_arm_fix import arm_refine
+
+        qpos = arm_refine(last['r'], qpos, frames)
     # no quaternion reorder: GMR returns MuJoCo qpos, whose free-joint quat is already wxyz -- the order the allmimic
     # contract uses (scripts/prepare_motions.py converts the G1 CSVs from xyzw *because* that format is xyzw).
     # Verified against MuJoCo FK: reading qpos[3:7] as wxyz gives 1 - R_zz = 1e-4 for an upright walking frame,
@@ -199,6 +208,9 @@ def main() -> int:
                     help='per-frame: the lowest sole point is on the floor every frame (walking); '
                          'per-clip: one offset, keeps a flight phase')
     ap.add_argument('--ik-passes', type=int, default=2, help='GMR IK passes over each clip (see retarget_clip)')
+    ap.add_argument('--arm-mode', choices=('refine', 'stock'), default='refine',
+                    help='refine: second pass re-solves the arms with robot-anchored wrist targets '
+                         '(phase-2 fix, tools/x1_arm_fix.py); stock: phase-1 behaviour')
     ap.add_argument('--drop-head-s', type=float, default=0.2,
                     help='drop this much of each clip after resampling: the IK start pose is a different local '
                          'minimum than the rest of the clip (measured: a 30 rad/s joint-velocity spike in frames 0-1)')
@@ -224,7 +236,7 @@ def main() -> int:
     t0 = time.time()
     for i, f in enumerate(files):
         try:
-            qpos, src_fps = retarget_clip(f, args.smplx, retargeter, state, args.ik_passes)
+            qpos, src_fps = retarget_clip(f, args.smplx, retargeter, state, args.ik_passes, args.arm_mode)
         except Exception as e:  # noqa: BLE001
             print(f'[{i + 1}/{len(files)}] SKIP {f.name}: {type(e).__name__}: {e}')
             report.append({'clip': str(f), 'error': f'{type(e).__name__}: {e}'})

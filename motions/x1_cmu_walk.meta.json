@@ -1,6 +1,6 @@
 {
- "out": "motions/x1_cmu_walk.npz",
- "out_sha256": "309a6896110c3ba584f9c9e69eb2765afe24a54a4ba3e80b799a138a84cf38bd",
+ "out": "motions/x1_cmu_walk_v2.npz",
+ "out_sha256": "cf29dd6bfd3c4af8758c25eebee803dd298fb48a05bec13f64f1a2122c58c119",
  "out_bytes": 1754832,
  "clips_kept": 41,
  "frames": 6168,
@@ -42,13 +42,14 @@
  "args": {
   "input": "/Users/yumx/code/X1_29_AMP/data/amass/CMU",
   "smplx": "/Users/yumx/code/X1_29_AMP/_gmr_local/GMR/assets/body_models",
-  "out": "motions/x1_cmu_walk.npz",
-  "report": "motions/x1_cmu_walk.meta.json",
+  "out": "motions/x1_cmu_walk_v2.npz",
+  "report": "motions/x1_cmu_walk_v2.meta.json",
   "limit": 0,
   "fps_out": 50.0,
   "ik_config": "/Users/yumx/code/super_mimic_F1/motions/x1_ik_config.json",
   "ground": "per-frame",
   "ik_passes": 2,
+  "arm_mode": "refine",
   "drop_head_s": 0.2,
   "reject_over_limit": 0.35,
   "reject_root_z": 0.45,
@@ -66,17 +67,17 @@
   "right_foot_4_collision"
  ],
  "sole_plane_below_base_m": 0.6275,
- "command": "scripts/build_x1_motions.py --out motions/x1_cmu_walk.npz --report motions/x1_cmu_walk.meta.json",
+ "command": "scripts/build_x1_motions.py --out motions/x1_cmu_walk_v2.npz --report motions/x1_cmu_walk_v2.meta.json",
  "python": "/Users/yumx/code/X1_29_AMP/_gmr_local/venv/bin/python",
- "elapsed_s": 102.6,
+ "elapsed_s": 120.3,
  "clips": [
   {
    "frames": 122,
    "seconds": 2.44,
    "root_z": [
-    0.6106,
-    0.6287,
-    0.6437
+    0.5805,
+    0.615,
+    0.6501
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -84,75 +85,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.126 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_knee_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint",
-    "right_knee_pitch_joint"
-   ],
-   "tilt_max": 0.0145,
-   "yaw_start_deg": 4.5,
-   "yaw_net_change_deg": -22.3,
-   "qd_max": 10.12,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0944,
+   "yaw_start_deg": 2.2,
+   "yaw_net_change_deg": -31.6,
+   "qd_max": 8.0,
    "q_mean": [
-    0.184,
-    -0.045,
-    0.416,
-    1.499,
-    -0.0,
-    0.506,
-    0.0,
-    0.88,
-    -0.4,
-    0.321,
-    -0.361,
-    -0.333,
-    0.141,
-    1.998,
-    0.11,
-    -0.354,
-    0.241,
-    0.193,
-    -0.049,
-    0.163,
-    0.275,
-    -0.142,
-    0.043,
-    -0.172,
-    0.052,
+    -0.061,
+    -0.012,
+    0.138,
+    -0.174,
+    -0.163,
+    -0.11,
+    0.678,
+    -0.001,
     0.012,
-    0.251,
-    -0.065,
-    0.047
+    -0.012,
+    -0.121,
+    -0.194,
+    -0.077,
+    0.646,
+    -0.026,
+    -0.027,
+    0.005,
+    0.061,
+    -0.075,
+    0.254,
+    0.377,
+    -0.145,
+    0.04,
+    -0.052,
+    0.095,
+    -0.079,
+    0.354,
+    -0.11,
+    0.052
    ],
-   "root_vel_max": 1.34,
+   "root_vel_max": 2.04,
    "contact_frac": [
-    0.508,
-    0.754
+    0.746,
+    0.426
    ],
    "touchdowns": [
-    3,
-    2
+    2,
+    4
    ],
    "cadence_hz": [
     0.93,
-    0.93
+    2.63
    ],
    "stride_s": [
     1.08,
-    1.08
+    0.38
    ],
    "alternation_between_left_td": [
-    1,
-    1
+    3
    ],
    "gait_resolved": true,
-   "walk_like": true,
+   "walk_like": false,
    "clip": "07_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_01_stageii.npz",
    "src_fps": 120.0
@@ -161,9 +154,9 @@
    "frames": 127,
    "seconds": 2.54,
    "root_z": [
-    0.6143,
-    0.63,
-    0.6459
+    0.5769,
+    0.6192,
+    0.6531
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -171,68 +164,65 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.613 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0265,
-   "yaw_start_deg": 20.4,
-   "yaw_net_change_deg": -35.6,
-   "qd_max": 8.1,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0879,
+   "yaw_start_deg": 30.0,
+   "yaw_net_change_deg": -57.8,
+   "qd_max": 7.78,
    "q_mean": [
-    0.145,
-    -0.041,
-    0.417,
-    1.499,
-    0.0,
-    0.516,
-    -0.0,
-    0.863,
-    -0.4,
-    0.394,
-    -0.336,
-    -0.323,
-    0.122,
-    1.994,
-    0.076,
-    -0.343,
-    0.216,
-    0.194,
-    -0.048,
-    0.146,
-    0.347,
-    -0.133,
-    0.03,
-    -0.191,
-    0.063,
-    0.02,
-    0.281,
-    -0.116,
-    0.056
+    -0.082,
+    -0.011,
+    0.138,
+    -0.174,
+    -0.153,
+    -0.176,
+    0.722,
+    -0.015,
+    0.014,
+    -0.02,
+    -0.119,
+    -0.171,
+    -0.131,
+    0.655,
+    -0.034,
+    -0.022,
+    0.004,
+    0.071,
+    -0.078,
+    0.225,
+    0.433,
+    -0.132,
+    0.029,
+    -0.071,
+    0.102,
+    -0.071,
+    0.372,
+    -0.149,
+    0.06
    ],
-   "root_vel_max": 1.31,
+   "root_vel_max": 2.05,
    "contact_frac": [
-    0.417,
-    0.78
+    0.622,
+    0.583
    ],
    "touchdowns": [
-    2,
+    4,
     2
    ],
    "cadence_hz": [
-    0.91,
+    1.56,
     0.91
    ],
    "stride_s": [
-    1.1,
+    0.64,
     1.1
    ],
    "alternation_between_left_td": [
+    1,
+    0,
     1
    ],
    "gait_resolved": true,
@@ -245,9 +235,9 @@
    "frames": 163,
    "seconds": 3.26,
    "root_z": [
-    0.6216,
-    0.6334,
-    0.6462
+    0.6064,
+    0.6241,
+    0.6412
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -255,70 +245,63 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.055 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_knee_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0231,
-   "yaw_start_deg": -4.1,
-   "yaw_net_change_deg": 20.8,
-   "qd_max": 6.66,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0614,
+   "yaw_start_deg": -9.3,
+   "yaw_net_change_deg": 31.1,
+   "qd_max": 6.18,
    "q_mean": [
-    0.158,
-    -0.03,
-    0.439,
-    1.5,
-    -0.0,
-    0.499,
-    0.0,
-    0.878,
-    -0.4,
-    0.4,
-    -0.407,
-    -0.274,
-    0.117,
-    1.999,
-    0.097,
-    -0.379,
-    0.241,
-    0.249,
-    -0.018,
-    0.142,
-    0.233,
-    -0.152,
-    0.021,
-    -0.227,
-    0.072,
-    0.008,
-    0.277,
+    -0.084,
+    -0.005,
+    0.162,
+    -0.157,
+    -0.151,
+    -0.156,
+    0.661,
+    -0.023,
+    -0.004,
+    -0.016,
     -0.073,
-    0.057
+    -0.171,
+    -0.108,
+    0.627,
+    -0.033,
+    -0.035,
+    0.017,
+    0.077,
+    -0.05,
+    0.248,
+    0.339,
+    -0.152,
+    0.019,
+    -0.079,
+    0.109,
+    -0.109,
+    0.389,
+    -0.124,
+    0.06
    ],
-   "root_vel_max": 0.99,
+   "root_vel_max": 1.47,
    "contact_frac": [
-    0.577,
-    0.693
+    0.693,
+    0.54
    ],
    "touchdowns": [
-    3,
+    2,
     3
    ],
    "cadence_hz": [
     0.81,
-    0.83
+    0.81
    ],
    "stride_s": [
-    1.23,
-    1.2
+    1.24,
+    1.23
    ],
    "alternation_between_left_td": [
-    1,
     1
    ],
    "gait_resolved": true,
@@ -331,9 +314,9 @@
    "frames": 164,
    "seconds": 3.28,
    "root_z": [
-    0.611,
-    0.6288,
-    0.6491
+    0.584,
+    0.6171,
+    0.6474
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -341,69 +324,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.279 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0286,
-   "yaw_start_deg": -16.1,
-   "yaw_net_change_deg": 7.1,
-   "qd_max": 8.17,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0637,
+   "yaw_start_deg": -24.5,
+   "yaw_net_change_deg": 11.6,
+   "qd_max": 6.83,
    "q_mean": [
-    0.069,
-    -0.047,
-    0.425,
-    1.499,
-    0.0,
-    0.548,
-    0.0,
-    0.787,
-    -0.4,
-    0.37,
-    -0.345,
-    -0.296,
-    0.16,
-    1.999,
-    0.09,
-    -0.371,
-    0.282,
-    0.181,
-    -0.018,
-    0.085,
-    0.324,
+    -0.155,
+    -0.008,
+    0.183,
     -0.186,
-    0.015,
-    -0.275,
-    0.078,
-    0.045,
-    0.309,
-    -0.088,
-    0.062
+    -0.162,
+    -0.083,
+    0.662,
+    0.0,
+    0.007,
+    -0.007,
+    -0.077,
+    -0.184,
+    -0.06,
+    0.614,
+    -0.023,
+    -0.028,
+    0.006,
+    0.032,
+    -0.057,
+    0.188,
+    0.406,
+    -0.183,
+    0.013,
+    -0.125,
+    0.127,
+    -0.062,
+    0.422,
+    -0.133,
+    0.068
    ],
-   "root_vel_max": 1.2,
+   "root_vel_max": 2.11,
    "contact_frac": [
-    0.427,
-    0.768
+    0.707,
+    0.555
    ],
    "touchdowns": [
-    1,
+    2,
     3
    ],
    "cadence_hz": [
+    0.86,
     0.87
    ],
    "stride_s": [
-    null,
+    1.16,
     1.15
    ],
-   "alternation_between_left_td": [],
-   "gait_resolved": false,
-   "walk_like": false,
+   "alternation_between_left_td": [
+    1
+   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "07_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_06_stageii.npz",
    "src_fps": 120.0
@@ -412,9 +393,9 @@
    "frames": 148,
    "seconds": 2.96,
    "root_z": [
-    0.6021,
-    0.6247,
-    0.6491
+    0.5618,
+    0.6106,
+    0.6391
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -422,66 +403,61 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.507 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0399,
-   "yaw_start_deg": 16.3,
-   "yaw_net_change_deg": -27.0,
-   "qd_max": 7.05,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0666,
+   "yaw_start_deg": 18.9,
+   "yaw_net_change_deg": -41.2,
+   "qd_max": 6.52,
    "q_mean": [
-    0.22,
-    -0.043,
-    0.439,
-    1.5,
-    0.0,
-    0.534,
-    0.0,
-    0.827,
-    -0.4,
-    0.362,
-    -0.413,
-    -0.328,
-    0.227,
-    2.0,
-    0.068,
-    -0.384,
-    0.267,
-    0.348,
-    -0.04,
-    0.088,
-    0.343,
-    -0.157,
-    0.034,
-    -0.241,
-    0.062,
-    0.088,
-    0.276,
-    -0.125,
-    0.071
+    -0.048,
+    -0.006,
+    0.207,
+    -0.16,
+    -0.16,
+    -0.06,
+    0.61,
+    -0.001,
+    -0.005,
+    -0.005,
+    -0.08,
+    -0.212,
+    -0.015,
+    0.62,
+    -0.013,
+    -0.041,
+    0.006,
+    0.146,
+    -0.085,
+    0.231,
+    0.446,
+    -0.175,
+    0.027,
+    -0.058,
+    0.123,
+    -0.037,
+    0.418,
+    -0.166,
+    0.078
    ],
-   "root_vel_max": 1.31,
+   "root_vel_max": 2.2,
    "contact_frac": [
-    0.514,
-    0.797
+    0.764,
+    0.5
    ],
    "touchdowns": [
     3,
-    2
+    3
    ],
    "cadence_hz": [
     0.85,
-    0.86
+    1.01
    ],
    "stride_s": [
-    1.18,
-    1.16
+    1.17,
+    0.99
    ],
    "alternation_between_left_td": [
     1,
@@ -497,9 +473,9 @@
    "frames": 141,
    "seconds": 2.82,
    "root_z": [
-    0.5912,
-    0.6175,
-    0.6445
+    0.5644,
+    0.6048,
+    0.6304
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -507,72 +483,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.440 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0711,
-   "yaw_start_deg": -18.5,
-   "yaw_net_change_deg": 14.4,
-   "qd_max": 6.89,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0401,
+   "yaw_start_deg": -30.6,
+   "yaw_net_change_deg": 24.5,
+   "qd_max": 6.61,
    "q_mean": [
-    0.174,
-    -0.016,
-    0.436,
-    1.5,
-    -0.0,
-    0.569,
-    0.0,
-    0.774,
-    -0.4,
-    0.376,
-    -0.407,
-    -0.324,
-    0.228,
-    2.0,
-    0.086,
-    -0.388,
-    0.302,
-    0.352,
-    -0.037,
-    0.028,
-    0.31,
-    -0.186,
-    0.022,
-    -0.323,
-    0.1,
-    0.079,
-    0.332,
-    -0.126,
-    0.043
+    -0.065,
+    0.014,
+    0.218,
+    -0.168,
+    -0.164,
+    -0.039,
+    0.612,
+    0.005,
+    -0.004,
+    -0.008,
+    -0.064,
+    -0.238,
+    0.008,
+    0.595,
+    -0.003,
+    -0.035,
+    -0.005,
+    0.139,
+    -0.092,
+    0.19,
+    0.426,
+    -0.198,
+    0.016,
+    -0.123,
+    0.184,
+    -0.039,
+    0.487,
+    -0.153,
+    0.055
    ],
-   "root_vel_max": 1.35,
+   "root_vel_max": 2.0,
    "contact_frac": [
-    0.574,
-    0.709
+    0.844,
+    0.454
    ],
    "touchdowns": [
     2,
-    2
+    4
    ],
    "cadence_hz": [
-    0.79,
-    0.81
+    0.76,
+    1.11
    ],
    "stride_s": [
-    1.26,
-    1.24
+    1.32,
+    0.9
    ],
    "alternation_between_left_td": [
-    1
+    2
    ],
    "gait_resolved": true,
-   "walk_like": true,
+   "walk_like": false,
    "clip": "07_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_08_stageii.npz",
    "src_fps": 120.0
@@ -581,9 +552,9 @@
    "frames": 118,
    "seconds": 2.36,
    "root_z": [
-    0.5995,
-    0.6251,
-    0.6449
+    0.5744,
+    0.6117,
+    0.6402
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -591,70 +562,65 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.419 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.036,
-   "yaw_start_deg": -15.4,
-   "yaw_net_change_deg": 24.4,
-   "qd_max": 8.6,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0606,
+   "yaw_start_deg": -29.8,
+   "yaw_net_change_deg": 43.0,
+   "qd_max": 7.25,
    "q_mean": [
-    0.208,
-    -0.053,
-    0.441,
-    1.5,
+    -0.057,
+    -0.005,
+    0.218,
+    -0.175,
+    -0.169,
+    -0.065,
+    0.635,
+    0.001,
     -0.0,
-    0.521,
-    -0.0,
-    0.812,
-    -0.4,
-    0.339,
-    -0.371,
-    -0.304,
-    0.194,
-    1.999,
-    0.056,
-    -0.378,
-    0.273,
-    0.247,
-    -0.034,
-    0.056,
-    0.312,
-    -0.173,
-    0.038,
-    -0.284,
-    0.055,
-    0.057,
-    0.342,
-    -0.055,
-    0.034
+    -0.003,
+    -0.088,
+    -0.202,
+    -0.043,
+    0.628,
+    -0.02,
+    -0.03,
+    0.008,
+    0.06,
+    -0.064,
+    0.182,
+    0.399,
+    -0.176,
+    0.035,
+    -0.118,
+    0.138,
+    -0.062,
+    0.475,
+    -0.116,
+    0.043
    ],
-   "root_vel_max": 1.52,
+   "root_vel_max": 2.04,
    "contact_frac": [
-    0.593,
-    0.669
+    0.712,
+    0.508
    ],
    "touchdowns": [
     3,
-    2
+    3
    ],
    "cadence_hz": [
-    1.89,
-    0.94
+    1.47,
+    1.1
    ],
    "stride_s": [
-    0.53,
-    1.06
+    0.68,
+    0.91
    ],
    "alternation_between_left_td": [
-    1,
-    0
+    0,
+    1
    ],
    "gait_resolved": true,
    "walk_like": true,
@@ -666,9 +632,9 @@
    "frames": 115,
    "seconds": 2.3,
    "root_z": [
-    0.595,
-    0.6226,
-    0.6459
+    0.5602,
+    0.6089,
+    0.6451
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -676,72 +642,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_elbow_pitch_joint: -0.000 (limit +0.00..+2.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.491 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0403,
-   "yaw_start_deg": -17.4,
-   "yaw_net_change_deg": 18.4,
-   "qd_max": 8.28,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0699,
+   "yaw_start_deg": -32.9,
+   "yaw_net_change_deg": 35.7,
+   "qd_max": 7.18,
    "q_mean": [
-    0.23,
-    -0.05,
-    0.433,
-    1.499,
-    -0.0,
-    0.579,
-    0.0,
-    0.827,
-    -0.4,
-    0.335,
-    -0.405,
-    -0.337,
-    0.169,
-    1.999,
-    0.024,
-    -0.383,
-    0.263,
-    0.279,
-    -0.039,
-    0.055,
-    0.321,
-    -0.194,
-    0.045,
-    -0.283,
-    0.071,
-    0.027,
-    0.344,
-    -0.097,
-    0.036
+    -0.038,
+    0.002,
+    0.219,
+    -0.167,
+    -0.157,
+    -0.117,
+    0.647,
+    -0.01,
+    0.001,
+    -0.013,
+    -0.113,
+    -0.178,
+    -0.08,
+    0.665,
+    -0.026,
+    -0.035,
+    0.007,
+    0.098,
+    -0.075,
+    0.189,
+    0.42,
+    -0.201,
+    0.04,
+    -0.12,
+    0.159,
+    -0.075,
+    0.487,
+    -0.144,
+    0.047
    ],
-   "root_vel_max": 1.54,
+   "root_vel_max": 2.2,
    "contact_frac": [
-    0.557,
-    0.687
+    0.687,
+    0.504
    ],
    "touchdowns": [
     2,
-    2
+    4
    ],
    "cadence_hz": [
-    1.0,
-    0.94
+    0.98,
+    1.43
    ],
    "stride_s": [
-    1.0,
-    1.06
+    1.02,
+    0.7
    ],
    "alternation_between_left_td": [
-    1
+    2
    ],
    "gait_resolved": true,
-   "walk_like": true,
+   "walk_like": false,
    "clip": "07_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/07_10_stageii.npz",
    "src_fps": 120.0
@@ -750,81 +711,77 @@
    "frames": 105,
    "seconds": 2.1,
    "root_z": [
-    0.5764,
-    0.626,
-    0.6499
+    0.5772,
+    0.6209,
+    0.6524
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
     0.0
    ],
-   "joint_over_limit_max_rad": 0.0702,
-   "joint_over_limit_worst": "right_ankle_roll_joint: +0.570 (limit -0.50..+0.50)",
-   "joint_over_limit_n": 3,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0699,
-   "yaw_start_deg": 34.9,
-   "yaw_net_change_deg": -7.0,
-   "qd_max": 11.15,
+   "joint_over_limit_max_rad": 0.0,
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.686 (limit -1.00..+1.00)",
+   "joint_over_limit_n": 0,
+   "at_limit_frame_frac": 0.038,
+   "at_limit_joints": [],
+   "tilt_max": 0.0838,
+   "yaw_start_deg": 41.9,
+   "yaw_net_change_deg": -6.4,
+   "qd_max": 10.49,
    "q_mean": [
-    -0.003,
-    0.01,
-    0.22,
-    -0.061,
-    -0.086,
-    -0.007,
-    1.993,
-    -0.146,
-    0.375,
-    0.384,
-    -0.097,
-    -0.123,
-    -0.086,
-    1.941,
-    -0.114,
-    -0.234,
-    0.219,
-    -0.045,
+    -0.017,
+    -0.001,
+    0.224,
+    -0.025,
+    -0.41,
+    0.102,
+    0.507,
+    0.031,
+    0.009,
+    -0.006,
+    -0.135,
+    -0.366,
+    0.087,
+    0.579,
+    0.025,
+    -0.005,
     -0.014,
-    0.069,
-    0.291,
-    -0.144,
-    -0.037,
+    -0.039,
     -0.027,
-    0.106,
-    -0.016,
-    0.352,
-    -0.074,
-    0.184
+    0.063,
+    0.311,
+    -0.124,
+    -0.038,
+    -0.036,
+    0.113,
+    -0.012,
+    0.355,
+    -0.09,
+    0.181
    ],
-   "root_vel_max": 1.44,
+   "root_vel_max": 2.93,
    "contact_frac": [
-    0.457,
-    0.752
+    0.381,
+    0.781
    ],
    "touchdowns": [
-    3,
+    2,
     2
    ],
    "cadence_hz": [
-    2.56,
-    0.98
+    1.0,
+    1.0
    ],
    "stride_s": [
-    0.39,
-    1.02
+    1.0,
+    1.0
    ],
    "alternation_between_left_td": [
-    1,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "08_01",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_01_stageii.npz",
    "src_fps": 120.0
@@ -833,9 +790,9 @@
    "frames": 119,
    "seconds": 2.38,
    "root_z": [
-    0.5881,
-    0.6263,
-    0.651
+    0.5884,
+    0.6225,
+    0.6546
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -843,64 +800,61 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "lumbar_yaw_joint: +0.516 (limit -1.00..+1.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.544 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0575,
-   "yaw_start_deg": -22.7,
-   "yaw_net_change_deg": 42.6,
-   "qd_max": 12.04,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.065,
+   "yaw_start_deg": -25.8,
+   "yaw_net_change_deg": 52.5,
+   "qd_max": 11.97,
    "q_mean": [
-    0.003,
-    0.021,
-    0.209,
-    -0.031,
-    -0.095,
-    0.026,
-    1.993,
-    -0.198,
-    0.376,
-    0.39,
-    -0.131,
-    -0.12,
-    -0.102,
-    1.948,
-    -0.109,
-    -0.248,
-    0.21,
-    -0.049,
-    -0.02,
-    0.09,
-    0.239,
-    -0.175,
+    -0.007,
+    0.006,
+    0.216,
+    -0.012,
+    -0.403,
+    0.096,
+    0.496,
+    0.03,
+    0.009,
+    -0.005,
+    -0.137,
+    -0.366,
+    0.085,
+    0.584,
+    0.025,
+    -0.004,
+    -0.014,
+    -0.042,
+    -0.034,
+    0.084,
+    0.269,
+    -0.148,
+    -0.044,
+    -0.036,
+    0.11,
     -0.043,
-    -0.029,
-    0.107,
-    -0.046,
-    0.381,
-    -0.043,
-    0.165
+    0.385,
+    -0.058,
+    0.164
    ],
-   "root_vel_max": 1.37,
+   "root_vel_max": 2.24,
    "contact_frac": [
-    0.639,
+    0.487,
     0.655
    ],
    "touchdowns": [
     2,
-    2
+    4
    ],
    "cadence_hz": [
-    1.0,
-    0.96
+    0.98,
+    1.28
    ],
    "stride_s": [
-    1.0,
-    1.04
+    1.02,
+    0.78
    ],
    "alternation_between_left_td": [
     1
@@ -915,9 +869,9 @@
    "frames": 137,
    "seconds": 2.74,
    "root_z": [
-    0.5836,
-    0.6252,
-    0.6504
+    0.5796,
+    0.6201,
+    0.6547
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -925,67 +879,63 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "lumbar_yaw_joint: +0.571 (limit -1.00..+1.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.591 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0619,
-   "yaw_start_deg": -26.0,
-   "yaw_net_change_deg": 49.0,
-   "qd_max": 12.85,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0874,
+   "yaw_start_deg": -29.6,
+   "yaw_net_change_deg": 58.8,
+   "qd_max": 12.76,
    "q_mean": [
-    -0.026,
-    0.017,
-    0.214,
-    -0.049,
-    -0.095,
-    -0.016,
-    1.994,
-    -0.195,
-    0.377,
-    0.389,
-    -0.101,
-    -0.126,
-    -0.109,
-    1.944,
-    -0.128,
-    -0.241,
-    0.202,
-    -0.09,
+    -0.038,
+    0.008,
+    0.218,
+    -0.045,
+    -0.387,
+    0.095,
+    0.527,
+    0.029,
+    0.011,
     -0.006,
-    0.057,
-    0.252,
-    -0.181,
-    -0.039,
-    -0.058,
-    0.127,
-    -0.058,
-    0.373,
-    -0.044,
-    0.183
+    -0.125,
+    -0.333,
+    0.072,
+    0.58,
+    0.023,
+    -0.01,
+    -0.015,
+    -0.083,
+    -0.022,
+    0.051,
+    0.278,
+    -0.149,
+    -0.04,
+    -0.066,
+    0.13,
+    -0.054,
+    0.379,
+    -0.059,
+    0.182
    ],
-   "root_vel_max": 1.42,
+   "root_vel_max": 2.55,
    "contact_frac": [
-    0.584,
-    0.686
+    0.431,
+    0.745
    ],
    "touchdowns": [
-    3,
-    3
+    2,
+    4
    ],
    "cadence_hz": [
-    1.45,
-    0.96
+    0.98,
+    1.28
    ],
    "stride_s": [
-    0.69,
-    1.04
+    1.02,
+    0.78
    ],
    "alternation_between_left_td": [
-    0,
     1
    ],
    "gait_resolved": true,
@@ -998,80 +948,79 @@
    "frames": 113,
    "seconds": 2.26,
    "root_z": [
-    0.5757,
-    0.6253,
-    0.6498
+    0.5671,
+    0.6153,
+    0.6557
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
     0.0
    ],
-   "joint_over_limit_max_rad": 0.0301,
-   "joint_over_limit_worst": "right_ankle_roll_joint: +0.530 (limit -0.50..+0.50)",
-   "joint_over_limit_n": 1,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0679,
-   "yaw_start_deg": 30.9,
-   "yaw_net_change_deg": -58.4,
-   "qd_max": 14.75,
+   "joint_over_limit_max_rad": 0.0,
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.626 (limit -1.00..+1.00)",
+   "joint_over_limit_n": 0,
+   "at_limit_frame_frac": 0.009,
+   "at_limit_joints": [],
+   "tilt_max": 0.1161,
+   "yaw_start_deg": 41.1,
+   "yaw_net_change_deg": -75.6,
+   "qd_max": 15.32,
    "q_mean": [
+    0.015,
+    0.02,
+    0.246,
+    -0.064,
+    -0.321,
+    0.066,
+    0.546,
     0.024,
-    0.021,
-    0.244,
-    -0.026,
-    -0.102,
-    -0.052,
-    1.994,
-    -0.206,
-    0.386,
-    0.35,
-    -0.163,
-    -0.152,
-    -0.163,
-    1.95,
-    -0.181,
-    -0.271,
-    0.125,
-    -0.004,
-    -0.023,
-    0.071,
-    0.318,
-    -0.099,
-    -0.062,
-    0.028,
-    0.087,
+    0.018,
+    -0.007,
+    -0.159,
+    -0.256,
+    0.032,
+    0.632,
+    0.014,
     -0.021,
-    0.307,
-    -0.11,
-    0.161
+    -0.015,
+    0.003,
+    -0.03,
+    0.065,
+    0.351,
+    -0.093,
+    -0.063,
+    0.019,
+    0.099,
+    -0.017,
+    0.315,
+    -0.115,
+    0.159
    ],
-   "root_vel_max": 1.53,
+   "root_vel_max": 2.61,
    "contact_frac": [
-    0.469,
-    0.814
+    0.354,
+    0.858
    ],
    "touchdowns": [
-    2,
+    4,
     2
    ],
    "cadence_hz": [
-    0.57,
+    1.61,
     1.11
    ],
    "stride_s": [
-    1.74,
+    0.62,
     0.9
    ],
    "alternation_between_left_td": [
-    2
+    0,
+    1,
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "08_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_06_stageii.npz",
    "src_fps": 120.0
@@ -1080,77 +1029,77 @@
    "frames": 108,
    "seconds": 2.16,
    "root_z": [
-    0.5801,
-    0.6256,
-    0.6526
+    0.5709,
+    0.6164,
+    0.6569
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
     0.0
    ],
-   "joint_over_limit_max_rad": 0.0639,
-   "joint_over_limit_worst": "right_ankle_roll_joint: +0.564 (limit -0.50..+0.50)",
-   "joint_over_limit_n": 2,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0692,
-   "yaw_start_deg": -8.9,
-   "yaw_net_change_deg": 45.2,
-   "qd_max": 14.29,
+   "joint_over_limit_max_rad": 0.0,
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.223 (limit -1.00..+1.00)",
+   "joint_over_limit_n": 0,
+   "at_limit_frame_frac": 0.019,
+   "at_limit_joints": [],
+   "tilt_max": 0.1127,
+   "yaw_start_deg": -9.3,
+   "yaw_net_change_deg": 53.3,
+   "qd_max": 14.73,
    "q_mean": [
-    -0.08,
-    0.038,
-    0.238,
-    -0.027,
-    -0.108,
-    -0.008,
-    1.993,
-    -0.156,
-    0.389,
-    0.317,
-    -0.03,
-    -0.139,
-    -0.085,
-    1.934,
-    -0.139,
-    -0.257,
-    0.096,
-    -0.097,
-    -0.005,
-    0.047,
-    0.275,
-    -0.164,
-    -0.035,
-    -0.069,
-    0.112,
-    -0.049,
-    0.361,
+    -0.088,
+    0.028,
+    0.237,
+    -0.072,
+    -0.351,
+    0.079,
+    0.549,
+    0.025,
+    0.015,
+    -0.006,
+    -0.123,
+    -0.282,
+    0.049,
+    0.596,
+    0.018,
+    -0.019,
+    -0.015,
+    -0.09,
     -0.022,
-    0.19
+    0.041,
+    0.303,
+    -0.143,
+    -0.036,
+    -0.076,
+    0.118,
+    -0.046,
+    0.371,
+    -0.045,
+    0.188
    ],
-   "root_vel_max": 1.57,
+   "root_vel_max": 2.43,
    "contact_frac": [
-    0.463,
-    0.694
+    0.343,
+    0.806
    ],
    "touchdowns": [
-    0,
-    3
+    2,
+    2
    ],
    "cadence_hz": [
-    1.11
+    1.14,
+    1.06
    ],
    "stride_s": [
-    null,
-    0.9
+    0.88,
+    0.94
    ],
-   "alternation_between_left_td": [],
-   "gait_resolved": false,
-   "walk_like": false,
+   "alternation_between_left_td": [
+    1
+   ],
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "08_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/08_08_stageii.npz",
    "src_fps": 120.0
@@ -1159,76 +1108,74 @@
    "frames": 112,
    "seconds": 2.24,
    "root_z": [
-    0.576,
-    0.625,
-    0.6486
+    0.5613,
+    0.6177,
+    0.6525
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
     0.0
    ],
-   "joint_over_limit_max_rad": 0.0677,
-   "joint_over_limit_worst": "right_ankle_roll_joint: +0.568 (limit -0.50..+0.50)",
-   "joint_over_limit_n": 3,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.072,
-   "yaw_start_deg": -28.3,
-   "yaw_net_change_deg": 48.8,
-   "qd_max": 13.25,
+   "joint_over_limit_max_rad": 0.0,
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.543 (limit -1.00..+1.00)",
+   "joint_over_limit_n": 0,
+   "at_limit_frame_frac": 0.027,
+   "at_limit_joints": [],
+   "tilt_max": 0.1326,
+   "yaw_start_deg": -36.2,
+   "yaw_net_change_deg": 64.4,
+   "qd_max": 13.34,
    "q_mean": [
-    0.009,
-    0.044,
-    0.224,
-    -0.04,
-    -0.121,
-    -0.04,
-    1.996,
-    -0.193,
-    0.385,
-    0.356,
-    -0.133,
-    -0.162,
-    -0.15,
-    1.96,
-    -0.169,
-    -0.283,
-    0.102,
-    -0.021,
-    0.004,
-    0.094,
-    0.268,
-    -0.19,
-    -0.033,
-    0.0,
-    0.112,
-    -0.0,
-    0.406,
-    -0.026,
-    0.201
+    0.001,
+    0.026,
+    0.229,
+    -0.077,
+    -0.311,
+    0.06,
+    0.545,
+    0.021,
+    0.014,
+    -0.012,
+    -0.137,
+    -0.265,
+    0.043,
+    0.629,
+    0.023,
+    -0.027,
+    -0.028,
+    -0.014,
+    -0.014,
+    0.087,
+    0.291,
+    -0.163,
+    -0.034,
+    -0.007,
+    0.117,
+    0.003,
+    0.407,
+    -0.051,
+    0.198
    ],
-   "root_vel_max": 1.67,
+   "root_vel_max": 2.74,
    "contact_frac": [
-    0.509,
-    0.679
+    0.446,
+    0.732
    ],
    "touchdowns": [
-    2,
+    3,
     2
    ],
    "cadence_hz": [
-    1.43,
-    1.06
+    1.69,
+    1.09
    ],
    "stride_s": [
-    0.7,
-    0.94
+    0.59,
+    0.92
    ],
    "alternation_between_left_td": [
+    0,
     1
    ],
    "gait_resolved": true,
@@ -1241,79 +1188,77 @@
    "frames": 186,
    "seconds": 3.72,
    "root_z": [
-    0.5626,
-    0.6119,
-    0.6381
+    0.4855,
+    0.5694,
+    0.6369
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
     0.0,
     0.0
    ],
-   "joint_over_limit_max_rad": 0.0906,
-   "joint_over_limit_worst": "right_ankle_roll_joint: +0.591 (limit -0.50..+0.50)",
-   "joint_over_limit_n": 7,
-   "at_limit_frame_frac": 0.737,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0903,
-   "yaw_start_deg": -71.7,
-   "yaw_net_change_deg": -31.0,
-   "qd_max": 10.55,
+   "joint_over_limit_max_rad": 0.0,
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.294 (limit -1.00..+1.00)",
+   "joint_over_limit_n": 0,
+   "at_limit_frame_frac": 0.043,
+   "at_limit_joints": [],
+   "tilt_max": 0.3306,
+   "yaw_start_deg": -65.1,
+   "yaw_net_change_deg": -33.1,
+   "qd_max": 10.49,
    "q_mean": [
-    -0.041,
-    -0.052,
-    0.389,
-    -0.162,
-    -0.181,
-    -0.36,
-    1.842,
-    -0.001,
-    0.173,
-    -0.197,
-    -0.225,
-    -0.28,
-    -0.427,
-    1.763,
-    0.035,
-    0.04,
-    -0.253,
-    -0.001,
-    0.051,
-    0.012,
-    0.511,
-    -0.136,
-    -0.031,
-    -0.053,
+    -0.044,
     -0.023,
-    0.025,
-    0.506,
-    -0.099,
-    0.101
+    0.297,
+    -0.316,
+    -0.157,
+    -0.368,
+    1.018,
+    0.062,
+    0.016,
+    -0.04,
+    -0.291,
+    -0.155,
+    -0.363,
+    0.865,
+    0.023,
+    -0.036,
+    -0.081,
+    -0.005,
+    0.005,
+    0.018,
+    0.534,
+    -0.117,
+    -0.031,
+    -0.049,
+    0.015,
+    0.022,
+    0.524,
+    -0.101,
+    0.098
    ],
-   "root_vel_max": 1.48,
+   "root_vel_max": 2.45,
    "contact_frac": [
-    0.715,
-    0.677
+    0.672,
+    0.5
    ],
    "touchdowns": [
-    4,
-    4
+    5,
+    8
    ],
    "cadence_hz": [
-    3.12,
-    0.89
+    1.75,
+    2.38
    ],
    "stride_s": [
-    0.32,
-    1.12
+    0.57,
+    0.42
    ],
    "alternation_between_left_td": [
-    0,
-    3,
-    0
+    2,
+    1,
+    2,
+    1
    ],
    "gait_resolved": true,
    "walk_like": false,
@@ -1325,9 +1270,9 @@
    "frames": 139,
    "seconds": 2.78,
    "root_z": [
-    0.5617,
-    0.6082,
-    0.6254
+    0.5804,
+    0.6134,
+    0.6393
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1335,66 +1280,63 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.234 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.388,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0765,
-   "yaw_start_deg": -12.5,
-   "yaw_net_change_deg": 25.0,
-   "qd_max": 10.83,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.091,
+   "yaw_start_deg": -18.6,
+   "yaw_net_change_deg": 34.5,
+   "qd_max": 9.73,
    "q_mean": [
-    -0.044,
-    -0.006,
-    0.334,
-    -0.088,
-    -0.224,
-    -0.169,
-    1.965,
-    0.054,
-    0.082,
-    -0.117,
-    -0.139,
-    -0.204,
-    -0.138,
-    1.92,
+    -0.037,
+    0.008,
+    0.279,
+    -0.129,
+    -0.151,
+    -0.13,
+    0.635,
+    -0.017,
+    0.011,
+    -0.024,
+    -0.1,
+    -0.152,
+    -0.12,
+    0.61,
+    -0.022,
+    -0.01,
+    -0.007,
+    0.02,
+    0.008,
+    -0.077,
+    0.556,
+    -0.156,
     0.026,
-    -0.074,
-    0.108,
-    0.027,
-    0.074,
-    -0.083,
-    0.531,
-    -0.196,
-    0.025,
-    -0.143,
-    0.062,
-    -0.038,
-    0.582,
-    -0.078,
+    -0.132,
+    0.089,
+    -0.046,
+    0.607,
+    -0.069,
     0.056
    ],
-   "root_vel_max": 1.2,
+   "root_vel_max": 1.34,
    "contact_frac": [
-    0.647,
-    0.683
+    0.54,
+    0.576
    ],
    "touchdowns": [
-    3,
-    2
+    2,
+    3
    ],
    "cadence_hz": [
-    1.32,
-    0.89
+    0.86,
+    0.86
    ],
    "stride_s": [
-    0.76,
-    1.12
+    1.16,
+    1.16
    ],
    "alternation_between_left_td": [
-    1,
     1
    ],
    "gait_resolved": true,
@@ -1407,9 +1349,9 @@
    "frames": 159,
    "seconds": 3.18,
    "root_z": [
-    0.5709,
-    0.6106,
-    0.6276
+    0.5772,
+    0.6117,
+    0.6388
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1417,72 +1359,69 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.049 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.421,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0711,
-   "yaw_start_deg": -7.5,
-   "yaw_net_change_deg": 15.5,
-   "qd_max": 10.43,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0824,
+   "yaw_start_deg": -5.4,
+   "yaw_net_change_deg": 18.3,
+   "qd_max": 10.17,
    "q_mean": [
-    -0.008,
     -0.002,
-    0.343,
-    -0.114,
-    -0.222,
-    -0.165,
-    1.962,
-    0.032,
-    0.085,
-    -0.096,
-    -0.152,
-    -0.199,
-    -0.156,
-    1.903,
-    0.038,
-    -0.07,
-    0.117,
-    0.076,
-    0.07,
-    -0.068,
-    0.503,
+    0.007,
+    0.286,
+    -0.131,
     -0.153,
-    0.016,
-    -0.094,
-    0.047,
-    -0.048,
-    0.554,
+    -0.112,
+    0.645,
+    -0.014,
+    0.019,
+    -0.022,
     -0.107,
-    0.04
+    -0.153,
+    -0.102,
+    0.596,
+    -0.018,
+    -0.003,
+    -0.012,
+    0.069,
+    0.002,
+    -0.062,
+    0.557,
+    -0.14,
+    0.016,
+    -0.077,
+    0.076,
+    -0.061,
+    0.595,
+    -0.092,
+    0.039
    ],
-   "root_vel_max": 1.17,
+   "root_vel_max": 1.33,
    "contact_frac": [
-    0.597,
-    0.723
+    0.509,
+    0.616
    ],
    "touchdowns": [
-    5,
-    2
+    4,
+    3
    ],
    "cadence_hz": [
-    1.75,
-    0.54
+    1.25,
+    0.88
    ],
    "stride_s": [
-    0.57,
-    1.86
+    0.8,
+    1.13
    ],
    "alternation_between_left_td": [
-    0,
     1,
     0,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_02",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_02_stageii.npz",
    "src_fps": 120.0
@@ -1491,9 +1430,9 @@
    "frames": 168,
    "seconds": 3.36,
    "root_z": [
-    0.5642,
-    0.6076,
-    0.6273
+    0.568,
+    0.6059,
+    0.6325
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1501,70 +1440,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.073 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.458,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0743,
-   "yaw_start_deg": -10.5,
-   "yaw_net_change_deg": 7.8,
-   "qd_max": 10.95,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0938,
+   "yaw_start_deg": -9.0,
+   "yaw_net_change_deg": 9.7,
+   "qd_max": 10.69,
    "q_mean": [
-    -0.018,
-    -0.03,
-    0.345,
-    -0.121,
-    -0.217,
-    -0.153,
-    1.953,
-    0.029,
-    0.074,
-    -0.105,
-    -0.158,
-    -0.21,
-    -0.147,
-    1.897,
-    0.027,
-    -0.073,
-    0.106,
-    0.073,
-    0.068,
-    -0.087,
-    0.554,
+    -0.009,
+    -0.013,
+    0.288,
     -0.148,
-    0.003,
-    -0.108,
-    0.036,
-    -0.053,
-    0.587,
+    -0.155,
+    -0.098,
+    0.647,
+    -0.01,
+    0.015,
+    -0.023,
     -0.115,
-    0.04
+    -0.158,
+    -0.096,
+    0.607,
+    -0.019,
+    -0.008,
+    -0.011,
+    0.068,
+    -0.001,
+    -0.079,
+    0.623,
+    -0.131,
+    0.003,
+    -0.087,
+    0.068,
+    -0.067,
+    0.633,
+    -0.103,
+    0.039
    ],
-   "root_vel_max": 1.18,
+   "root_vel_max": 1.44,
    "contact_frac": [
-    0.631,
-    0.667
+    0.56,
+    0.595
    ],
    "touchdowns": [
-    6,
+    5,
     3
    ],
    "cadence_hz": [
-    1.43,
-    1.85
+    1.22,
+    0.86
    ],
    "stride_s": [
-    0.7,
-    0.54
+    0.82,
+    1.16
    ],
    "alternation_between_left_td": [
+    1,
+    1,
     0,
-    1,
-    1,
-    1,
-    0
+    1
    ],
    "gait_resolved": true,
    "walk_like": true,
@@ -1576,9 +1512,9 @@
    "frames": 170,
    "seconds": 3.4,
    "root_z": [
-    0.5637,
-    0.6081,
-    0.6322
+    0.5694,
+    0.6092,
+    0.6349
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1586,70 +1522,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.312 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.329,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0709,
-   "yaw_start_deg": 10.2,
-   "yaw_net_change_deg": -0.6,
-   "qd_max": 10.1,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0934,
+   "yaw_start_deg": 14.1,
+   "yaw_net_change_deg": 2.6,
+   "qd_max": 9.32,
    "q_mean": [
-    -0.013,
-    -0.029,
-    0.315,
-    -0.119,
-    -0.207,
-    -0.152,
-    1.939,
-    0.038,
-    0.061,
-    -0.11,
-    -0.164,
-    -0.206,
-    -0.145,
-    1.894,
-    0.018,
-    -0.07,
-    0.095,
-    0.083,
-    0.048,
-    -0.064,
-    0.562,
-    -0.129,
+    -0.004,
+    -0.009,
+    0.281,
+    -0.142,
+    -0.153,
+    -0.109,
+    0.643,
+    -0.011,
+    0.016,
+    -0.023,
+    -0.121,
+    -0.154,
+    -0.097,
+    0.615,
+    -0.017,
+    -0.009,
+    -0.014,
+    0.075,
+    -0.016,
+    -0.054,
+    0.627,
+    -0.118,
     0.01,
-    -0.096,
-    0.041,
-    -0.052,
-    0.556,
-    -0.125,
-    0.053
+    -0.077,
+    0.076,
+    -0.064,
+    0.605,
+    -0.119,
+    0.052
    ],
-   "root_vel_max": 1.26,
+   "root_vel_max": 1.48,
    "contact_frac": [
-    0.594,
-    0.812
+    0.512,
+    0.6
    ],
    "touchdowns": [
-    4,
-    1
+    3,
+    3
    ],
    "cadence_hz": [
-    1.39
+    0.88,
+    0.86
    ],
    "stride_s": [
-    0.72,
-    null
+    1.13,
+    1.16
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0
+    1,
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_04",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_04_stageii.npz",
    "src_fps": 120.0
@@ -1658,9 +1592,9 @@
    "frames": 168,
    "seconds": 3.36,
    "root_z": [
-    0.5695,
-    0.6133,
-    0.629
+    0.5739,
+    0.6156,
+    0.6369
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1668,67 +1602,63 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.081 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.363,
+   "at_limit_frame_frac": 0.0,
    "at_limit_joints": [],
-   "tilt_max": 0.068,
-   "yaw_start_deg": -0.8,
-   "yaw_net_change_deg": 11.4,
-   "qd_max": 9.35,
+   "tilt_max": 0.091,
+   "yaw_start_deg": 1.6,
+   "yaw_net_change_deg": 14.8,
+   "qd_max": 9.45,
    "q_mean": [
-    0.015,
-    -0.011,
-    0.318,
-    -0.119,
-    -0.202,
-    -0.183,
-    1.946,
-    0.054,
-    0.067,
+    0.023,
+    0.003,
+    0.281,
     -0.12,
-    -0.164,
-    -0.199,
-    -0.179,
-    1.896,
-    0.03,
-    -0.062,
-    0.088,
-    0.075,
-    0.063,
-    -0.041,
-    0.475,
-    -0.164,
-    0.04,
-    -0.097,
-    0.052,
-    -0.044,
-    0.531,
-    -0.121,
+    -0.15,
+    -0.191,
+    0.67,
+    -0.027,
+    0.024,
+    -0.033,
+    -0.113,
+    -0.15,
+    -0.174,
+    0.631,
+    -0.028,
+    -0.002,
+    -0.017,
+    0.067,
+    -0.003,
+    -0.029,
+    0.549,
+    -0.152,
+    0.041,
+    -0.077,
+    0.084,
+    -0.055,
+    0.584,
+    -0.114,
     0.062
    ],
-   "root_vel_max": 1.16,
+   "root_vel_max": 1.4,
    "contact_frac": [
-    0.577,
-    0.726
+    0.5,
+    0.595
    ],
    "touchdowns": [
-    6,
+    2,
     3
    ],
    "cadence_hz": [
-    1.32,
-    0.88
+    0.86,
+    0.84
    ],
    "stride_s": [
-    0.76,
-    1.14
+    1.16,
+    1.19
    ],
    "alternation_between_left_td": [
-    1,
-    0,
-    1,
-    0,
     1
    ],
    "gait_resolved": true,
@@ -1741,9 +1671,9 @@
    "frames": 173,
    "seconds": 3.46,
    "root_z": [
-    0.5811,
-    0.6113,
-    0.6311
+    0.586,
+    0.6123,
+    0.637
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1751,69 +1681,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.243 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.324,
+   "at_limit_frame_frac": 0.0,
    "at_limit_joints": [],
-   "tilt_max": 0.0629,
-   "yaw_start_deg": 9.7,
-   "yaw_net_change_deg": -3.1,
-   "qd_max": 11.28,
+   "tilt_max": 0.0833,
+   "yaw_start_deg": 12.5,
+   "yaw_net_change_deg": -3.4,
+   "qd_max": 9.63,
    "q_mean": [
-    -0.01,
+    -0.0,
+    0.001,
+    0.28,
+    -0.144,
+    -0.166,
+    -0.064,
+    0.623,
+    -0.003,
+    0.01,
+    -0.017,
+    -0.104,
+    -0.159,
+    -0.06,
+    0.592,
     -0.013,
-    0.322,
-    -0.111,
-    -0.211,
-    -0.151,
-    1.939,
-    0.04,
-    0.06,
-    -0.11,
-    -0.155,
-    -0.198,
-    -0.114,
-    1.873,
-    0.037,
-    -0.07,
-    0.136,
-    0.075,
-    0.061,
-    -0.072,
-    0.526,
-    -0.158,
+    -0.01,
+    -0.008,
+    0.066,
+    -0.004,
+    -0.061,
+    0.592,
+    -0.141,
     0.029,
-    -0.088,
-    0.032,
-    -0.039,
-    0.53,
-    -0.145,
+    -0.068,
+    0.066,
+    -0.052,
+    0.582,
+    -0.13,
     0.054
    ],
-   "root_vel_max": 1.12,
+   "root_vel_max": 1.38,
    "contact_frac": [
-    0.595,
-    0.74
+    0.497,
+    0.601
    ],
    "touchdowns": [
-    5,
-    1
+    3,
+    3
    ],
    "cadence_hz": [
-    1.75
+    0.87,
+    0.87
    ],
    "stride_s": [
-    0.57,
-    null
+    1.15,
+    1.15
    ],
    "alternation_between_left_td": [
     1,
-    0,
-    0,
-    0
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_06",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_06_stageii.npz",
    "src_fps": 120.0
@@ -1822,9 +1751,9 @@
    "frames": 140,
    "seconds": 2.8,
    "root_z": [
-    0.5701,
+    0.566,
     0.6112,
-    0.6306
+    0.6365
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1832,70 +1761,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.246 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.457,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0757,
-   "yaw_start_deg": -13.3,
-   "yaw_net_change_deg": 25.8,
-   "qd_max": 11.31,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0871,
+   "yaw_start_deg": -17.3,
+   "yaw_net_change_deg": 35.5,
+   "qd_max": 10.45,
    "q_mean": [
-    -0.018,
-    0.0,
-    0.291,
-    -0.1,
-    -0.22,
-    -0.118,
-    1.946,
-    0.012,
-    0.074,
+    -0.009,
+    0.011,
+    0.268,
+    -0.136,
+    -0.164,
+    -0.056,
+    0.62,
+    -0.004,
+    0.015,
+    -0.014,
+    -0.117,
+    -0.163,
+    -0.053,
+    0.595,
+    -0.009,
+    -0.008,
+    -0.011,
+    0.045,
+    0.004,
+    -0.057,
+    0.572,
+    -0.166,
+    0.019,
+    -0.095,
+    0.096,
     -0.07,
-    -0.157,
-    -0.198,
-    -0.147,
-    1.911,
-    0.03,
-    -0.074,
-    0.107,
-    0.051,
-    0.082,
-    -0.067,
-    0.504,
-    -0.196,
-    0.02,
-    -0.113,
-    0.068,
-    -0.059,
-    0.559,
-    -0.094,
-    0.071
+    0.612,
+    -0.095,
+    0.07
    ],
-   "root_vel_max": 1.22,
+   "root_vel_max": 1.46,
    "contact_frac": [
-    0.586,
-    0.779
+    0.543,
+    0.629
    ],
    "touchdowns": [
-    4,
-    0
+    2,
+    3
    ],
    "cadence_hz": [
-    2.78
+    0.94,
+    0.85
    ],
    "stride_s": [
-    0.36,
-    null
+    1.06,
+    1.18
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_07",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_07_stageii.npz",
    "src_fps": 120.0
@@ -1904,9 +1830,9 @@
    "frames": 180,
    "seconds": 3.6,
    "root_z": [
-    0.5845,
-    0.6136,
-    0.6331
+    0.5938,
+    0.616,
+    0.641
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1914,72 +1840,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.252 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.567,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0541,
-   "yaw_start_deg": 12.7,
-   "yaw_net_change_deg": -1.6,
-   "qd_max": 10.36,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0822,
+   "yaw_start_deg": 15.0,
+   "yaw_net_change_deg": 0.6,
+   "qd_max": 9.9,
    "q_mean": [
-    -0.022,
     -0.014,
-    0.292,
-    -0.113,
-    -0.217,
-    -0.116,
-    1.959,
+    -0.002,
+    0.271,
+    -0.133,
+    -0.168,
+    -0.033,
+    0.617,
+    0.0,
+    0.019,
+    -0.01,
+    -0.108,
+    -0.17,
+    -0.031,
+    0.576,
+    -0.006,
+    -0.002,
+    -0.01,
+    0.053,
+    -0.008,
+    -0.068,
+    0.573,
+    -0.138,
     0.001,
-    0.093,
-    -0.057,
-    -0.134,
-    -0.205,
+    -0.093,
+    0.078,
     -0.112,
-    1.928,
-    0.016,
-    -0.081,
-    0.119,
-    0.059,
-    0.055,
-    -0.077,
-    0.509,
-    -0.151,
-    0.001,
-    -0.113,
-    0.046,
-    -0.099,
-    0.508,
-    -0.129,
-    0.059
+    0.554,
+    -0.116,
+    0.058
    ],
-   "root_vel_max": 1.11,
+   "root_vel_max": 1.32,
    "contact_frac": [
-    0.578,
-    0.706
+    0.456,
+    0.622
    ],
    "touchdowns": [
-    6,
-    1
+    3,
+    3
    ],
    "cadence_hz": [
-    2.63
+    0.91,
+    0.88
    ],
    "stride_s": [
-    0.38,
-    null
+    1.1,
+    1.14
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0,
-    0,
-    0
+    1,
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_08",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_08_stageii.npz",
    "src_fps": 120.0
@@ -1988,9 +1910,9 @@
    "frames": 150,
    "seconds": 3.0,
    "root_z": [
-    0.5859,
-    0.6149,
-    0.6302
+    0.5973,
+    0.6158,
+    0.6368
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -1998,72 +1920,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.046 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.513,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0523,
-   "yaw_start_deg": 2.8,
-   "yaw_net_change_deg": -13.2,
-   "qd_max": 9.36,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0826,
+   "yaw_start_deg": 0.3,
+   "yaw_net_change_deg": -13.6,
+   "qd_max": 8.98,
    "q_mean": [
-    -0.049,
-    -0.025,
-    0.3,
-    -0.119,
-    -0.22,
-    -0.167,
-    1.972,
-    0.011,
-    0.105,
-    -0.069,
+    -0.042,
+    -0.01,
+    0.277,
+    -0.129,
+    -0.15,
     -0.132,
-    -0.215,
-    -0.177,
-    1.925,
-    0.021,
-    -0.081,
-    0.089,
-    0.045,
-    0.054,
-    -0.074,
-    0.533,
-    -0.136,
-    0.006,
+    0.662,
+    -0.018,
+    0.029,
+    -0.023,
     -0.116,
-    0.025,
-    -0.053,
-    0.496,
-    -0.126,
-    0.059
+    -0.151,
+    -0.125,
+    0.6,
+    -0.02,
+    0.004,
+    -0.017,
+    0.039,
+    -0.011,
+    -0.064,
+    0.604,
+    -0.131,
+    0.006,
+    -0.097,
+    0.062,
+    -0.065,
+    0.55,
+    -0.115,
+    0.058
    ],
-   "root_vel_max": 1.09,
+   "root_vel_max": 1.36,
    "contact_frac": [
-    0.533,
-    0.707
+    0.413,
+    0.673
    ],
    "touchdowns": [
-    5,
+    3,
     2
    ],
    "cadence_hz": [
-    1.82,
-    0.91
+    0.91,
+    0.89
    ],
    "stride_s": [
-    0.55,
-    1.1
+    1.1,
+    1.12
    ],
    "alternation_between_left_td": [
-    0,
     1,
-    0,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_09",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_09_stageii.npz",
    "src_fps": 120.0
@@ -2072,9 +1990,9 @@
    "frames": 170,
    "seconds": 3.4,
    "root_z": [
-    0.5755,
-    0.6123,
-    0.6282
+    0.5859,
+    0.613,
+    0.6369
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2082,71 +2000,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.136 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.4,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0609,
-   "yaw_start_deg": -10.5,
-   "yaw_net_change_deg": 1.1,
-   "qd_max": 9.8,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0796,
+   "yaw_start_deg": -9.9,
+   "yaw_net_change_deg": 2.1,
+   "qd_max": 9.74,
    "q_mean": [
-    -0.035,
-    -0.016,
-    0.32,
-    -0.129,
-    -0.205,
-    -0.16,
-    1.953,
-    0.016,
-    0.088,
-    -0.082,
-    -0.15,
-    -0.204,
-    -0.156,
-    1.915,
-    0.018,
-    -0.076,
-    0.098,
-    0.058,
-    0.054,
-    -0.065,
-    0.514,
-    -0.137,
-    -0.003,
+    -0.027,
+    -0.001,
+    0.282,
+    -0.134,
+    -0.151,
+    -0.114,
+    0.645,
+    -0.015,
+    0.021,
+    -0.021,
     -0.111,
-    0.038,
-    -0.05,
-    0.533,
-    -0.127,
-    0.064
+    -0.153,
+    -0.107,
+    0.602,
+    -0.02,
+    -0.003,
+    -0.011,
+    0.049,
+    -0.008,
+    -0.054,
+    0.585,
+    -0.13,
+    -0.003,
+    -0.091,
+    0.074,
+    -0.062,
+    0.585,
+    -0.119,
+    0.063
    ],
-   "root_vel_max": 1.14,
+   "root_vel_max": 1.29,
    "contact_frac": [
-    0.618,
-    0.676
+    0.494,
+    0.612
    ],
    "touchdowns": [
-    5,
-    1
+    2,
+    3
    ],
    "cadence_hz": [
-    1.35
+    0.93,
+    0.9
    ],
    "stride_s": [
-    0.74,
-    null
+    1.08,
+    1.11
    ],
    "alternation_between_left_td": [
-    1,
-    0,
-    0,
-    0
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_10",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_10_stageii.npz",
    "src_fps": 120.0
@@ -2155,9 +2069,9 @@
    "frames": 150,
    "seconds": 3.0,
    "root_z": [
-    0.5934,
-    0.612,
-    0.6299
+    0.5978,
+    0.6167,
+    0.6388
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2165,73 +2079,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.204 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.533,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0472,
-   "yaw_start_deg": 5.0,
-   "yaw_net_change_deg": -15.0,
-   "qd_max": 8.61,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0721,
+   "yaw_start_deg": 9.3,
+   "yaw_net_change_deg": -23.8,
+   "qd_max": 8.36,
    "q_mean": [
-    -0.008,
-    -0.038,
-    0.312,
-    -0.106,
-    -0.221,
-    -0.095,
-    1.969,
-    -0.032,
-    0.095,
-    -0.023,
-    -0.142,
-    -0.22,
-    -0.121,
-    1.903,
-    0.01,
-    -0.08,
-    0.135,
-    0.094,
-    0.034,
-    -0.048,
-    0.529,
-    -0.135,
+    -0.003,
+    -0.017,
+    0.28,
+    -0.128,
+    -0.193,
+    -0.003,
+    0.615,
+    0.008,
+    0.022,
+    -0.006,
+    -0.109,
+    -0.177,
+    -0.014,
+    0.563,
+    -0.002,
+    0.004,
+    -0.012,
+    0.086,
+    -0.02,
+    -0.04,
+    0.589,
+    -0.123,
     0.019,
-    -0.084,
-    0.02,
-    -0.072,
-    0.496,
-    -0.2,
+    -0.065,
+    0.053,
+    -0.085,
+    0.538,
+    -0.17,
     0.04
    ],
-   "root_vel_max": 1.11,
+   "root_vel_max": 1.28,
    "contact_frac": [
-    0.607,
-    0.707
+    0.427,
+    0.647
    ],
    "touchdowns": [
-    6,
+    3,
     2
    ],
    "cadence_hz": [
-    2.63,
-    0.88
+    0.89,
+    0.89
    ],
    "stride_s": [
-    0.38,
-    1.14
+    1.12,
+    1.12
    ],
    "alternation_between_left_td": [
-    0,
     1,
-    0,
-    1,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_11",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_11_stageii.npz",
    "src_fps": 120.0
@@ -2240,9 +2149,9 @@
    "frames": 155,
    "seconds": 3.1,
    "root_z": [
-    0.584,
-    0.614,
-    0.6323
+    0.5988,
+    0.6161,
+    0.6413
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2250,72 +2159,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.175 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.452,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0552,
-   "yaw_start_deg": 7.7,
-   "yaw_net_change_deg": -18.8,
-   "qd_max": 9.53,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0696,
+   "yaw_start_deg": 6.2,
+   "yaw_net_change_deg": -22.8,
+   "qd_max": 9.21,
    "q_mean": [
-    -0.017,
-    -0.02,
-    0.321,
-    -0.095,
-    -0.231,
-    -0.131,
-    1.965,
-    0.038,
-    0.092,
-    -0.065,
-    -0.152,
-    -0.213,
-    -0.088,
-    1.881,
-    0.041,
-    -0.081,
-    0.159,
-    0.085,
-    0.051,
-    -0.068,
-    0.528,
-    -0.132,
+    -0.008,
+    -0.005,
+    0.282,
+    -0.138,
+    -0.186,
+    -0.013,
+    0.606,
+    0.005,
+    0.011,
+    -0.008,
+    -0.09,
+    -0.182,
+    -0.014,
+    0.563,
+    -0.004,
+    -0.005,
+    -0.007,
+    0.077,
+    -0.008,
+    -0.059,
+    0.593,
+    -0.124,
     0.012,
-    -0.095,
-    0.029,
-    -0.063,
-    0.48,
-    -0.163,
-    0.054
+    -0.076,
+    0.062,
+    -0.076,
+    0.529,
+    -0.141,
+    0.053
    ],
-   "root_vel_max": 1.08,
+   "root_vel_max": 1.3,
    "contact_frac": [
-    0.548,
-    0.787
+    0.445,
+    0.658
    ],
    "touchdowns": [
-    6,
-    0
+    3,
+    2
    ],
    "cadence_hz": [
-    2.5
+    0.92,
+    0.91
    ],
    "stride_s": [
-    0.4,
-    null
+    1.09,
+    1.1
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0,
-    0,
-    0
+    1,
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_12",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_12_stageii.npz",
    "src_fps": 120.0
@@ -2324,9 +2229,9 @@
    "frames": 179,
    "seconds": 3.58,
    "root_z": [
-    0.5811,
-    0.6138,
-    0.6374
+    0.5842,
+    0.6134,
+    0.6376
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2334,73 +2239,69 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.284 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.469,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0597,
-   "yaw_start_deg": 11.5,
-   "yaw_net_change_deg": -21.6,
-   "qd_max": 10.06,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0806,
+   "yaw_start_deg": 15.8,
+   "yaw_net_change_deg": -25.3,
+   "qd_max": 9.67,
    "q_mean": [
-    -0.018,
-    -0.026,
-    0.311,
-    -0.138,
-    -0.198,
-    -0.151,
-    1.955,
-    0.032,
-    0.085,
-    -0.058,
-    -0.139,
-    -0.199,
-    -0.144,
-    1.9,
-    0.049,
-    -0.078,
-    0.122,
-    0.073,
-    0.062,
-    -0.093,
-    0.531,
-    -0.099,
-    -0.026,
-    -0.093,
-    0.02,
-    -0.073,
-    0.507,
-    -0.125,
-    0.057
+    -0.011,
+    -0.009,
+    0.28,
+    -0.134,
+    -0.163,
+    -0.069,
+    0.638,
+    -0.005,
+    0.026,
+    -0.015,
+    -0.107,
+    -0.16,
+    -0.066,
+    0.575,
+    -0.011,
+    0.004,
+    -0.013,
+    0.069,
+    0.001,
+    -0.086,
+    0.608,
+    -0.107,
+    -0.027,
+    -0.072,
+    0.061,
+    -0.089,
+    0.561,
+    -0.119,
+    0.055
    ],
-   "root_vel_max": 1.12,
+   "root_vel_max": 1.35,
    "contact_frac": [
-    0.626,
-    0.704
+    0.43,
+    0.709
    ],
    "touchdowns": [
-    6,
-    3
+    4,
+    2
    ],
    "cadence_hz": [
-    1.39,
-    0.92
+    1.19,
+    0.96
    ],
    "stride_s": [
-    0.72,
-    1.09
+    0.84,
+    1.04
    ],
    "alternation_between_left_td": [
     0,
-    1,
     0,
-    1,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_13_stageii.npz",
    "src_fps": 120.0
@@ -2409,9 +2310,9 @@
    "frames": 161,
    "seconds": 3.22,
    "root_z": [
-    0.5736,
-    0.6133,
-    0.6319
+    0.5743,
+    0.6142,
+    0.638
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2419,69 +2320,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.316 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.385,
+   "at_limit_frame_frac": 0.0,
    "at_limit_joints": [],
-   "tilt_max": 0.0681,
-   "yaw_start_deg": 10.0,
-   "yaw_net_change_deg": -2.1,
-   "qd_max": 10.01,
+   "tilt_max": 0.0922,
+   "yaw_start_deg": 14.6,
+   "yaw_net_change_deg": -3.9,
+   "qd_max": 9.85,
    "q_mean": [
-    0.009,
-    -0.007,
-    0.312,
-    -0.109,
-    -0.21,
-    -0.144,
-    1.945,
-    0.042,
-    0.074,
-    -0.086,
-    -0.146,
-    -0.2,
-    -0.142,
-    1.89,
-    0.044,
-    -0.079,
-    0.118,
-    0.095,
-    0.069,
-    -0.074,
-    0.486,
-    -0.128,
+    0.019,
+    0.008,
+    0.28,
+    -0.139,
+    -0.155,
+    -0.07,
+    0.63,
+    -0.006,
+    0.017,
+    -0.016,
+    -0.111,
+    -0.162,
+    -0.061,
+    0.587,
+    -0.011,
+    -0.005,
+    -0.012,
+    0.091,
+    -0.003,
+    -0.064,
+    0.563,
+    -0.134,
     -0.001,
-    -0.075,
-    0.058,
-    -0.053,
-    0.551,
-    -0.127,
-    0.057
+    -0.051,
+    0.088,
+    -0.068,
+    0.596,
+    -0.114,
+    0.056
    ],
-   "root_vel_max": 1.14,
+   "root_vel_max": 1.38,
    "contact_frac": [
-    0.602,
-    0.714
+    0.484,
+    0.64
    ],
    "touchdowns": [
-    5,
-    1
+    3,
+    2
    ],
    "cadence_hz": [
-    1.75
+    0.87,
+    0.85
    ],
    "stride_s": [
-    0.57,
-    null
+    1.15,
+    1.18
    ],
    "alternation_between_left_td": [
     0,
-    0,
-    0,
-    0
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_14",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_14_stageii.npz",
    "src_fps": 120.0
@@ -2490,9 +2390,9 @@
    "frames": 159,
    "seconds": 3.18,
    "root_z": [
-    0.5798,
-    0.6131,
-    0.6291
+    0.5921,
+    0.6149,
+    0.6402
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2500,73 +2400,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.245 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.371,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0557,
-   "yaw_start_deg": 9.5,
-   "yaw_net_change_deg": -8.4,
-   "qd_max": 10.15,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0879,
+   "yaw_start_deg": 13.6,
+   "yaw_net_change_deg": -14.0,
+   "qd_max": 9.71,
    "q_mean": [
-    -0.017,
-    -0.015,
-    0.301,
-    -0.107,
-    -0.2,
-    -0.102,
-    1.939,
-    0.001,
-    0.06,
-    -0.053,
-    -0.143,
-    -0.193,
-    -0.113,
-    1.862,
-    0.045,
-    -0.073,
-    0.135,
-    0.098,
-    0.042,
-    -0.053,
-    0.522,
-    -0.14,
+    -0.008,
+    -0.003,
+    0.272,
+    -0.136,
+    -0.188,
+    -0.011,
+    0.612,
+    0.007,
+    0.017,
+    -0.009,
+    -0.104,
+    -0.179,
+    -0.016,
+    0.567,
+    -0.002,
+    -0.001,
+    -0.011,
+    0.091,
+    -0.016,
+    -0.043,
+    0.593,
+    -0.142,
     0.003,
-    -0.07,
-    0.016,
-    -0.014,
-    0.523,
-    -0.164,
+    -0.051,
+    0.051,
+    -0.026,
+    0.57,
+    -0.146,
     0.065
    ],
-   "root_vel_max": 1.13,
+   "root_vel_max": 1.51,
    "contact_frac": [
-    0.572,
-    0.723
+    0.453,
+    0.66
    ],
    "touchdowns": [
-    6,
+    3,
     2
    ],
    "cadence_hz": [
-    2.63,
-    0.89
+    0.88,
+    1.02
    ],
    "stride_s": [
-    0.38,
-    1.12
+    1.14,
+    0.98
    ],
    "alternation_between_left_td": [
     0,
-    1,
-    0,
-    1,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_15",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_15_stageii.npz",
    "src_fps": 120.0
@@ -2575,9 +2470,9 @@
    "frames": 175,
    "seconds": 3.5,
    "root_z": [
-    0.5951,
-    0.6146,
-    0.6322
+    0.5923,
+    0.6138,
+    0.635
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2585,73 +2480,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.240 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.474,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0448,
-   "yaw_start_deg": 10.4,
-   "yaw_net_change_deg": -3.5,
-   "qd_max": 10.4,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.083,
+   "yaw_start_deg": 9.5,
+   "yaw_net_change_deg": 1.5,
+   "qd_max": 10.06,
    "q_mean": [
-    -0.009,
-    -0.012,
-    0.31,
-    -0.119,
-    -0.221,
-    -0.177,
-    1.946,
-    0.06,
-    0.063,
-    -0.12,
+    0.002,
+    0.003,
+    0.28,
     -0.148,
-    -0.208,
-    -0.132,
-    1.905,
-    0.041,
-    -0.075,
-    0.124,
-    0.078,
-    0.066,
-    -0.059,
-    0.504,
-    -0.149,
-    0.022,
-    -0.1,
-    0.039,
-    -0.076,
-    0.503,
-    -0.158,
+    -0.155,
+    -0.099,
+    0.633,
+    -0.011,
+    0.009,
+    -0.021,
+    -0.105,
+    -0.152,
+    -0.092,
+    0.608,
+    -0.02,
+    -0.013,
+    -0.005,
+    0.07,
+    -0.003,
+    -0.048,
+    0.578,
+    -0.14,
+    0.023,
+    -0.079,
+    0.074,
+    -0.089,
+    0.559,
+    -0.142,
     0.066
    ],
-   "root_vel_max": 1.13,
+   "root_vel_max": 1.38,
    "contact_frac": [
-    0.554,
-    0.737
+    0.503,
+    0.629
    ],
    "touchdowns": [
-    6,
-    2
+    3,
+    3
    ],
    "cadence_hz": [
-    2.5,
+    0.89,
     0.89
    ],
    "stride_s": [
-    0.4,
+    1.12,
     1.12
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0,
     1,
-    0
+    1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_16",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_16_stageii.npz",
    "src_fps": 120.0
@@ -2660,9 +2550,9 @@
    "frames": 164,
    "seconds": 3.28,
    "root_z": [
-    0.5697,
-    0.6082,
-    0.6306
+    0.5748,
+    0.6117,
+    0.6358
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2670,71 +2560,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.251 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.555,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0652,
-   "yaw_start_deg": 5.7,
-   "yaw_net_change_deg": -0.1,
-   "qd_max": 9.27,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.091,
+   "yaw_start_deg": 10.2,
+   "yaw_net_change_deg": -0.5,
+   "qd_max": 9.25,
    "q_mean": [
-    0.007,
-    -0.026,
-    0.39,
-    -0.102,
-    -0.246,
-    -0.241,
-    1.972,
-    0.101,
-    0.077,
-    -0.184,
-    -0.137,
-    -0.233,
-    -0.181,
-    1.945,
-    0.026,
-    -0.058,
-    0.074,
-    0.09,
-    0.053,
-    -0.046,
-    0.596,
-    -0.184,
+    0.014,
+    -0.007,
+    0.297,
+    -0.134,
+    -0.15,
+    -0.277,
+    0.72,
+    -0.038,
+    0.012,
+    -0.044,
+    -0.117,
+    -0.15,
+    -0.267,
+    0.704,
+    -0.05,
+    -0.009,
+    -0.005,
+    0.078,
+    -0.012,
+    -0.036,
+    0.639,
+    -0.153,
     0.043,
-    -0.084,
-    0.053,
-    -0.022,
-    0.601,
-    -0.143,
-    0.04
+    -0.066,
+    0.085,
+    -0.035,
+    0.634,
+    -0.122,
+    0.041
    ],
-   "root_vel_max": 1.08,
+   "root_vel_max": 1.29,
    "contact_frac": [
-    0.579,
-    0.762
+    0.518,
+    0.573
    ],
    "touchdowns": [
-    5,
-    0
+    3,
+    3
    ],
    "cadence_hz": [
-    1.75
+    0.89,
+    0.85
    ],
    "stride_s": [
-    0.57,
-    null
+    1.12,
+    1.17
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0,
-    0
+    1,
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_28",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_28_stageii.npz",
    "src_fps": 120.0
@@ -2743,9 +2630,9 @@
    "frames": 162,
    "seconds": 3.24,
    "root_z": [
-    0.5849,
-    0.6112,
-    0.6253
+    0.5821,
+    0.6114,
+    0.637
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2753,71 +2640,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.306 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.648,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0537,
-   "yaw_start_deg": -12.1,
-   "yaw_net_change_deg": 4.5,
-   "qd_max": 9.34,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0814,
+   "yaw_start_deg": -15.1,
+   "yaw_net_change_deg": 9.2,
+   "qd_max": 9.21,
    "q_mean": [
-    -0.046,
-    -0.031,
-    0.318,
-    -0.077,
+    -0.04,
+    -0.008,
+    0.276,
+    -0.106,
+    -0.15,
     -0.261,
-    -0.208,
-    1.983,
-    0.072,
-    0.127,
-    -0.135,
-    -0.101,
-    -0.218,
-    -0.192,
-    1.947,
-    0.046,
-    -0.063,
-    0.068,
-    0.019,
-    0.066,
-    -0.093,
-    0.508,
-    -0.16,
+    0.724,
+    -0.036,
+    0.037,
+    -0.036,
+    -0.107,
+    -0.15,
+    -0.233,
+    0.639,
+    -0.032,
+    0.011,
+    -0.024,
+    0.009,
+    0.004,
+    -0.081,
+    0.557,
+    -0.146,
     -0.005,
-    -0.157,
-    0.036,
-    -0.021,
-    0.547,
-    -0.12,
-    0.036
+    -0.139,
+    0.07,
+    -0.035,
+    0.587,
+    -0.108,
+    0.035
    ],
-   "root_vel_max": 1.15,
+   "root_vel_max": 1.33,
    "contact_frac": [
-    0.698,
-    0.648
+    0.432,
+    0.685
    ],
    "touchdowns": [
-    4,
-    6
+    3,
+    4
    ],
    "cadence_hz": [
-    1.25,
-    2.5
+    0.93,
+    0.94
    ],
    "stride_s": [
-    0.8,
-    0.4
+    1.07,
+    1.06
    ],
    "alternation_between_left_td": [
     1,
-    1,
-    1
+    2
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_30",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_30_stageii.npz",
    "src_fps": 120.0
@@ -2826,9 +2710,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.5804,
-    0.613,
-    0.6287
+    0.5879,
+    0.6148,
+    0.6394
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2836,71 +2720,67 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.255 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.364,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0614,
-   "yaw_start_deg": -12.7,
-   "yaw_net_change_deg": 5.9,
-   "qd_max": 8.93,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0844,
+   "yaw_start_deg": -15.6,
+   "yaw_net_change_deg": 10.1,
+   "qd_max": 9.14,
    "q_mean": [
-    -0.063,
-    -0.018,
-    0.316,
-    -0.095,
-    -0.231,
-    -0.21,
-    1.968,
-    0.06,
-    0.093,
-    -0.127,
+    -0.055,
+    0.001,
+    0.282,
     -0.125,
-    -0.214,
-    -0.199,
-    1.906,
-    0.04,
-    -0.061,
-    0.066,
-    0.024,
-    0.054,
-    -0.051,
-    0.479,
-    -0.165,
+    -0.15,
+    -0.238,
+    0.712,
+    -0.03,
+    0.029,
+    -0.038,
+    -0.112,
+    -0.15,
+    -0.221,
+    0.648,
+    -0.031,
     -0.0,
-    -0.14,
-    0.056,
-    -0.056,
-    0.543,
-    -0.121,
-    0.057
+    -0.022,
+    0.013,
+    -0.008,
+    -0.037,
+    0.547,
+    -0.154,
+    -0.0,
+    -0.118,
+    0.093,
+    -0.069,
+    0.595,
+    -0.118,
+    0.056
    ],
-   "root_vel_max": 1.11,
+   "root_vel_max": 1.3,
    "contact_frac": [
-    0.642,
-    0.648
+    0.442,
+    0.624
    ],
    "touchdowns": [
-    5,
-    1
+    2,
+    3
    ],
    "cadence_hz": [
-    1.72
+    0.82,
+    0.83
    ],
    "stride_s": [
-    0.58,
-    null
+    1.22,
+    1.21
    ],
    "alternation_between_left_td": [
-    0,
-    1,
-    0,
-    0
+    1
    ],
-   "gait_resolved": false,
-   "walk_like": false,
+   "gait_resolved": true,
+   "walk_like": true,
    "clip": "35_31",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_31_stageii.npz",
    "src_fps": 120.0
@@ -2909,9 +2789,9 @@
    "frames": 153,
    "seconds": 3.06,
    "root_z": [
-    0.5864,
-    0.6103,
-    0.6318
+    0.5852,
+    0.6125,
+    0.6381
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -2919,73 +2799,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.263 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.438,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0483,
-   "yaw_start_deg": 9.1,
-   "yaw_net_change_deg": -24.2,
-   "qd_max": 9.0,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0849,
+   "yaw_start_deg": 12.5,
+   "yaw_net_change_deg": -33.5,
+   "qd_max": 9.9,
    "q_mean": [
-    -0.005,
-    -0.035,
-    0.319,
-    -0.114,
-    -0.233,
-    -0.179,
-    1.965,
-    0.017,
-    0.097,
-    -0.094,
-    -0.137,
-    -0.208,
-    -0.179,
-    1.9,
-    0.017,
-    -0.071,
-    0.097,
-    0.092,
+    -0.0,
+    -0.015,
+    0.281,
+    -0.135,
+    -0.151,
+    -0.145,
+    0.676,
+    -0.018,
     0.029,
-    -0.071,
-    0.55,
-    -0.134,
+    -0.025,
+    -0.118,
+    -0.15,
+    -0.142,
+    0.61,
+    -0.025,
+    0.004,
+    -0.015,
+    0.081,
+    -0.022,
+    -0.062,
+    0.61,
+    -0.122,
     -0.014,
-    -0.086,
-    0.022,
-    -0.042,
-    0.502,
-    -0.188,
+    -0.066,
+    0.061,
+    -0.057,
+    0.551,
+    -0.161,
     0.053
    ],
-   "root_vel_max": 1.24,
+   "root_vel_max": 1.4,
    "contact_frac": [
-    0.562,
-    0.784
+    0.425,
+    0.647
    ],
    "touchdowns": [
-    6,
+    3,
     2
    ],
    "cadence_hz": [
-    2.5,
-    2.38
+    0.86,
+    0.85
    ],
    "stride_s": [
-    0.4,
-    0.42
+    1.16,
+    1.18
    ],
    "alternation_between_left_td": [
-    0,
-    0,
-    0,
     1,
     1
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_32",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_32_stageii.npz",
    "src_fps": 120.0
@@ -2994,9 +2869,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.558,
-    0.6095,
-    0.6299
+    0.5616,
+    0.6089,
+    0.6329
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3004,67 +2879,63 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.073 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.455,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0734,
-   "yaw_start_deg": -3.2,
-   "yaw_net_change_deg": 16.8,
-   "qd_max": 10.51,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0986,
+   "yaw_start_deg": -0.1,
+   "yaw_net_change_deg": 20.3,
+   "qd_max": 10.42,
    "q_mean": [
-    0.003,
-    -0.02,
-    0.334,
-    -0.081,
-    -0.242,
-    -0.162,
-    1.959,
-    0.033,
-    0.083,
-    -0.102,
-    -0.153,
-    -0.211,
-    -0.174,
-    1.928,
-    0.031,
-    -0.076,
-    0.096,
-    0.08,
-    0.073,
-    -0.115,
-    0.524,
+    0.012,
+    -0.01,
+    0.282,
+    -0.126,
+    -0.152,
+    -0.137,
+    0.645,
+    -0.019,
+    0.016,
+    -0.025,
+    -0.119,
     -0.154,
+    -0.131,
+    0.626,
+    -0.025,
+    -0.007,
+    -0.008,
+    0.076,
+    0.007,
+    -0.107,
+    0.597,
+    -0.14,
     -0.012,
-    -0.093,
-    0.041,
-    -0.061,
-    0.562,
-    -0.133,
-    0.049
+    -0.071,
+    0.069,
+    -0.076,
+    0.608,
+    -0.12,
+    0.048
    ],
-   "root_vel_max": 1.25,
+   "root_vel_max": 1.4,
    "contact_frac": [
-    0.636,
-    0.697
+    0.576,
+    0.588
    ],
    "touchdowns": [
-    5,
-    2
+    3,
+    3
    ],
    "cadence_hz": [
-    1.35,
-    1.39
+    1.37,
+    0.87
    ],
    "stride_s": [
-    0.74,
-    0.72
+    0.73,
+    1.15
    ],
    "alternation_between_left_td": [
-    0,
-    1,
     1,
     0
    ],
@@ -3078,9 +2949,9 @@
    "frames": 163,
    "seconds": 3.26,
    "root_z": [
-    0.571,
-    0.6092,
-    0.6291
+    0.5681,
+    0.6107,
+    0.6384
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3088,72 +2959,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "left_knee_pitch_joint: -0.000 (limit +0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.181 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 0.46,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0624,
-   "yaw_start_deg": -10.3,
-   "yaw_net_change_deg": 2.2,
-   "qd_max": 9.89,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0784,
+   "yaw_start_deg": -13.7,
+   "yaw_net_change_deg": 8.7,
+   "qd_max": 9.48,
    "q_mean": [
-    -0.03,
-    -0.016,
-    0.33,
-    -0.13,
-    -0.226,
-    -0.166,
-    1.963,
-    0.033,
-    0.081,
-    -0.11,
-    -0.153,
-    -0.201,
-    -0.161,
-    1.912,
-    0.032,
-    -0.072,
-    0.097,
-    0.043,
-    0.079,
-    -0.084,
-    0.512,
-    -0.168,
+    -0.022,
+    0.003,
+    0.286,
+    -0.137,
+    -0.157,
+    -0.144,
+    0.67,
+    -0.018,
+    0.025,
+    -0.026,
+    -0.111,
+    -0.154,
+    -0.14,
+    0.615,
+    -0.025,
+    0.001,
+    -0.012,
+    0.036,
+    0.009,
+    -0.074,
+    0.574,
+    -0.149,
     0.002,
-    -0.133,
-    0.055,
-    -0.038,
-    0.565,
-    -0.112,
+    -0.114,
+    0.088,
+    -0.05,
+    0.612,
+    -0.104,
     0.058
    ],
-   "root_vel_max": 1.2,
+   "root_vel_max": 1.44,
    "contact_frac": [
-    0.65,
-    0.736
+    0.485,
+    0.644
    ],
    "touchdowns": [
-    5,
-    2
+    3,
+    3
    ],
    "cadence_hz": [
-    1.79,
-    2.38
+    1.72,
+    0.88
    ],
    "stride_s": [
-    0.56,
-    0.42
+    0.58,
+    1.14
    ],
    "alternation_between_left_td": [
-    0,
-    1,
     1,
     0
    ],
    "gait_resolved": true,
-   "walk_like": false,
+   "walk_like": true,
    "clip": "35_34",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/35_34_stageii.npz",
    "src_fps": 120.0
@@ -3162,9 +3029,9 @@
    "frames": 137,
    "seconds": 2.74,
    "root_z": [
-    0.6004,
-    0.6304,
-    0.6439
+    0.601,
+    0.6317,
+    0.6576
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3172,66 +3039,64 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "lumbar_yaw_joint: +0.371 (limit -1.00..+1.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.368 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0375,
-   "yaw_start_deg": -28.4,
-   "yaw_net_change_deg": 48.2,
-   "qd_max": 8.86,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.1268,
+   "yaw_start_deg": -25.2,
+   "yaw_net_change_deg": 49.5,
+   "qd_max": 8.7,
    "q_mean": [
-    -0.048,
-    0.095,
-    0.284,
-    -0.117,
-    -0.225,
-    -0.322,
-    2.0,
-    -0.097,
-    0.326,
-    -0.165,
-    -0.105,
-    -0.242,
-    -0.409,
-    1.998,
-    -0.03,
-    -0.279,
-    -0.086,
+    -0.047,
+    0.077,
+    0.268,
+    -0.073,
+    -0.15,
+    -0.658,
+    1.019,
+    -0.113,
+    -0.002,
+    -0.056,
+    -0.106,
+    -0.15,
+    -0.559,
+    0.864,
+    -0.067,
+    0.064,
+    0.006,
     -0.063,
-    0.066,
-    0.309,
-    0.299,
-    -0.324,
-    0.129,
-    -0.083,
-    0.233,
+    0.01,
+    0.308,
+    0.345,
+    -0.226,
+    0.13,
+    -0.082,
+    0.231,
     -0.116,
-    0.465,
-    0.007,
+    0.474,
+    -0.017,
     0.165
    ],
-   "root_vel_max": 1.31,
+   "root_vel_max": 1.55,
    "contact_frac": [
-    0.467,
-    0.73
+    0.365,
+    0.701
    ],
    "touchdowns": [
-    2,
-    3
+    3,
+    2
    ],
    "cadence_hz": [
-    0.88,
-    0.91
+    1.0,
+    0.88
    ],
    "stride_s": [
-    1.14,
-    1.1
+    1.0,
+    1.14
    ],
    "alternation_between_left_td": [
+    0,
     1
    ],
    "gait_resolved": true,
@@ -3244,9 +3109,9 @@
    "frames": 165,
    "seconds": 3.3,
    "root_z": [
-    0.5867,
-    0.6246,
-    0.6399
+    0.5738,
+    0.6234,
+    0.656
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3254,68 +3119,66 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "right_knee_pitch_joint: -0.000 (limit -0.00..+2.70)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: +0.201 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0355,
-   "yaw_start_deg": -14.2,
-   "yaw_net_change_deg": -6.1,
-   "qd_max": 11.33,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.0826,
+   "yaw_start_deg": -7.8,
+   "yaw_net_change_deg": -9.9,
+   "qd_max": 11.32,
    "q_mean": [
-    -0.029,
-    0.02,
-    0.197,
-    -0.077,
-    -0.231,
-    -0.292,
-    2.0,
-    -0.205,
-    0.333,
-    -0.112,
-    -0.095,
-    -0.241,
-    -0.447,
-    1.997,
+    -0.031,
+    0.017,
+    0.194,
+    -0.082,
+    -0.15,
+    -0.628,
+    1.033,
+    -0.116,
+    0.008,
     -0.044,
-    -0.259,
-    -0.042,
-    0.091,
-    -0.073,
-    0.22,
-    0.311,
-    -0.048,
+    -0.148,
+    -0.15,
+    -0.509,
+    0.834,
+    -0.066,
+    0.072,
+    0.016,
+    0.092,
+    -0.083,
+    0.219,
+    0.348,
+    -0.053,
     -0.061,
     -0.097,
     0.131,
     -0.132,
-    0.315,
-    -0.044,
+    0.335,
+    -0.058,
     0.1
    ],
-   "root_vel_max": 1.49,
+   "root_vel_max": 1.88,
    "contact_frac": [
-    0.424,
-    0.794
+    0.448,
+    0.691
    ],
    "touchdowns": [
-    4,
-    3
+    5,
+    2
    ],
    "cadence_hz": [
-    1.19,
-    0.95
+    1.54,
+    1.0
    ],
    "stride_s": [
-    0.84,
-    1.05
+    0.65,
+    1.0
    ],
    "alternation_between_left_td": [
     0,
     1,
+    0,
     1
    ],
    "gait_resolved": true,
@@ -3328,9 +3191,9 @@
    "frames": 158,
    "seconds": 3.16,
    "root_z": [
-    0.5838,
-    0.6267,
-    0.6496
+    0.5804,
+    0.6225,
+    0.663
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3338,66 +3201,66 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "lumbar_yaw_joint: -0.490 (limit -1.00..+1.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.516 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0521,
-   "yaw_start_deg": 109.7,
-   "yaw_net_change_deg": -8.6,
-   "qd_max": 12.04,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.1004,
+   "yaw_start_deg": 122.0,
+   "yaw_net_change_deg": -6.2,
+   "qd_max": 12.22,
    "q_mean": [
-    -0.018,
-    0.035,
-    0.11,
-    -0.049,
-    -0.134,
-    -0.075,
-    2.0,
-    -0.553,
-    0.351,
-    0.4,
-    -0.11,
-    -0.137,
-    -0.237,
-    1.845,
-    -0.164,
-    -0.275,
-    0.123,
-    -0.013,
-    -0.04,
-    0.004,
-    0.157,
-    -0.03,
-    -0.076,
-    -0.004,
-    0.111,
-    0.005,
-    0.243,
+    -0.032,
     0.022,
-    0.128
+    0.122,
+    0.039,
+    -0.34,
+    0.095,
+    0.546,
+    0.035,
+    0.085,
+    0.034,
+    -0.171,
+    -0.202,
+    -0.013,
+    0.567,
+    -0.009,
+    0.036,
+    0.003,
+    -0.008,
+    -0.053,
+    0.001,
+    0.221,
+    -0.044,
+    -0.077,
+    -0.009,
+    0.112,
+    0.01,
+    0.272,
+    -0.008,
+    0.127
    ],
-   "root_vel_max": 1.43,
+   "root_vel_max": 1.8,
    "contact_frac": [
-    0.601,
-    0.759
+    0.316,
+    0.924
    ],
    "touchdowns": [
-    2,
-    1
+    5,
+    0
    ],
    "cadence_hz": [
-    0.72
+    1.82
    ],
    "stride_s": [
-    1.38,
+    0.55,
     null
    ],
    "alternation_between_left_td": [
-    1
+    0,
+    0,
+    0,
+    0
    ],
    "gait_resolved": false,
    "walk_like": false,
@@ -3409,9 +3272,9 @@
    "frames": 162,
    "seconds": 3.24,
    "root_z": [
-    0.5847,
-    0.6258,
-    0.6487
+    0.573,
+    0.6204,
+    0.6617
    ],
    "sole_min": 0.0,
    "sole_min_per_foot": [
@@ -3419,69 +3282,68 @@
     0.0
    ],
    "joint_over_limit_max_rad": 0.0,
-   "joint_over_limit_worst": "lumbar_yaw_joint: -0.579 (limit -1.00..+1.00)",
+   "joint_over_limit_worst": "lumbar_yaw_joint: -0.607 (limit -1.00..+1.00)",
    "joint_over_limit_n": 0,
-   "at_limit_frame_frac": 1.0,
-   "at_limit_joints": [
-    "left_elbow_pitch_joint",
-    "right_elbow_pitch_joint"
-   ],
-   "tilt_max": 0.0471,
-   "yaw_start_deg": 119.6,
-   "yaw_net_change_deg": -12.6,
-   "qd_max": 11.59,
+   "at_limit_frame_frac": 0.0,
+   "at_limit_joints": [],
+   "tilt_max": 0.1073,
+   "yaw_start_deg": 133.8,
+   "yaw_net_change_deg": -10.9,
+   "qd_max": 11.56,
    "q_mean": [
-    -0.021,
-    0.009,
-    0.1,
-    -0.009,
-    -0.129,
-    -0.058,
-    2.0,
-    -0.525,
-    0.359,
-    0.4,
-    -0.091,
-    -0.147,
-    -0.164,
-    1.859,
-    -0.19,
-    -0.27,
-    0.13,
-    0.025,
-    -0.055,
-    0.105,
-    0.164,
     -0.033,
-    -0.059,
-    -0.028,
-    0.133,
-    -0.045,
-    0.238,
+    0.003,
+    0.115,
+    0.026,
+    -0.344,
+    0.096,
+    0.541,
+    0.037,
+    0.07,
+    0.021,
+    -0.162,
+    -0.23,
     0.006,
-    0.128
+    0.573,
+    -0.002,
+    0.022,
+    -0.003,
+    0.03,
+    -0.063,
+    0.102,
+    0.218,
+    -0.045,
+    -0.06,
+    -0.035,
+    0.134,
+    -0.039,
+    0.271,
+    -0.022,
+    0.127
    ],
-   "root_vel_max": 1.4,
+   "root_vel_max": 1.77,
    "contact_frac": [
-    0.617,
-    0.753
+    0.42,
+    0.877
    ],
    "touchdowns": [
-    2,
-    2
+    5,
+    1
    ],
    "cadence_hz": [
-    0.79,
-    3.85
+    1.89
    ],
    "stride_s": [
-    1.26,
-    0.26
+    0.53,
+    null
    ],
    "alternation_between_left_td": [
+    0,
+    0,
+    1,
     0
    ],
-   "gait_resolved": true,
+   "gait_resolved": false,
    "walk_like": false,
    "clip": "82_13",
    "path": "/Users/yumx/code/X1_29_AMP/data/amass/CMU/82_13_stageii.npz",

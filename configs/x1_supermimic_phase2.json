@@ -1,0 +1,19 @@
+{
+  "description": "X1 phase-2 full training: 330-clip multi-activity library (walk/jog/run/turn/dance, arm fix baked into the retarget pipeline), 60k iterations on 1x4090D. Budget mapping in docs/X1_PHASE2_DATASET.md: 0.55 s/iter measured on TASK_20261102_068 -> 60k it ~ 9.2 h ~ Y53, wall_hours 10 caps it under Y58. eval_every_hours 2 gives ~5 in-sample EVAL points; stop-early criterion (two consecutive EVALs with 0 failed and norm_return >= 0.90) is evaluated offline from eval.jsonl, the run itself is capped by wall_hours. Same deviations from --preset recommended as phase 1 (compile off, bptt_checkpoint 1): both were proven on TASK_20261102_068 on this SKU.",
+  "robot": "x1_29dof",
+  "preset": "recommended",
+  "motions": "motions/x1_phase2_train.npz",
+  "out": "runs/x1_phase2",
+  "iterations": 60000,
+  "num_envs": 4096,
+  "log_every": 50,
+  "ckpt_every": 4000,
+  "eval_every_hours": 2.0,
+  "eval_envs": 64,
+  "seed": 0,
+  "buffer_steps": 1000,
+  "wall_hours": 10.0,
+  "compile_bptt": "",
+  "compile_wm": false,
+  "bptt_checkpoint": 1
+}

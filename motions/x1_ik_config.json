@@ -169,7 +169,7 @@
   "left_elbow_pitch_link": [
    "left_elbow",
    0,
-   10,
+   3,
    [
     0.01120418920031305,
     0.06263252668049116,
@@ -185,7 +185,7 @@
   "left_wrist_roll_link": [
    "left_wrist",
    0,
-   10,
+   1e-09,
    [
     0.01178724804800918,
     -0.11675270966423412,
@@ -217,7 +217,7 @@
   "right_elbow_pitch_link": [
    "right_elbow",
    0,
-   10,
+   3,
    [
     0.0017890401808968463,
     -0.05180479520150229,
@@ -233,7 +233,7 @@
   "right_wrist_roll_link": [
    "right_wrist",
    0,
-   10,
+   1e-09,
    [
     0.0101346369140361,
     -0.13943519196838675,
@@ -395,7 +395,7 @@
   "left_elbow_pitch_link": [
    "left_elbow",
    10,
-   5,
+   1,
    [
     0.01120418920031305,
     0.06263252668049116,
@@ -410,8 +410,8 @@
   ],
   "left_wrist_roll_link": [
    "left_wrist",
-   10,
    5,
+   0,
    [
     0.01178724804800918,
     -0.11675270966423412,
@@ -443,7 +443,7 @@
   "right_elbow_pitch_link": [
    "right_elbow",
    10,
-   5,
+   1,
    [
     0.0017890401808968463,
     -0.05180479520150229,
@@ -458,8 +458,8 @@
   ],
   "right_wrist_roll_link": [
    "right_wrist",
-   10,
    5,
+   0,
    [
     0.0101346369140361,
     -0.13943519196838675,
@@ -479,5 +479,9 @@
   "human_pelvis_height_m": 0.954,
   "factor": 0.657757,
   "source": "/Users/yumx/code/X1_29_AMP/_gmr_local/GMR/general_motion_retargeting/ik_configs/smplx_to_x1.json"
+ },
+ "_arm_fix": {
+  "note": "phase-2 arm fix: GMR pass weights softened as above; the arms are then re-solved in a second pass (scripts/build_x1_motions.py --arm-mode refine -> tools/x1_arm_fix.py) with wrist targets anchored on the robot shoulder FK, distance clip(0.62*human|wr-sh|, 0.268, 0.300), posture prior, 0.15 rad limit margin and 5-tap smoothing. Measured on the 5-clip study set: elbow-pitch at-limit 100%->0%, any-arm at-limit 100%->0%, wrist dir err 78-120deg -> 22-45deg.",
+  "study": "tools/x1_arm_study.py, data/arm_study*/arm_study.json (gitignored)"
  }
 }
