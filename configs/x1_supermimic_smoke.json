@@ -1,0 +1,18 @@
+{
+  "description": "Plumbing run: prove the whole Gradmotion path (clone -> pip -> CUDA -> train -> log -> checkpoint -> metrics) end to end in a few minutes before spending a full 3000-iteration run. Same entry script, image and branch as configs/x1_supermimic.json; only the iteration count and the logging/checkpoint cadence are smaller.",
+  "robot": "x1_29dof",
+  "preset": "recommended",
+  "motions": "motions/x1_cmu_walk.npz",
+  "out": "runs/x1_plumbing",
+  "iterations": 60,
+  "num_envs": 1024,
+  "log_every": 5,
+  "ckpt_every": 30,
+  "eval_every": 1000000,
+  "seed": 0,
+  "buffer_steps": 256,
+  "wall_hours": 1.0,
+  "compile_bptt": "",
+  "compile_wm": false,
+  "bptt_checkpoint": 1
+}
