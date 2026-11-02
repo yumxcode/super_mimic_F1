@@ -1,10 +1,10 @@
 {
   "taskBaseInfo": {
-    "projectId": "PRO_20261102_001",
+    "projectId": "PRO_20261102_002",
     "taskType": "1",
     "trainType": "1",
     "taskName": "x1-supermimic-cmu-walk-3k",
-    "taskDescription": "X1 29-DoF allmimic (SuperMimic re-implementation) on the 41-clip CMU walking library: 3000 iterations, 4096 envs, 1x4090D. Entry scripts/gm_x1_train.py pip-installs requirements.txt, verifies CUDA/mjlab, trains with configs/x1_supermimic.json, mirrors runs/x1_cmu_walk/log.jsonl to TensorBoard under logs/x1_supermimic/, and publishes the newest checkpoint to output/.",
+    "taskDescription": "X1 29-DoF allmimic (SuperMimic re-implementation) on the 41-clip CMU walking library: 3000 iterations, 4096 envs, 1x4090D. Entry scripts/gm_x1_train.py pip-installs requirements.txt, verifies CUDA/mjlab, trains with configs/x1_supermimic.json, mirrors runs/x1_cmu_walk/log.jsonl to TensorBoard under logs/x1_supermimic/, and publishes the newest checkpoint to output/. Runs on the account with balance (PRO_20261102_002).",
     "taskTag": [
       "x1",
       "supermimic",
