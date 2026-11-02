@@ -120,19 +120,26 @@ X1_TRACKED_BODIES = (
 )
 X1_ROOT_BODY = 'base_link'
 X1_TORSO_BODY = 'lumbar_pitch_link'
-# Foot contact geoms: one 6 x 14 cm sole box per foot (tools/vendor_x1_assets.py replaces the source asset's four
-# 2 mm corner spheres -- those sink several radii into the floor at 200 Hz, see PROVENANCE.md change 4).
-X1_FOOT_GEOMS = ('left_foot_sole_collision', 'right_foot_sole_collision')
+# Foot contact geoms: four 2 mm corner spheres per foot, the only collision geoms below the ankle in the asset (the
+# vendored MJCF is byte-identical to the source; see assets/x1_29dof/PROVENANCE.md).
+X1_FOOT_GEOMS = tuple(f'{s}_foot_{k}_collision' for s in ('left', 'right') for k in (1, 2, 3, 4))
+# Regex the entity's CollisionCfg keys on, built from the tuple above. It has to be derived: when the asset's foot
+# geoms were renamed once, a hand-written regex silently matched nothing, the soles kept the asset's contact defaults
+# (condim 1 from the CollisionCfg fallback branch, the 5 ms solref) and nothing failed until the robot was simulated.
+X1_FOOT_GEOM_RE = '^(' + '|'.join(X1_FOOT_GEOMS) + ')$'
 # The asset's contact default is solref="0.005 1", tuned for its own 1 kHz scene. allmimic steps physics at 200 Hz
 # (mjlab SimulationCfg timestep 0.005), where a 5 ms contact time constant blows up (measured: |qd| -> 1e6 rad/s
 # within a second). MuJoCo's own default 20 ms is stable at 200 Hz, so the foot contacts use that instead. Nothing
 # else about the contact model changes.
 X1_FOOT_SOLREF = (0.02, 1.0)
+X1_FOOT_CONDIM = 3  # normal + 2 friction directions; the soles carry the whole weight, so they need friction
+X1_FOOT_PRIORITY = 1  # the sole contact wins over any other contact on the same pair
+X1_FOOT_FRICTION = (0.6,)  # sliding friction; the domain randomization overwrites [0] per episode
 
 # Initial root height used by EntityCfg (the reset pose comes from the motion reference, so this only sets the
-# state the simulator starts in). Straight-leg stance, measured on the compiled model at q=0: the sole plane is
-# 0.62750 m below base_link (0.0428 m below the ankle_roll joint, foot_sole_collision pos -0.0403 + half 0.0025).
-# Starting higher free-falls the robot onto its feet and injects a contact impulse at t=0 (0.66 is 3.25 cm too high).
+# state the simulator starts in). Straight-leg stance, measured on the compiled model at q=0: the sole spheres'
+# lowest point is 0.62750 m below base_link, so the soles touch z=0 there. Starting higher free-falls the robot onto
+# its feet and injects a contact impulse at t=0 (a flat 0.66 would be 3.25 cm too high).
 X1_INIT_HEIGHT = 0.6275
 
 # Joint pose the observation / absolute actions are centred on (Task.q0). Zeros = the MJCF rest pose, which is
@@ -151,51 +158,72 @@ def x1_spec():
     return spec
 
 
-def x1_actuator_cfgs():
-    """(BuiltinPositionActuatorCfg, ...) -- one group per distinct (kp, kd, effort, armature, frictionloss)."""
-    from mjlab.actuator import BuiltinPositionActuatorCfg
+def x1_actuator_groups():
+    """[(kp, kd, effort, armature, frictionloss, (joint, ...)), ...] -- one group per distinct parameter tuple.
 
+    This is the single table both mjlab's actuator configs and scripts/x1_smoke.py iterate, so a joint cannot end up
+    with different gains in the two paths.
+    """
     groups: dict[tuple, list[str]] = {}
     for name in X1_JOINT_ORDER:
         p = X1_JOINT_PARAMS[name]
         key = (p['kp'], p['kd'], p['effort'], p['armature'], p['frictionloss'])
         groups.setdefault(key, []).append(name)
+    return [(kp, kd, effort, armature, frictionloss, tuple(names))
+            for (kp, kd, effort, armature, frictionloss), names in groups.items()]
+
+
+def x1_actuator_cfgs():
+    """(BuiltinPositionActuatorCfg, ...) -- one group per distinct (kp, kd, effort, armature, frictionloss)."""
+    from mjlab.actuator import BuiltinPositionActuatorCfg
+
     return tuple(
         BuiltinPositionActuatorCfg(
-            target_names_expr=tuple(names),
+            target_names_expr=names,
             stiffness=kp,
             damping=kd,
             effort_limit=effort,
             armature=armature,
             frictionloss=frictionloss,
         )
-        for (kp, kd, effort, armature, frictionloss), names in groups.items()
+        for kp, kd, effort, armature, frictionloss, names in x1_actuator_groups()
+    )
+
+
+def x1_collision_cfgs():
+    """(CollisionCfg,) for the entity -- the sole boxes get condim 3 + friction + priority + the 200 Hz solref.
+
+    Kept separate from get_x1_robot_cfg() so scripts/x1_smoke.py can apply the *same* object to a real MjSpec and
+    assert the compiled geoms carry these values: this is the layer that decides what the simulator actually uses,
+    and a regex that matches nothing fails silently.
+    """
+    from mjlab.utils.spec_config import CollisionCfg
+
+    foot = X1_FOOT_GEOM_RE
+    # Everything that is not a foot keeps condim 1 (the asset only gives the base and the torso a collision mesh).
+    return (
+        CollisionCfg(
+            geom_names_expr=('.*_collision',),
+            condim={foot: X1_FOOT_CONDIM, '.*_collision': 1},
+            priority={foot: X1_FOOT_PRIORITY},
+            friction={foot: X1_FOOT_FRICTION},
+            solref={foot: X1_FOOT_SOLREF},
+        ),
     )
 
 
 def get_x1_robot_cfg():
     """EntityCfg of the X1 29-DoF robot for mjlab (the G1 stays available as get_g1_robot_cfg())."""
     from mjlab.entity import EntityArticulationInfoCfg, EntityCfg
-    from mjlab.utils.spec_config import CollisionCfg
 
     articulation = EntityArticulationInfoCfg(actuators=x1_actuator_cfgs(), soft_joint_pos_limit_factor=0.9)
-    # Feet: condim 3 + priority so the sole contacts are the ones the friction randomization and the reward see.
-    # Everything else keeps condim 1 (the asset only gives the base and the torso a collision mesh).
-    foot = r'^(left|right)_foot_[1-4]_collision$'
-    collision = CollisionCfg(
-        geom_names_expr=('.*_collision',),
-        condim={foot: 3, '.*_collision': 1},
-        priority={foot: 1},
-        friction={foot: (0.6,)},
-        solref={foot: X1_FOOT_SOLREF},
-    )
     return EntityCfg(
         init_state=EntityCfg.InitialStateCfg(
             pos=(0.0, 0.0, X1_INIT_HEIGHT),
             joint_pos={n: X1_HOME_JOINT_POS[n] for n in X1_JOINT_ORDER},
             joint_vel={'.*': 0.0},
         ),
-        collisions=(collision,),
+        collisions=x1_collision_cfgs(),
         spec_fn=x1_spec,
         articulation=articulation,
     )

@@ -1,7 +1,7 @@
 """Vendor the X1 29-DoF MJCF into this repository as assets/x1_29dof/.
 
 The source asset lives outside the repository (see --src). This script copies the meshes the robot XML
-actually references plus the XML itself, and applies exactly four mechanical changes so the asset works
+actually references plus the XML itself, and applies exactly three mechanical changes so the asset works
 inside allmimic / mjlab on Linux:
 
   1. meshdir  "../meshes" -> "meshes"          (flat layout: assets/x1_29dof/{x1_29dof.xml,meshes/})
@@ -9,11 +9,8 @@ inside allmimic / mjlab on Linux:
               (XML `lumbar_pitch.STL` vs file `lumbar_pitch.stl`) cannot break the Linux container
   3. names    every unnamed <geom> gets a name derived from its body / role. Purely additive: MuJoCo
               resolves collision groups and the env's foot geoms by name.
-  4. sole     each foot's four 2 mm corner spheres are replaced by one flat sole box with the same contact
-              class and the same footprint. See foot_sole_box() -- this is the only change to the contact
-              geometry, and it is not in the source asset.
 
-No inertia, joint limit, actuator, contact parameter or body pose is modified. PROVENANCE.md (written next
+No geometry, inertia, joint limit, actuator or contact parameter is modified. PROVENANCE.md (written next
 to the XML) records the source path, its sha256 and the list of changes.
 
   PYTHONPATH=. python tools/vendor_x1_assets.py                     # default source, writes assets/x1_29dof/
@@ -28,14 +25,11 @@ import re
 import shutil
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SRC = Path.home() / 'code' / 'X1_29_AMP' / 'X1_29DOF'
 SRC_XML = Path('mjcf') / 'robot' / 'xyber_x1' / 'xyber_x1_serial.xml'
 OUT_DIR = ROOT / 'assets' / 'x1_29dof'
 FOOT_BODIES = ('left_ankle_roll_link', 'right_ankle_roll_link')
-SOLE_THICKNESS = 0.005  # m; a 5 mm plate whose underside is the plane the corner spheres touched
 
 GEOM_RE = re.compile(r'<geom\b[^>]*?/?>')
 BODY_RE = re.compile(r'<body name="([^"]+)"')
@@ -97,61 +91,6 @@ def referenced_meshes(xml: str) -> list[str]:
     return sorted(set(re.findall(r'<mesh\b[^>]*\bfile="([^"]+)"', xml)))
 
 
-def foot_sole_box(xml: str) -> tuple[str, list[str]]:
-    """replace each foot's four 2 mm corner spheres with one flat sole box.
-
-    The source asset gives the foot exactly four collision geoms: 2 mm spheres at the four corners of the sole
-    rectangle. A 2 mm point contact has to carry ~86 N of standing load, which at the 200 Hz contact stiffness
-    sinks the sphere several radii into the floor (measured: up to 15 mm) -- the contact normal is then resolved
-    on a degenerate, deeply penetrating point. A plate is how the G1 model is built and how a real sole behaves:
-    the box keeps the same footprint (the four sphere centres become the box corners) and the same underside
-    plane (the spheres' lowest point), so the model's standing height does not change.
-    """
-    per_foot: dict[str, list[tuple[int, re.Match]]] = {}
-    for m in re.finditer(r'[ \t]*<geom\b[^>]*?/?>[ \t]*\n', xml):
-        tag = m.group(0)
-        name = attr(tag, 'name') or ''
-        fm = re.fullmatch(r'(left|right)_foot_(\d)_collision', name)
-        if fm and attr(tag, 'type') == 'sphere':
-            per_foot.setdefault(fm.group(1), []).append(m)
-    if not per_foot:
-        return xml, []
-
-    changes, spans = [], []
-    for foot, hits in sorted(per_foot.items()):
-        if len(hits) != 4:
-            raise SystemExit(f'{foot} foot: expected 4 corner spheres, found {len(hits)}')
-        pos = [np.array([float(v) for v in (attr(h.group(0), 'pos') or '0 0 0').split()]) for h in hits]
-        radius = float((attr(hits[0].group(0), 'size') or '0').split()[0])
-        pts = np.array(pos)
-        spread = pts.max(0) - pts.min(0)
-        normal = int(np.argmin(spread))  # the four spheres share one coordinate: that axis is the sole normal
-        if spread[normal] > 1e-6:
-            raise SystemExit(f'{foot} foot: the four spheres do not lie in one plane ({pts})')
-        sign = float(np.sign(pts[0, normal]))  # the sole is on the far side of the body origin (the ankle)
-        size = list(spread / 2)
-        size[normal] = SOLE_THICKNESS / 2
-        centre = pts.mean(0)
-        centre[normal] = sign * (abs(pts[0, normal]) + radius - SOLE_THICKNESS / 2)
-        box = (
-            f'<geom name="{foot}_foot_sole_collision" type="box" '
-            f'size="{" ".join(f"{v:.5g}" for v in size)}" '
-            f'pos="{" ".join(f"{v:.5g}" for v in centre)}" class="collision" />'
-        )
-        first = hits[0]
-        indent = first.group(0)[: len(first.group(0)) - len(first.group(0).lstrip(' \t'))]
-        last = hits[-1]
-        spans.append((first.start(), last.end(), f'{indent}{box}\n'))
-        changes.append(
-            f'{foot}_ankle_roll_link: 4 sphere collision geoms -> 1 sole box '
-            f'(size {" ".join(f"{v:.5g}" for v in size)}, pos {" ".join(f"{v:.5g}" for v in centre)}, '
-            f'sole plane {abs(pts[0, normal]) + radius:.5f} from the ankle)'
-        )
-    for start, end, repl in sorted(spans, reverse=True):
-        xml = xml[:start] + repl + xml[end:]
-    return xml, changes
-
-
 def build(src: Path, out_dir: Path, keep_stl_bytes: bool) -> None:
     src_xml = src / SRC_XML
     xml = src_xml.read_text()
@@ -179,7 +118,6 @@ def build(src: Path, out_dir: Path, keep_stl_bytes: bool) -> None:
 
     xml = re.sub(r'<compiler\b[^>]*?>', lambda m: re.sub(r'meshdir="[^"]*"', 'meshdir="meshes"', m.group(0)), xml, count=1)
     xml, changes = name_geoms(xml)
-    xml, sole = foot_sole_box(xml)
     (out_dir / 'x1_29dof.xml').write_text(xml)
 
     prov = [
@@ -197,16 +135,6 @@ def build(src: Path, out_dir: Path, keep_stl_bytes: bool) -> None:
     prov += [f'2. mesh file renamed on copy (Linux case sensitivity): `{r}`' for r in renamed]
     prov += ['3. geom names added (collision selection / domain randomization by name):', '']
     prov += [f'   - {c}' for c in changes]
-    prov += ['4. foot sole box (the only change to the collision geometry):', '']
-    prov += [f'   - {c}' for c in sole]
-    prov += [
-        '',
-        '   Why: the four 2 mm corner spheres put the whole standing load (~86 N each at 35 kg) on a point, and',
-        '   at the 200 Hz contact stiffness (solref 0.02) the sphere sinks several radii into the floor. The box',
-        '   keeps the same footprint (the sphere centres become its corners) and the same underside plane',
-        '   (the spheres\' lowest point), so the standing height, the motion-library root heights and the',
-        '   contact material (class="collision", inherited condim/friction/solref) are unchanged.',
-    ]
     prov += [
         '',
         'Everything else (body poses, inertias, joint axes/limits, damping, friction loss, actuators, contact',
@@ -228,7 +156,6 @@ def check(src: Path, out_dir: Path) -> int:
     want, _ = name_geoms(
         re.sub(r'<compiler\b[^>]*?>', lambda m: re.sub(r'meshdir="[^"]*"', 'meshdir="meshes"', m.group(0)), xml, count=1)
     )
-    want, _ = foot_sole_box(want)
     have = (out_dir / 'x1_29dof.xml').read_text()
     if want != have:
         (out_dir / 'x1_29dof.expected.xml').write_text(want)

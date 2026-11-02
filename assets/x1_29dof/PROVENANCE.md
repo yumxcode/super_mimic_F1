@@ -2,7 +2,7 @@
 
 source asset : `/Users/yumx/code/X1_29_AMP/X1_29DOF`
 source xml   : `mjcf/robot/xyber_x1/xyber_x1_serial.xml` (sha256 `f3ce939cbbdf5ef64871a1711b188bd11fb6ea8bfc2a8477ba81757e00a2ba19`)
-vendored xml : `assets/x1_29dof/x1_29dof.xml` (sha256 `0d84bef67e800705f7b1c1e3736396b0c6872335d5a1822233adc3d966a90169`)
+vendored xml : `assets/x1_29dof/x1_29dof.xml` (sha256 `e8afe91024178b4b3b3f95bdec2f91b975c2125050ca404a0989f1d7bcc1b16a`)
 meshes       : 30 STL referenced by the xml, copied under the referenced name
 
 ## Changes applied by tools/vendor_x1_assets.py
@@ -58,16 +58,6 @@ meshes       : 30 STL referenced by the xml, copied under the referenced name
    - right_ankle_roll_link: unnamed <geom> -> name="right_foot_3_marker"
    - right_ankle_roll_link: unnamed <geom> -> name="right_foot_4_marker"
    - right_ankle_roll_link: unnamed <geom> -> name="right_foot_5_marker"
-4. foot sole box (the only change to the collision geometry):
-
-   - left_ankle_roll_link: 4 sphere collision geoms -> 1 sole box (size 0.03 0.0025 0.07, pos 0 -0.0403 0, sole plane 0.04280 from the ankle)
-   - right_ankle_roll_link: 4 sphere collision geoms -> 1 sole box (size 0.03 0.0025 0.07, pos 0 0.0403 0, sole plane 0.04280 from the ankle)
-
-   Why: the four 2 mm corner spheres put the whole standing load (~86 N each at 35 kg) on a point, and
-   at the 200 Hz contact stiffness (solref 0.02) the sphere sinks several radii into the floor. The box
-   keeps the same footprint (the sphere centres become its corners) and the same underside plane
-   (the spheres' lowest point), so the standing height, the motion-library root heights and the
-   contact material (class="collision", inherited condim/friction/solref) are unchanged.
 
 Everything else (body poses, inertias, joint axes/limits, damping, friction loss, actuators, contact
 parameters) is byte-identical to the source XML.

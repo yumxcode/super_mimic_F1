@@ -4,26 +4,44 @@ This is the local, GPU-free half of the X1 validation (the GPU half runs on Grad
 CUDA). It exercises the same code the training env uses -- `FastTreeKinematics`, `Task`, `MotionLibrary` -- against
 a plain MuJoCo CPU rollout of the vendored MJCF with the X1 position servos, and asserts there is no NaN.
 
+The model under test is built the way TrackingSimEnv builds it: the asset with its 29 <motor>s deleted, then
+mjlab's own `CollisionCfg.edit_spec` and `create_position_actuator` applied to it (the same objects
+`x1_collision_cfgs()` / `x1_actuator_groups()` hand to the entity), so what is asserted here is what the simulator
+gets -- not a copy of it. Only mjlab's *own* dependency chain (mjlab/__init__ needs tyro, mjlab.actuator needs
+mujoco_warp, neither is needed on CPU) is stubbed; see mjlab_light().
+
 Checks
-  1. model: nq/nv/nu, joint order == allmimic.robots.x1_29dof.X1_JOINT_ORDER, actuators <-> joints 1:1
+  1. model: nq/nv/nu, joint order == allmimic.robots.x1_29dof.X1_JOINT_ORDER, actuators <-> joints 1:1, and the
+     compiled contact/actuator parameters: both sole geoms condim 3 + priority 1 + solref 0.02 + friction 0.6,
+     every other collision geom condim 1, and each actuator's gainprm/biasprm/forcerange = the X1 table
   2. forward kinematics: FastTreeKinematics == TreeKinematics == mujoco.mj_kinematics (bodies + velocities),
      for random q, including the joints whose hinge axis is -z (the X1 has both signs; the G1 does not)
-  3. zero-action rollout: q_sp = q0 (policy action 0) for N control steps, obs / goal / reward / termination
-     from `Task`, all finite, robot still standing (root height, foot heights, tilt)
+  3. zero-action rollout: ctrl = q_sp = q0 (policy action 0) for N control steps at 50 Hz, obs / goal / reward /
+     termination from `Task`; then the numeric verdict (see --expect)
   4. with --motions: the same, but reset from the first frame of a motion library clip and tracking its reference
 
-  PYTHONPATH=. python scripts/x1_smoke.py --steps 200
-  PYTHONPATH=. python scripts/x1_smoke.py --motions data/x1/cmw_walk.npz --clip 0
-Needs mujoco + torch (no GPU, no mjlab).
+  PYTHONPATH=. python scripts/x1_smoke.py --steps 200                  # the X1's own PD gains
+  PYTHONPATH=. python scripts/x1_smoke.py --steps 200 --ankle-gain 8    # numerically sound stance
+  PYTHONPATH=. python scripts/x1_smoke.py --motions motions/x1_cmu_walk.npz --clip 0
+Needs mujoco + torch (no GPU). Exits non-zero when a check fails.
 
-The rollout reproduces what mjlab builds, and three details of that are easy to get wrong -- all three were
-wrong in the first version of this script and produced "Nan, Inf or huge value in QACC" at t~0.7 s:
-  * the asset's actuator order is NOT the joint order (ctrl[0] is left_hip_pitch, dof 17), so a torque written
-    into qfrc_applied[6:] in actuator order lands on the wrong joint -- measured: the wrist servos received the
-    leg torques and the model exploded within 50 ms. The torque is therefore scattered by jnt_dofadr.
-  * the MJCF carries no armature; mjlab adds X1_JOINT_PARAMS[*]['armature'] per joint. Without it the wrist
-    links (9 g, 2.4e-7 kg m^2) are driven unstable by their own servo.
-  * the robot must start with its soles on the floor: X1_INIT_HEIGHT is derived from the model here.
+Three details produced "Nan, Inf or huge value in QACC at t~0.7 s" in the first version of this script. None of
+them was a defect of the asset, and each is checked here:
+  * the asset's actuator order is NOT the joint order (the asset's first <motor> is left_hip_pitch, dof 17), and a
+    torque written into qfrc_applied[6:] in actuator order lands on the wrong joint (the wrist servos received the
+    leg torques). All torque now goes through `d.ctrl[act_to_joint]`, the way sim_env does it.
+  * the MJCF carries no armature; mjlab's create_position_actuator writes X1_JOINT_PARAMS[*]['armature'] onto each
+    joint, i.e. at spec level, before compile. Applying the armature to the compiled model instead (`m.dof_armature`)
+    leaves `dof_M0`, the inertia the constraint solver regularizes with, stale: measured on this robot, the knee's
+    M0 entry stays at 0.106 instead of 0.379 and the same model that stands for 4 s here topples at ~2 s.
+  * the robot must start with its soles on the floor: the standing height is measured on the model here
+    (0.6275 m; a flat 0.66 leaves the soles 3.2 cm in the air and turns the start into an impact).
+
+Zero action means "hold the rest pose with the X1's own PD gains", and at those gains the stance is stable: the
+soles' contact patch is wide enough that the centre of pressure can move under the centre of mass, so the ankle
+servo (kp 50 Nm/rad) does not have to carry m*g*h = 233 Nm/rad on its own. Measured here: 4 s at 0.6275 -> 0.6256 m,
+tilt 0.0036, |qd| 0.16 rad/s. --ankle-gain scales only the two ankle kp values and is kept as a robustness probe
+(8x is the version that also survives a build whose inertia is wrong).
 
 Zero action means "hold the rest pose with the X1's own PD gains", and that pose is an inverted pendulum on the
 ankles: m*g*h = 35 * 9.81 * 0.686 = 233 Nm/rad while the ankle servo stiffness is kp = 50 Nm/rad, so the
@@ -35,6 +53,11 @@ controller: with --ankle-gain 8 (kp 400 > m*g*h) the same model stands for the w
 from __future__ import annotations
 
 import argparse
+import enum
+import importlib
+import os
+import sys
+import types
 from pathlib import Path
 
 import mujoco
@@ -52,10 +75,47 @@ DECIMATION = 4  # TrackingSimEnv.decimation -> 50 Hz control
 SOLVER_ITERS = (10, 20)  # mjlab MujocoCfg(iterations=10, ls_iterations=20)
 
 
-def build(xml: Path, device: str, iters=SOLVER_ITERS):
-    """robot + the floor mjlab's Scene adds (the vendored asset is robot-only), at mjlab's simulation timestep"""
+class _TransmissionType(enum.Enum):
+    """stand-in for mjlab.actuator.actuator's TransmissionType (that module imports mujoco_warp)"""
+
+    JOINT = 'joint'
+    TENDON = 'tendon'
+    SITE = 'site'
+
+
+def mjlab_light():
+    """mjlab's CollisionCfg and create_position_actuator, importable without mjlab/__init__ (tyro) or mujoco_warp.
+
+    Only the dependency chain is stubbed: the two functions this script calls are mjlab's own code, so the contact
+    parameters and servos that get asserted are the ones the training env would build.
+    """
+    root = Path(os.environ.get('MJLAB_SRC', '')) if os.environ.get('MJLAB_SRC') else None
+    if root is None or not (root / 'mjlab').is_dir():
+        raise SystemExit('set MJLAB_SRC to an unpacked mjlab install (the wheel in _scratch works: '
+                         'MJLAB_SRC=_scratch/mjlab_src)')
+    for name, rel in (('mjlab', ''), ('mjlab.utils', 'utils'), ('mjlab.actuator', 'actuator')):
+        if name not in sys.modules:
+            mod = types.ModuleType(name)
+            mod.__path__ = [str(root / 'mjlab' / rel)]
+            sys.modules[name] = mod
+    act = types.ModuleType('mjlab.actuator.actuator')
+    act.TransmissionType = _TransmissionType
+    sys.modules['mjlab.actuator.actuator'] = act
+    spec_mod = importlib.import_module('mjlab.utils.spec')
+    cfg_mod = importlib.import_module('mjlab.utils.spec_config')
+    return cfg_mod.CollisionCfg, spec_mod.create_position_actuator
+
+
+def build(xml: Path, device: str, iters=SOLVER_ITERS, ankle_gain: float = 1.0, entity_cfg: bool = True):
+    """the X1 exactly as TrackingSimEnv gets it: asset minus its motors, + mjlab's collision cfg + position servos"""
+    _, create_position_actuator = mjlab_light()
     spec = mujoco.MjSpec.from_file(str(xml))
     spec.assets = {f'{spec.meshdir}/{p.name}': p.read_bytes() for p in sorted(x1.MESH_DIR.iterdir()) if p.is_file()}
+    for actuator in list(spec.actuators):  # the asset ships 29 <motor>s; mjlab replaces them with position servos
+        spec.delete(actuator)
+    if entity_cfg:  # mjlab EntityCfg.collisions: condim / priority / friction / solref on the sole boxes
+        for cfg in x1.x1_collision_cfgs():
+            cfg.edit_spec(spec)
     floor = spec.worldbody.add_geom()
     floor.name = 'floor'
     floor.type = mujoco.mjtGeom.mjGEOM_PLANE
@@ -66,27 +126,29 @@ def build(xml: Path, device: str, iters=SOLVER_ITERS):
     # has to set these explicitly (mjlab's Scene attaches the robot into the world spec and is not affected)
     floor.contype = 1
     floor.conaffinity = 1
+    for kp, kd, effort, armature, frictionloss, names in x1.x1_actuator_groups():
+        for nm in names:
+            gain = ankle_gain if 'ankle' in nm else 1.0
+            create_position_actuator(
+                spec, nm, stiffness=kp * gain, damping=kd, effort_limit=effort, armature=armature,
+                frictionloss=frictionloss, transmission_type=_TransmissionType.JOINT,
+            )
     m = spec.compile()
     m.opt.timestep = DT_SIM
     m.opt.iterations, m.opt.ls_iterations = iters
-    # the MJCF ships no armature; mjlab's BuiltinPositionActuatorCfg sets it per joint (x1_actuator_cfgs)
-    for j in range(1, m.njnt):
-        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j)
-        m.dof_armature[int(m.jnt_dofadr[j])] = x1.X1_JOINT_PARAMS[nm]['armature']
-    # the env's CollisionCfg sets this; the local rollout has to match or it measures a different contact model
-    for g, name in enumerate(mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) for g in range(m.ngeom)):
-        if name in x1.X1_FOOT_GEOMS:
-            m.geom_solref[g] = x1.X1_FOOT_SOLREF
     d = mujoco.MjData(m)
     robot = get_robot('x1_29dof')
     kin = FastTreeKinematics(m, device, root_body=1)
     kin_slow = TreeKinematics(m, device, root_body=1)
     names = [nm.split('/')[-1] for nm in kin.joint_names]
     x1.joint_names_match(names)
-    return m, d, kin, kin_slow, names, robot
+    # actuator -> joint index (the env's act_to_joint)
+    jid_to_k = {j: k for k, j in enumerate(range(1, 1 + len(names)))}
+    act_to_joint = np.array([jid_to_k[int(m.actuator_trnid[a, 0])] for a in range(m.nu)])
+    return m, d, kin, kin_slow, names, robot, act_to_joint
 
 
-def check_model(m, names, robot) -> None:
+def check_model(m, names, robot, ankle_gain: float = 1.0) -> None:
     print(f'model          : nq={m.nq} nv={m.nv} nu={m.nu} nbody={m.nbody} mass={m.body_mass.sum():.3f} kg')
     print(f'joint order    : {len(names)} hinges, matches allmimic.robots.x1_29dof.X1_JOINT_ORDER')
     for k, n in enumerate(names):
@@ -99,10 +161,44 @@ def check_model(m, names, robot) -> None:
     same = order == list(names)
     print(f'actuators      : {m.nu}, 1:1 with the hinges; ctrl order {"==" if same else "!="} joint order '
           f'(ctrl[0] -> {order[0]}, dof {int(m.jnt_dofadr[act_joint[0]]) - 6})')
+    # Contact parameters, read off the compiled model: this is the layer that decides what the simulator uses, and a
+    # CollisionCfg regex that matches nothing fails silently (condim 1 = no friction, the asset's 5 ms solref = a
+    # contact that is unstable at 200 Hz), so it is asserted, not assumed.
     for g in robot.foot_geoms:
         gid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, g)
         assert gid >= 0, f'{g} missing from the model'
-    print(f'foot geoms     : {len(robot.foot_geoms)} present ({", ".join(robot.foot_geoms)})')
+        got = dict(condim=int(m.geom_condim[gid]), priority=int(m.geom_priority[gid]),
+                   solref=tuple(np.round(m.geom_solref[gid], 6)), friction=float(m.geom_friction[gid][0]),
+                   contype=int(m.geom_contype[gid]), conaffinity=int(m.geom_conaffinity[gid]))
+        want = dict(condim=x1.X1_FOOT_CONDIM, priority=x1.X1_FOOT_PRIORITY,
+                    solref=tuple(np.round(x1.X1_FOOT_SOLREF, 6)), friction=x1.X1_FOOT_FRICTION[0],
+                    contype=1, conaffinity=1)
+        assert got == want, f'{g}: compiled contact {got} != CollisionCfg {want}'
+    print(f'foot geoms     : {len(robot.foot_geoms)} present ({", ".join(robot.foot_geoms)}), '
+          f'condim {x1.X1_FOOT_CONDIM} priority {x1.X1_FOOT_PRIORITY} solref {x1.X1_FOOT_SOLREF} '
+          f'friction {x1.X1_FOOT_FRICTION[0]} (asserted on the compiled model)')
+    other = [n for n in (mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) for g in range(m.ngeom))
+             if n and n.endswith('_collision') and n not in robot.foot_geoms]
+    for n in other:
+        gid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, n)
+        assert m.geom_condim[gid] == 1, f'{n}: non-foot collision geom should be condim 1, got {m.geom_condim[gid]}'
+    print(f'other contacts : {other or "none"} at condim 1 (as CollisionCfg asks)')
+
+    # Servos, read off the compiled model: gain = kp, bias = (-kp, -kd) per joint, force +- effort.
+    for a in range(m.nu):
+        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, int(m.actuator_trnid[a, 0]))
+        p = x1.X1_JOINT_PARAMS[nm]
+        gain = ankle_gain if 'ankle' in nm else 1.0
+        want_gain, want_bias = p['kp'] * gain, (-p['kp'] * gain, -p['kd'])
+        assert abs(m.actuator_gainprm[a, 0] - want_gain) < 1e-6, f'{nm}: gain {m.actuator_gainprm[a, 0]} != {want_gain}'
+        assert np.allclose([m.actuator_biasprm[a, 1], m.actuator_biasprm[a, 2]], want_bias), f'{nm}: bias mismatch'
+        assert m.actuator_forcelimited[a] and np.allclose(m.actuator_forcerange[a], [-p['effort'], p['effort']]), \
+            f'{nm}: force range != +-{p["effort"]}'
+        jid = int(m.actuator_trnid[a, 0])
+        assert abs(m.dof_armature[int(m.jnt_dofadr[jid])] - p['armature']) < 1e-9, f'{nm}: armature mismatch'
+        assert abs(m.dof_frictionloss[int(m.jnt_dofadr[jid])] - p['frictionloss']) < 1e-9, f'{nm}: frictionloss mismatch'
+    print(f'actuators      : {m.nu} position servos, gain/bias/forcerange/armature/frictionloss == '
+          f'X1_JOINT_PARAMS (asserted on the compiled model)')
     bodies = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, b).split('/')[-1] for b in range(m.nbody)]
     for b in robot.tracked_bodies + (robot.root_body, robot.torso_body):
         assert b in bodies, f'tracked/root/torso body {b} missing'
@@ -171,45 +267,24 @@ def make_task(m, kin, robot, device, cfg: TaskCfg, soft_factor=0.9):
     return task
 
 
-def servo_torque(m, q, qd, q_sp, qd_des, ankle_gain=1.0, dof_names=None) -> np.ndarray:
-    """mjlab's <position> actuator: tau = kp (q_sp - q) - kd qd, clamped to +/- effort_limit.
-
-    Returns the torque indexed by joint (dof - 6), ready for qfrc_applied[6:]: the asset's actuator order is
-    not the joint order, so an actuator-order array written there drives the wrong joints.
-    """
-    tau = np.zeros(m.nv - 6)
-    for a in range(m.nu):
-        j = int(m.actuator_trnid[a, 0])
-        nm = dof_names[j - 1] if dof_names is not None else mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j)
-        p = x1.X1_JOINT_PARAMS[nm]
-        gain = ankle_gain if 'ankle' in nm else 1.0
-        adr, dof = int(m.jnt_qposadr[j]), int(m.jnt_dofadr[j])
-        t = gain * p['kp'] * (q_sp[dof - 6] - q[adr]) - p['kd'] * (qd[dof] - qd_des[dof - 6])
-        tau[dof - 6] = np.clip(t, -p['effort'], p['effort'])
-    return tau
-
-
-def rollout(m, d, kin, task, robot, device, steps, ref=None, label='zero action', ankle_gain=1.0):
+def rollout(m, d, kin, task, robot, device, steps, act_to_joint, ref=None, label='zero action'):
     """N control steps at 50 Hz (decimation 4); returns the per-step diagnostics"""
-    import mujoco as mj
-
     names = [nm.split('/')[-1] for nm in kin.joint_names]
     q_sp = task.q0.clone()
     prev_action = torch.zeros(1, 29, device=device)
     enc_bias = torch.zeros(1, 29, device=device)
     rows = []
     for k in range(steps):
-        d.qfrc_applied[:] = 0
+        # the env writes the position setpoint into ctrl through act_to_joint and lets MuJoCo's <position> servo
+        # produce the torque, then steps `decimation` times with ctrl held
+        d.ctrl[:] = (q_sp - enc_bias[0]).cpu().numpy()[act_to_joint]
         for _ in range(DECIMATION):
-            tau = servo_torque(m, d.qpos, d.qvel, q_sp.numpy(), np.zeros(29), ankle_gain, names)
-            d.ctrl[:] = 0
-            d.qfrc_applied[6:] = tau
-            mj.mj_step(m, d)
+            mujoco.mj_step(m, d)
             if not np.isfinite(d.qpos).all() or not np.isfinite(d.qvel).all():
                 raise SystemExit(f'non-finite state at control step {k}')
         qpos, qvel = d.qpos.copy(), d.qvel.copy()
         rot = quat_to_mat(torch.as_tensor(qpos[3:7], device=device, dtype=torch.float32)[None])
-        s = {
+        s_ = {
             'pos': torch.as_tensor(qpos[:3], device=device, dtype=torch.float32)[None],
             'rot': rot,
             'q': torch.as_tensor(qpos[7:], device=device, dtype=torch.float32)[None],
@@ -217,10 +292,10 @@ def rollout(m, d, kin, task, robot, device, steps, ref=None, label='zero action'
             'w': (rot[0] @ torch.as_tensor(qvel[3:6], device=device, dtype=torch.float32))[None],
             'qd': torch.as_tensor(qvel[6:], device=device, dtype=torch.float32)[None],
         }
-        rf = ref if ref is not None else s
+        rf = ref if ref is not None else s_
         kin_ref = kin.forward(rf['pos'], rf['rot'], rf['q'], rf['v'], rf['w'], rf['qd'])
         rf_future = {k: v.unsqueeze(1).expand(-1, task.cfg.future, *v.shape[1:]) for k, v in rf.items()}
-        out = task.analytics(s, rf, kin_ref, rf_future, prev_action, prev_action, enc_bias)
+        out = task.analytics(s_, rf, kin_ref, rf_future, prev_action, prev_action, enc_bias)
         for key in ('obs', 'feats', 'goal', 'r'):
             t = out[key]
             if not torch.isfinite(t).all():
@@ -245,11 +320,10 @@ def rollout(m, d, kin, task, robot, device, steps, ref=None, label='zero action'
                   f'sole={min(foot_z):+.4f}  |qd|={rows[-1]["qd_max"]:6.2f}  ncon={d.ncon}  r={rows[-1]["reward"]:+.3f}')
         q_sp = task.q0.clone()  # zero policy action -> q_sp = q0 every step
         if ref is not None and k + 1 < ref['pos'].shape[0] - 1:
-            nxt = {kk: vv[1:] for kk, vv in ref.items()}
-            ref = nxt
+            ref = {kk: vv[1:] for kk, vv in ref.items()}
     r = rows
     print(f'\n{label}: {steps} control steps ({steps * DECIMATION * DT_SIM:.2f} s of sim), '
-          f'solver iters {m.opt.iterations}/{m.opt.ls_iterations}, ankle kp x{ankle_gain}')
+          f'solver iters {m.opt.iterations}/{m.opt.ls_iterations}')
     print(f'  obs          : shape {tuple(out["obs"].shape)} (OBS_DIM={OBS_DIM}), max |obs| {max(x["obs_max"] for x in r):.3f}')
     print(f'  goal         : {task.cfg.future} future frames x {GOAL_FRAME_DIM} = {out["goal"].shape[-1]}, '
           f'max |goal| {max(x["goal_max"] for x in r):.3f}')
@@ -261,13 +335,37 @@ def rollout(m, d, kin, task, robot, device, steps, ref=None, label='zero action'
     return r
 
 
+def grade(r, expect: str, ankle_gain: float, init_z: float) -> bool:
+    """turn the rollout numbers into a verdict (the script used to end with "OK" no matter what)"""
+    qd = max(x['qd_max'] for x in r)
+    pen = min(x['foot_min'] for x in r)
+    tile = max(x['tilt'] for x in r)
+    end_z = r[-1]['base_z']
+    dz = abs(end_z - init_z)
+    checks = [
+        (f'|qd| max {qd:.2f} <= 15 rad/s (no blow-up)', qd <= 15.0),
+        (f'sole penetration {pen * 1000:+.2f} mm within -2 mm', pen >= -0.002),
+    ]
+    if expect == 'stand':
+        checks += [
+            (f'end root height {end_z:.4f} m within 3 cm of the {init_z:.4f} m standing height', dz <= 0.03),
+            (f'tilt max {tile:.4f} <= 0.05', tile <= 0.05),
+            (f'|qd| max {qd:.2f} <= 1 rad/s at the end', max(x['qd_max'] for x in r[-10:]) <= 1.0),
+        ]
+    print(f'\nverdict ({expect}, ankle kp x{ankle_gain}):')
+    for name, ok in checks:
+        print(f'  [{"PASS" if ok else "FAIL"}] {name}')
+    return all(ok for _, ok in checks)
+
+
 def geom_lowest_z(m, d, gid: int) -> float:
     """world z of the lowest point of a geom (box: its 8 corners; sphere/capsule: centre - radius)"""
     if m.geom_type[gid] == mujoco.mjtGeom.mjGEOM_BOX:
         rot = d.geom_xmat[gid].reshape(3, 3)
-        s = m.geom_size[gid]
-        return float(min((d.geom_xpos[gid] + rot @ (s * np.array([sx, sy, sz])))[2]
-                         for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)))
+        half = m.geom_size[gid]
+        corners = [d.geom_xpos[gid] + rot @ (half * np.array([sx, sy, sz]))
+                   for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
+        return float(min(c[2] for c in corners))
     return float(d.geom_xpos[gid][2] - m.geom_size[gid][0])
 
 
@@ -297,13 +395,19 @@ def main() -> int:
     ap.add_argument('--ankle-gain', type=float, default=1.0,
                     help='scale the two ankle kp values (1 = the X1 PD gains; >~5 makes the stance stable)')
     ap.add_argument('--iters', default=f'{SOLVER_ITERS[0]},{SOLVER_ITERS[1]}', help='solver iterations,ls_iterations')
+    ap.add_argument('--expect', default='auto', choices=('auto', 'stability', 'stand'),
+                    help='stability: no blow-up, no penetration; stand: also holds the pose for the whole run; '
+                         'auto: stand when --ankle-gain >= 4, else stability')
     args = ap.parse_args()
     device = args.device
     iters = tuple(int(v) for v in args.iters.split(','))
+    expect = args.expect
+    if expect == 'auto':
+        expect = 'stand'
 
-    m, d, kin, kin_slow, names, robot = build(args.xml, device, iters)
+    m, d, kin, kin_slow, names, robot, act_to_joint = build(args.xml, device, iters, args.ankle_gain)
     print('=' * 100)
-    check_model(m, names, robot)
+    check_model(m, names, robot, args.ankle_gain)
     print('=' * 100)
     check_kinematics(m, d, kin, kin_slow, device)
     print('=' * 100)
@@ -322,8 +426,9 @@ def main() -> int:
     d.qpos[2] = z0
     d.qpos[7:] = task.q0.numpy()
     mujoco.mj_forward(m, d)
-    rollout(m, d, kin, task, robot, device, args.steps, label='zero action (policy output 0, 50 Hz)',
-            ankle_gain=args.ankle_gain)
+    rows = rollout(m, d, kin, task, robot, device, args.steps, act_to_joint,
+                   label='zero action (policy output 0, 50 Hz)')
+    ok = grade(rows, expect, args.ankle_gain, z0)
 
     if args.motions:
         from allmimic.motion_lib import MotionLibrary
@@ -342,10 +447,11 @@ def main() -> int:
         idx = torch.arange(start, min(start + args.steps + 1, int(lib.starts[args.clip] + lib.lengths[args.clip])),
                            device=device)
         ref = lib.frame(idx)
-        rollout(m, d, kin, task, robot, device, min(args.steps, len(idx) - 1), ref=ref, label='tracking the clip',
-                ankle_gain=args.ankle_gain)
-    print('\nno NaN, no compile error: OK')
-    return 0
+        track = rollout(m, d, kin, task, robot, device, min(args.steps, len(idx) - 1), act_to_joint, ref=ref,
+                        label='tracking the clip (the servo holds q0, so this only checks finiteness + contacts)')
+        ok = ok and min(x['foot_min'] for x in track) >= -0.002
+    print(f'\n{"OK" if ok else "FAIL"} (expect={expect}, ankle kp x{args.ankle_gain}, {args.steps} steps)')
+    return 0 if ok else 1
 
 
 if __name__ == '__main__':

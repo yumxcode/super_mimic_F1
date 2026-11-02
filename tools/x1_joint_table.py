@@ -126,7 +126,11 @@ def to_markdown(inv: dict) -> str:
         '',
         'The asset models each sole with four 2 mm collision spheres and nothing else below the ankle: there is',
         'no sole box, so foot contact is four point contacts per foot and the shank / ankle has no collision',
-        'geometry. Recorded as a known limitation (see the delivery report).',
+        'geometry. The vendored MJCF keeps this as the source has it; allmimic.robots.x1_29dof gives these eight',
+        'geoms condim 3, priority 1, friction 0.6 and solref 20 ms through the entity CollisionCfg (the asset',
+        'default is 5 ms, unstable at the 200 Hz timestep), which the CPU smoke asserts on the compiled model.',
+        'With that applied the four-sphere stance is stable at the real PD gains (4 s: 0.6275 -> 0.6256 m,',
+        'tilt 0.0036, |qd| 0.16 rad/s); a flat sole box is a modelling option, not a fix for a measured defect.',
         '',
     ]
     return '\n'.join(L)

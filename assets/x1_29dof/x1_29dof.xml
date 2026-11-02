@@ -188,7 +188,10 @@
                   <inertial pos="0.00017156 -0.02524695 -0.00019936" mass="0.58971207" quat="-0.50741897 0.49044917 0.49158279 0.51022737" diaginertia="0.00054139113 0.0015211445 0.0019006944" />
                   <joint name="left_ankle_roll_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.8" range="-0.5 0.5" frictionloss="1.5" />
                   <geom name="left_foot_1_marker" type="mesh" mesh="left_ankle_roll" pos="0 0 0" euler="0 0 0" rgba="1 0.5 1 1" />
-                  <geom name="left_foot_sole_collision" type="box" size="0.03 0.0025 0.07" pos="0 -0.0403 0" class="collision" />
+                  <geom name="left_foot_1_collision" type="sphere" size="0.002" pos="0.03 -0.0408 0.07" class="collision" />
+                  <geom name="left_foot_2_collision" type="sphere" size="0.002" pos="-0.03 -0.0408 0.07" class="collision" />
+                  <geom name="left_foot_3_collision" type="sphere" size="0.002" pos="0.03 -0.0408 -0.07" class="collision" />
+                  <geom name="left_foot_4_collision" type="sphere" size="0.002" pos="-0.03 -0.0408 -0.07" class="collision" />
                   <geom name="left_foot_2_marker" type="sphere" size="0.02" pos="0.03 -0.0408 0.07" rgba="255 0 0 0.5" />
                   <geom name="left_foot_3_marker" type="sphere" size="0.02" pos="-0.03 -0.0408 0.07" rgba="255 0 0 0.5" />
                   <geom name="left_foot_4_marker" type="sphere" size="0.02" pos="0.03 -0.0408 -0.07" rgba="255 0 0 0.5" />
@@ -229,7 +232,10 @@
                   <inertial pos="-2.32e-06 0.02507893 0.00010556" mass="0.59182763" quat="-0.49119535 0.50862693 0.50864236 0.49123185" diaginertia="0.00054236958 0.00151845 0.0018940604" />
                   <joint name="right_ankle_roll_joint" type="hinge" pos="0 0 0" axis="0 0 1" damping="0.8" range="-0.5 0.5" frictionloss="1.5" />
                   <geom name="right_foot_1_marker" type="mesh" mesh="right_ankle_roll" pos="0 0 0" euler="0 0 0" rgba="1 0.5 1 1" />
-                  <geom name="right_foot_sole_collision" type="box" size="0.03 0.0025 0.07" pos="0 0.0403 0" class="collision" />
+                  <geom name="right_foot_1_collision" type="sphere" size="0.002" pos="0.03 0.0408 0.07" class="collision" />
+                  <geom name="right_foot_2_collision" type="sphere" size="0.002" pos="-0.03 0.0408 0.07" class="collision" />
+                  <geom name="right_foot_3_collision" type="sphere" size="0.002" pos="0.03 0.0408 -0.07" class="collision" />
+                  <geom name="right_foot_4_collision" type="sphere" size="0.002" pos="-0.03 0.0408 -0.07" class="collision" />
                   <geom name="right_foot_2_marker" type="sphere" size="0.02" pos="0.03 0.0408 0.07" rgba="255 0 0 0.5" />
                   <geom name="right_foot_3_marker" type="sphere" size="0.02" pos="-0.03 0.0408 0.07" rgba="255 0 0 0.5" />
                   <geom name="right_foot_4_marker" type="sphere" size="0.02" pos="0.03 0.0408 -0.07" rgba="255 0 0 0.5" />
