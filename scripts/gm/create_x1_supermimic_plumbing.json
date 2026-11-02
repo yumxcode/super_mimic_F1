@@ -1,0 +1,30 @@
+{
+  "taskBaseInfo": {
+    "projectId": "PRO_20261102_002",
+    "taskType": "1",
+    "trainType": "1",
+    "taskName": "x1-supermimic-plumbing-60",
+    "taskDescription": "Plumbing run for the X1 allmimic path: 60 iterations / 1024 envs, same entry script, image and branch as the 3000-iteration task. Purpose: prove clone -> pip install -> CUDA/mjlab import -> train -> log.jsonl -> TensorBoard mirror -> checkpoint publication -> gm task data get, in a few minutes, before spending a full run. Image: plain Ubuntu 24.04 (the IsaacSim 5.1 image pins numpy<2 via an Isaac Sim constraint, which conflicts with requirements.txt numpy 2.4.6).",
+    "taskTag": [
+      "x1",
+      "supermimic",
+      "plumbing"
+    ],
+    "goodsId": "ESKU000001",
+    "imageId": "BJX00000119",
+    "imageVersion": "V000158",
+    "personalDataPath": ""
+  },
+  "taskCodeInfo": {
+    "codeType": "2",
+    "codeUrl": "[{\"codeUrl\":\"https://github.com/yumxcode/super_mimic_F1.git\",\"versionType\":\"1\",\"versionName\":\"feat/x1-29dof\"}]",
+    "mainCodeUri": "super_mimic_F1/allmimic/train.py",
+    "hparamsPath": "super_mimic_F1/configs/x1_supermimic_smoke.json",
+    "startScript": "gm-run super_mimic_F1/scripts/gm_x1_train.py --hparams super_mimic_F1/configs/x1_supermimic_smoke.json",
+    "isOpen": "1"
+  },
+  "runtimeReminderConfig": {
+    "enableRuntimeReminder": false,
+    "reminderDurations": []
+  }
+}

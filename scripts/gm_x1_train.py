@@ -70,8 +70,26 @@ def stack_ok() -> bool:
     return False
 
 
+def ensure_pip() -> list[str]:
+    """`python -m pip` for this interpreter, installing pip first if the image ships a bare Python.
+
+    The plain Ubuntu images have no pip unless python3-pip was baked in. Try ensurepip (offline, ships with CPython),
+    then get-pip.py, then apt; if all fail, raise with what was tried.
+    """
+    if subprocess.run([sys.executable, '-m', 'pip', '--version'], capture_output=True).returncode == 0:
+        return [sys.executable, '-m', 'pip']
+    for cmd in ([sys.executable, '-m', 'ensurepip', '--upgrade'],
+                ['bash', '-lc', 'curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3 -'],
+                ['bash', '-lc', 'apt-get update -qq && apt-get install -y -qq python3-pip']):
+        log('no pip; trying ' + ' '.join(str(c) for c in cmd))
+        if subprocess.run([str(c) for c in cmd], cwd=str(ROOT)).returncode == 0:
+            if subprocess.run([sys.executable, '-m', 'pip', '--version'], capture_output=True).returncode == 0:
+                return [sys.executable, '-m', 'pip']
+    raise SystemExit('pip is unavailable and could not be installed in this image')
+
+
 def pip_install() -> None:
-    base = [sys.executable, '-m', 'pip', 'install', '--no-input', '--disable-pip-version-check']
+    base = [*ensure_pip(), 'install', '--no-input', '--disable-pip-version-check']
     req = ROOT / 'runs' / 'requirements.gm.txt'
     req.parent.mkdir(parents=True, exist_ok=True)
     req.write_text(''.join(
