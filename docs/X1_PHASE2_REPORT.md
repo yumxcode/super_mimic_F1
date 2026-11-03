@@ -119,6 +119,41 @@ walk/run/dance）与 `runs/sim2sim_renders/`（策略跟踪 held-out 转身/舞�
 | 存储终态 | motions/：x1_phase2_train 23MB + heldout 3.4MB + meta 1.8MB（git）；
   data/ 53MB 渲染与日志（gitignored）；raw/中间件 0（已删） |
 
+### 6.1 平台产物落地清单（2026-11-03，全部经 OSS 直链下载，无新增平台费用）
+
+校验方式（统一采用）：`torch.load(map_location='cpu', weights_only=False)` 读出 14 键
+checkpoint 字典（`bin_G/bin_past_w/bin_visits/cfg/critic/env_steps/it/opt_pi/opt_v/opt_wm/policy/train_time/updates/wm`），
+并核对文件大小 >200MB。**10/10 全部 PASS，无一需要重下**（比 zipfile -t 更强：真实反序列化出策略权重）。
+
+TASK_20261102_258（正式训练，平台 9 条产物全量落地）→ `runs/phase2/`：
+
+| checkpoint | 本地路径 | 大小（字节） | torch.load | ckpt 内 `it` |
+|---|---|---|---|---|
+| 4000 | runs/phase2/ckpt_0004000.pt | 224,175,691 | PASS | 4000 |
+| 8000 | runs/phase2/ckpt_0008000.pt | 224,175,691 | PASS | 8000 |
+| 12000 | runs/phase2/ckpt_0012000.pt | 224,175,691 | PASS | 12000 |
+| 16000 | runs/phase2/ckpt_0016000.pt | 224,175,691 | PASS | 16000 |
+| 20000 | runs/phase2/ckpt_0020000.pt | 224,175,691 | PASS | 20000 |
+| 24000（既有） | runs/phase2/ckpt_0024000.pt | 224,175,691 | PASS（本次复核） | 24000 |
+| 28000 | runs/phase2/ckpt_0028000.pt | 224,175,691 | PASS | 28000 |
+| 32000（既有） | runs/phase2/ckpt_0032000.pt | 224,175,691 | PASS（本次复核） | 32000 |
+| last（checkpoint=None 条目） | runs/phase2/last.pt | 224,173,963 | PASS | 32000 |
+| — 训练曲线 | runs/phase2/rl-tfevents-logs.tgz | 334,090 | tar -tzf 完整（单 tfevents 文件，保留原始文件名） | — |
+| — 控制台日志 | runs/phase2/train_258_console.log | 177,692 | 962 行，`gm task logs --raw` 一次性快照 | — |
+
+TASK_20261102_222（新库×3k iter A/B 点，只取 ckpt_0003000；1000/2000/last 与 published
+副本 `x1_supermimic_iter003000.pt` 按约定不落）→ `runs/phase2/task222_abd/`：
+
+| checkpoint | 本地路径 | 大小（字节） | torch.load | 备注 |
+|---|---|---|---|---|
+| 3000 | runs/phase2/task222_abd/ckpt_0003000.pt | 224,156,491 | PASS | `it=3000`，cfg.motions=`motions/x1_cmu_walk.npz`，确系新库 A/B 点 |
+| — 训练曲线 | runs/phase2/task222_abd/rl-tfevents-logs.tgz | 61,422 | tar -tzf 完整 | 同一 `gm task data download` 通道顺带带出 |
+
+存储账目：本次新增 **1,793,957,804 B ≈ 1.79GB**（预估 1.6GB）；`runs/phase2/` 合计
+**2.24GB**（`du -sh` 2.2G；`runs/` 整体 gitignored，不进 git）。本机磁盘余量开工
+143Gi → 收工 141Gi。`last.pt` 与 `ckpt_0032000.pt` 的 `it` 均为 32000（32k 提前收工，
+last 为停机时刻的保存，字节数略有差异属正常）。
+
 ## 7. 限制与下一步
 
 1. **跑步/快跑不在训练库**（重定向腕误差物理边界）——需要前臂更长或腕目标动态缩放的
